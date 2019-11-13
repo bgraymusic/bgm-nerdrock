@@ -1,0 +1,4 @@
+requests
+PyYAML
+./lib/cryptography-2.6.1-cp34-abi3-manylinux1_x86_64.whl
+./lib/cffi-1.12.3-cp37-cp37m-manylinux1_x86_64.whl

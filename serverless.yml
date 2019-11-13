@@ -1,0 +1,58 @@
+# This file is the main config file for your service.
+#
+# For full config options, check the docs:
+#    docs.serverless.com
+
+service: bgm-nerdrock
+
+provider:
+  name: aws
+  region: us-east-1
+  stage: dev
+  role: arn:aws:iam::028568048704:role/service-role/bgmMicroserviceRole
+  runtime: python3.7
+  stackTags:
+    project: nerdrock
+
+plugins:
+  - fullstack-serverless
+  - serverless-python-requirements
+
+custom:
+  fullstack:
+    bucketName: web
+    distributionFolder: client/dist
+    indexDocument: index.html
+    errorDocument: error.html
+    singlePageApp: true
+    apiPath: api
+    clientSrcPath: client
+  pythonRequirements:
+    dockerizePip: false
+
+functions:
+  badges:
+    handler: handlers.handle_badges
+    timeout: 5
+    memorySize: 128
+    environment:
+      config: config.yml
+      log_level: INFO
+    events:
+      - http:
+          path: ${self:custom.fullstack.apiPath}/badges
+          method: get
+      - http:
+          path: ${self:custom.fullstack.apiPath}/badges
+          method: put
+  discography:
+    handler: handlers.handle_discography
+    timeout: 15
+    memorySize: 128
+    environment:
+      config: config.yml
+      log_level: INFO
+    events:
+      - http:
+          path: ${self:custom.fullstack.apiPath}/discography
+          method: get
