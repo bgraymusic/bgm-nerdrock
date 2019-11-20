@@ -1,7 +1,7 @@
-import configparser
-import json
-import logging
-import requests
+from discography.bandcamp import Bandcamp
+from badge.core import BadgeCore
+import boto3
+import os
 
 
 class DiscographyService:
@@ -10,41 +10,49 @@ class DiscographyService:
 		self.config = config
 		self.bc_key_param = {'key': config['bandcamp']['bcKey']}
 		self.LOG = LOG
-		self.cache = {}
+		self.band_cache = {}
+		self.album_cache = {}
+		self.bandcamp = Bandcamp(config, LOG)
+		self.badge_core = BadgeCore(config, LOG)
 
-	def get_discography(self, no_cache):
-	    band_ids = self.config['bandcamp']['bcBIDs']
-	    discography = []
-	    for band_id in band_ids:
-	        if not no_cache and band_id in self.cache:
-	            band = self.cache[band_id]
-	            self.LOG.info(f'Discography from cache: {band["discography"][0]["artist"]}')
-	        else:
-	            band = self.get_band(band_id)
-	            self.cache[band_id] = band
-	        discography = discography + band['discography']
-	    return discography
+	def get_all_albums_from_all_bands(self, no_cache):
+		band_ids = self.config['bandcamp']['bcBIDs']
+		albums = []
+		for band_id in band_ids:
+			band = self.get_band(band_id, no_cache)
+			for album_id in band['discography']:
+					albums.append(self.get_album(album_id))
+		return albums
 
-	def get_band(self, band_id):
-	    payload = {**self.bc_key_param, **{'band_id': band_id}}
-	    band = requests.get(self.config['bandcamp']['bcApiUrl'] + self.config['bandcamp']['bcDiscographyPath'], payload).json()
-	    self.LOG.debug(f'Discography from Bandcamp: {band["discography"][0]["artist"]}')
-	    for album in band['discography']:
-	        album_data = self.get_album(album['album_id'])
-	        album.update(album_data)
-	    return band
+	def get_band(self, band_id, no_cache):
+		if not no_cache and band_id in self.band_cache:
+			return self.band_cache[band_id]
+		else:
+			band = self.bandcamp.get_band_from_bc(band_id)
+			self.band_cache[band_id] = band
+			return band
 
-	def get_album(self, album_id):
-	    payload = {**self.bc_key_param, **{'album_id': album_id}}
-	    album = requests.get(self.config['bandcamp']['bcApiUrl'] + self.config['bandcamp']['bcAlbumPath'], payload).json()
-	    self.LOG.debug(f'Album from Bandcamp: {album["title"]}')
-	    for track in album['tracks']:
-	        track_data = self.get_track(track['track_id'])
-	        track.update(track_data)
-	    return album
+	def get_selected_albums(self, album_list, no_cache):
+		albums = []
+		for album in album_list:
+				albums.append(self.get_album(album))
+		return albums
 
-	def get_track(self, track_id):
-	    payload = {**self.bc_key_param, **{'track_id': track_id}}
-	    track = requests.get(self.config['bandcamp']['bcApiUrl'] + self.config['bandcamp']['bcTrackPath'], payload).json()
-	    self.LOG.debug(f'Track from Bandcamp: {track["title"]}')
-	    return track
+	def get_album(self, album_id, no_cache):
+		if not no_cache and album_id in self.album_cache:
+			return self.album_cache[album_id]
+		else:
+			album = self.bandcamp.get_album_from_bc(album_id)
+			self.album_cache[album_id] = album
+			return album
+
+	def trigger_cache_refresh(self):
+		sns_client = boto3.client('sns')
+		sns_client.publish(
+			TopicArn=os.getenv['refreshCacheTopic'], Message='{}')
+		self.LOG.info(f'Cache refresh triggered')
+
+	def refresh_cache(self):
+		self.album_cache = {}
+		self.get_all_albums_from_all_bands(True)
+		self.LOG.info(f'Cache refreshed')
