@@ -1,40 +1,32 @@
+core:
+  refresh_discography_cache_sns_topic: RefreshDiscographyCache
+
 bandcamp:
   bcApiUrl: http://api.bandcamp.com/api
   bcDiscographyPath: /band/3/discography
   bcAlbumPath: /album/2/info
   bcTrackPath: /track/3/info
-  bcKey: throtaudvinroftignmarkreina
   bcBIDs:
     - 230945364
-    - 2536692004
 
 badges:
-  encryption_key: lLLcUDWfRGMGO4tB89m_77lo3uDAN4T34H_ZryHf1Xk=
   default_album_ids:
     - 0000
     - 3541981135
     - 1047117555
   badges:
-    - code: p
+    p:
+      code: p
       enum: Patreon
-      key: expecto
-      album_ids:
-        - 3599490148
-    - code: s
+    s:
+      code: s
       enum: Spintunes
-      key: notevenclose
-      album_ids:
-        - 444214854
-    - code: j
+    j:
+      code: j
       enum: JoCoCruise
-      key: seamonkey
-      album_ids:
-        - 24668382
-    - code: k
+    k:
+      code: k
       enum: Karaoke
-      key: emptyoke
-      album_ids:
-        - 3639645898
-    - code: w
+    w:
+      code: w
       enum: SafeForWork
-      key: sfw
