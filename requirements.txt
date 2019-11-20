@@ -1,3 +1,4 @@
+deepmerge
 requests
 PyYAML
 ./lib/cryptography-2.8-cp34-abi3-manylinux1_x86_64.whl
