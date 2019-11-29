@@ -5,23 +5,29 @@ class BadgeService:
 	def __init__(self, config, LOG):
 		self.config = config
 		self.LOG = LOG
-		self.core = BadgeCore(config, LOG)
+		self.core = BadgeCore(config['badges']['badges'], config['badges']['encryptionKey'], LOG)
 
-	def create_badge_token(self):
-		return self.core.generate_token([])
+	def create_token(self):
+		return self.core.badge_codes_to_token([])
 
+	def get_badges_from_token(self, token):
+		if not self.core.is_valid_token(token):
+			raise ValueError(f'Token value {token} is invalid')
+		else:
+			badges = []
+			badge_codes = self.core.token_to_badge_codes(token)
+			for code in badge_codes:
+				badges.append(self.core.badges_spec[code])
+			return badges, badge_codes
 
 	def add_badge_to_token(self, token, key):
 		if not self.core.is_valid_token(token):
-			self.LOG.info(f'Invalid token: {token}')
-			return self.core.generate_token([])
+			raise ValueError(f'Token value {token} is invalid')
 		elif not self.core.is_valid_key(key):
-			self.LOG.info(f'Invalid key: {key}')
-			return token
+			raise KeyError(f'Key value {key} is invalid')
 		else:
-			token_data = self.core.extract_data_from_token(token)
+			badge_codes = self.core.token_to_badge_codes(token)
 			spec = self.core.get_spec_for_key(key)
-			if (spec['code'] in token_data['Badges']):
-				return token
-			token_data['Badges'].append(spec['code'])
-			return self.core.generate_token(token_data['Badges'])
+			if not spec['code'] in badge_codes:
+				badge_codes.append(spec['code'])
+			return badge_codes, self.core.badge_codes_to_token(badge_codes)

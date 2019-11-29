@@ -13,15 +13,18 @@ class DiscographyService:
 		self.band_cache = {}
 		self.album_cache = {}
 		self.bandcamp = Bandcamp(config, LOG)
-		self.badge_core = BadgeCore(config, LOG)
+		self.badge_core = BadgeCore(config['badges']['badges'], config['badges']['encryptionKey'], LOG)
+
+	def get_discography(self, badges, no_cache):
+		return self.get_selected_albums(self.get_albums_for_badges(badges), no_cache)
 
 	def get_all_albums_from_all_bands(self, no_cache):
-		band_ids = self.config['bandcamp']['bcBIDs']
+		band_ids = self.config['bandcamp']['bcBandIDs']
 		albums = []
 		for band_id in band_ids:
 			band = self.get_band(band_id, no_cache)
 			for album_id in band['discography']:
-					albums.append(self.get_album(album_id))
+					albums.append(self.get_album(album_id, no_cache))
 		return albums
 
 	def get_band(self, band_id, no_cache):
@@ -32,10 +35,10 @@ class DiscographyService:
 			self.band_cache[band_id] = band
 			return band
 
-	def get_selected_albums(self, album_list, no_cache):
+	def get_selected_albums(self, albums, no_cache):
 		albums = []
-		for album in album_list:
-				albums.append(self.get_album(album))
+		for album in albums:
+				albums.append(self.get_album(album, no_cache))
 		return albums
 
 	def get_album(self, album_id, no_cache):
@@ -56,3 +59,10 @@ class DiscographyService:
 		self.album_cache = {}
 		self.get_all_albums_from_all_bands(True)
 		self.LOG.info(f'Cache refreshed')
+
+	def get_albums_for_badges(self, badges):
+		albums = self.config['badges']['defaultAlbumIDs']
+		for badge in badges:
+			if 'albumIDs' in badge:
+				albums += badge['albumIDs']
+		return albums

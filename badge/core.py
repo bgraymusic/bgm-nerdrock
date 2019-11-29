@@ -1,57 +1,42 @@
-import enum, json
-# from Crypto.Cipher import AES
+import json
 from cryptography.fernet import Fernet
 
-
-class Badge(enum.Enum):
-		PATREON = enum.auto
-		SPINTUNES = enum.auto
-		JCC = enum.auto
-		KARAOKE = enum.auto
-		SFW = enum.auto
-
-
 class BadgeCore:
-	def __init__(self, config, LOG):
-		self.config = config
+	def __init__(self, badges_spec, encryption_key, LOG):
 		self.LOG = LOG
-# 		self.cipher = AES.new(config['badges']['encryption_key'])
-		self.cipher = Fernet(config['badges']['encryption_key'].encode())
-
-	def get_badges_from_token(self, token):
-		if self.is_valid_token(token):
-			return self.extract_data_from_token(token)['Badges']
-		else:
-			raise ValueError('Invalid badge token')
+		self.badges_spec = badges_spec
+		self.cipher = Fernet(encryption_key.encode())
 
 	def is_valid_token(self, token):
-		token_data = self.extract_data_from_token(token)
-		encoded_token_data = token_data['EncryptedBadges'].encode()
-		decrypted_token_data = self.cipher.decrypt(encoded_token_data)
-		json_token_data = decrypted_token_data.decode()
-		enc_badges = json.loads(json_token_data)
-		return sorted(token_data['Badges']) == sorted(enc_badges)
+		try:
+			badge_codes = self.token_to_badge_codes(token)
+			for code in badge_codes:
+				if not code in self.badges_spec:
+					return False
+			return True
+		except Exception as e:
+			self.LOG.debug(f'is_valid_token threw {type(e)}')
+			return False
 
 	def is_valid_key(self, key):
-		for badge in self.config['badges']['badges']:
-			self.LOG.info(f'Key found: {badge["key"]}')
-		return next((spec for spec in self.config['badges']['badges'] if spec['key'] == key), None) != None
+		return self.get_spec_for_key(key) != None
 
 	def get_spec_for_key(self, key):
-		return next(spec for spec in self.config['badges']['badges'] if spec['key'] == key)
+		spec = next((self.badges_spec[spec] for spec in self.badges_spec if self.badges_spec[spec]['key'] == key), None)
+		return spec
 
-	def generate_token(self, badges):
-		json_str = json.dumps(badges)
+	def badge_codes_to_token(self, badge_codes):
+		json_str = json.dumps(badge_codes)
 		padded_json = self.pad_string_to_multiple_of_16(json_str)
-		encrypted_json = self.cipher.encrypt(padded_json.encode()).decode()
-		token = '|'.join([json_str, encrypted_json])
-		return token
+		encoded_padded_json = padded_json.encode()
+		encrypted_token = self.cipher.encrypt(encoded_padded_json)
+		return encrypted_token.decode()
 
-	def extract_data_from_token(self, token):
-		return {
-			'Badges': json.loads(token.split('|')[0]),
-			'EncryptedBadges' : token.split('|')[1]
-		}
+	def token_to_badge_codes(self, token):
+		encoded_token_data = token.encode()
+		decrypted_token_data = self.cipher.decrypt(encoded_token_data)
+		decoded_json_token_str = decrypted_token_data.decode()
+		return json.loads(decoded_json_token_str)
 
 	def pad_string_to_multiple_of_16(self, s):
 		return s if len(s) % 16 == 0 else s + (' ' * (16 - len(s) % 16))

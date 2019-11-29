@@ -1,17 +1,13 @@
-core:
-  refresh_discography_cache_sns_topic: RefreshDiscographyCache
-
 bandcamp:
   bcApiUrl: http://api.bandcamp.com/api
   bcDiscographyPath: /band/3/discography
   bcAlbumPath: /album/2/info
   bcTrackPath: /track/3/info
-  bcBIDs:
+  bcBandIDs:
     - 230945364
 
 badges:
-  default_album_ids:
-    - 0000
+  defaultAlbumIDs:
     - 3541981135
     - 1047117555
   badges:

@@ -4,14 +4,17 @@
 #    docs.serverless.com
 
 service: bgm-nerdrock
+project: nerdrock
 
 provider:
   name: aws
-  region: us-east-1
-  stage: dev
-  role: arn:aws:iam::028568048704:role/service-role/bgmMicroserviceRole
   runtime: python3.7
+  stage: ${opt:stage, 'dev'}
+  region: ${opt:region, 'us-east-1'}
+  role: arn:aws:iam::028568048704:role/service-role/bgmMicroserviceRole
   stackTags:
+    project: nerdrock
+  tags:
     project: nerdrock
 
 plugins:
@@ -19,16 +22,37 @@ plugins:
   - serverless-python-requirements
 
 custom:
+  integration:
+    responseTemplate: "$input.json('$')"
+    response:
+      headers:
+        Content-Type: "'application/json'"
+      template: ${self:custom.integration.responseTemplate}
+      statusCodes:
+        200:
+          template:
+            application/json: ${self:custom.integration.responseTemplate}
+          pattern: '.*"statusCode":200,.*'
+        400:
+          template: ${self:custom.integration.responseTemplate}
+          pattern: '.*"statusCode":400,.*'
+        401:
+          template: ${self:custom.integration.responseTemplate}
+          pattern: ".*401.*"
+        500:
+          template: ${self:custom.integration.responseTemplate}
+          pattern: '.*"statusCode":500,.*'
+
   fullstack:
     bucketName: web
-    distributionFolder: client/dist
+    distributionFolder: web
     indexDocument: index.html
     errorDocument: error.html
     singlePageApp: true
     apiPath: api
     clientSrcPath: client
   pythonRequirements:
-    dockerizePip: false
+    dockerizePip: true
 
 functions:
   badges:
@@ -37,22 +61,63 @@ functions:
     memorySize: 128
     environment:
       config: config.yml
-      log_level: INFO
+      secretsBucket: bgm-nerdrock-dev-secrets
+      secretsFile: secrets.yml
+      log_level: DEBUG
     events:
-      - http:
+      - http: # Get new token with no badges
           path: ${self:custom.fullstack.apiPath}/badges
           method: get
+          integration: lambda
+          request:
+            template:
+              application/json: '{}'
       - http:
-          path: ${self:custom.fullstack.apiPath}/badges
-          method: put
+          path: ${self:custom.fullstack.apiPath}/badges/{token}
+          method: get
+          integration: lambda
+          request:
+            template:
+              application/json: "{ \"token\": \"$input.params().path['token']\" }"
+      - http:
+          path: ${self:custom.fullstack.apiPath}/badges/{token}/{key}
+          method: get
+          integration: lambda
+          request:
+            template:
+              application/json: "{
+                  \"token\": \"$input.params().path['token']\",
+                  \"key\": \"$input.params().path['key']\"
+                }"
   discography:
     handler: handlers.handle_discography
     timeout: 15
     memorySize: 128
     environment:
       config: config.yml
+      secretsBucket: bgm-nerdrock-dev-secrets
+      secretsFile: secrets.yml
+      refreshCacheTopic: RefreshDiscographyCache
       log_level: INFO
     events:
       - http:
           path: ${self:custom.fullstack.apiPath}/discography
           method: get
+      - http:
+          path: ${self:custom.fullstack.apiPath}/discography/refresh
+          method: get
+      - sns:
+          topicName: RefreshDiscographyCache
+          displayName: Force reload of discography data from BandCamp
+
+# Raw AWS CloudFormation goes in here.
+resources:
+  Description: The CloudFormation stack for the bgm-nerdrock project
+  Resources:
+    GatewayResponse401Unauthorized:
+      Type: 'AWS::ApiGateway::GatewayResponse'
+      Properties:
+        ResponseType: UNAUTHORIZED
+        RestApiId:
+          Ref: 'ApiGatewayRestApi'
+        StatusCode: '401'
