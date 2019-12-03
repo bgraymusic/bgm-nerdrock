@@ -6,6 +6,8 @@
 service: bgm-nerdrock
 project: nerdrock
 
+appConfig: $(file(../config.yml))
+
 provider:
   name: aws
   runtime: python3.7
@@ -71,24 +73,26 @@ functions:
           integration: lambda
           request:
             template:
-              application/json: '{}'
+              application/json: "{}"
       - http:
           path: ${self:custom.fullstack.apiPath}/badges/{token}
           method: get
           integration: lambda
           request:
             template:
-              application/json: "{ \"token\": \"$input.params().path['token']\" }"
+              application/json: '{
+                "token": "$input.params().path[''token'']"
+                }'
       - http:
           path: ${self:custom.fullstack.apiPath}/badges/{token}/{key}
           method: get
           integration: lambda
           request:
             template:
-              application/json: "{
-                  \"token\": \"$input.params().path['token']\",
-                  \"key\": \"$input.params().path['key']\"
-                }"
+              application/json: '{
+                "token": "$input.params().path[''token'']",
+                "key": "$input.params().path[''key'']"
+                }'
   discography:
     handler: handlers.handle_discography
     timeout: 15
@@ -97,16 +101,44 @@ functions:
       config: config.yml
       secretsBucket: bgm-nerdrock-dev-secrets
       secretsFile: secrets.yml
-      refreshCacheTopic: RefreshDiscographyCache
-      log_level: INFO
+      log_level: DEBUG
     events:
       - http:
           path: ${self:custom.fullstack.apiPath}/discography
           method: get
+          integration: lambda
+          request:
+            template:
+              application/json: "{}"
+      - http:
+          path: ${self:custom.fullstack.apiPath}/discography/{token}
+          method: get
+          integration: lambda
+          request:
+            template:
+              application/json: '{
+                "token": "$input.params().path[''token'']"
+                }'
+
+  discographyCacheRefresh:
+    handler: handlers.handle_refresh_discography_cache
+    timeout: 15
+    memorySize: 128
+    environment:
+      config: config.yml
+      secretsBucket: bgm-nerdrock-dev-secrets
+      secretsFile: secrets.yml
+      log_level: DEBUG
+    events:
       - http:
           path: ${self:custom.fullstack.apiPath}/discography/refresh
           method: get
+          integration: lambda
+          request:
+            template:
+              application/json: "{}"
       - sns:
+          # topicName: $(self:appConfig.aws.sns.refreshDiscographyCache.topic)
           topicName: RefreshDiscographyCache
           displayName: Force reload of discography data from BandCamp
 
@@ -115,9 +147,9 @@ resources:
   Description: The CloudFormation stack for the bgm-nerdrock project
   Resources:
     GatewayResponse401Unauthorized:
-      Type: 'AWS::ApiGateway::GatewayResponse'
+      Type: "AWS::ApiGateway::GatewayResponse"
       Properties:
         ResponseType: UNAUTHORIZED
         RestApiId:
-          Ref: 'ApiGatewayRestApi'
-        StatusCode: '401'
+          Ref: "ApiGatewayRestApi"
+        StatusCode: "401"
