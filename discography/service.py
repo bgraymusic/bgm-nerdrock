@@ -67,7 +67,9 @@ class DiscographyService:
 
     def get_album_ids_for_badges(self, badges):
         self.LOG.debug(f'get_album_ids_for_badges was sent badges: {badges}')
-        album_ids = self.config['badges']['defaultAlbumIDs']
+        album_ids = self.config['badges']['defaultAlbumIDs'].copy()
+        self.LOG.debug(
+            f'get_album_ids_for_badges found default album IDs: {album_ids}')
         for badge_key in badges:
             spec = self.badge_core.badges_spec[badge_key]
             self.LOG.debug(f'spec for badge {badge_key}: {spec}')

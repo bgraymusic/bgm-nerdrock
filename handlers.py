@@ -11,7 +11,7 @@ from badge.service import BadgeService
 
 
 LOG = logging.getLogger()
-LOG.setLevel(os.getenv('log_level', 'DEBUG'))
+LOG.setLevel(os.getenv('log_level', 'INFO'))
 LOG.addHandler(logging.StreamHandler())
 
 
