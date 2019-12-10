@@ -22,6 +22,7 @@ node_modules
 # VSCode
 __pycache__
 *.pyc
+.*project
 .vscode/settings.json
 package-lock.json
 
