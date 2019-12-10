@@ -10,7 +10,7 @@ appConfig: $(file(../config.yml))
 
 provider:
   name: aws
-  runtime: python3.7
+  runtime: python3.8
   stage: ${opt:stage, 'dev'}
   region: ${opt:region, 'us-east-1'}
   role: arn:aws:iam::028568048704:role/service-role/bgmMicroserviceRole
