@@ -1,7 +1,7 @@
 ## Prerequisites
-Python 3.8 installed (verify a successful response from `python3.8 --version` and `python3 --version`)
-Docker CLI
-AWS CLI
+* Python 3.8 installed (verify a successful response from `python3.8 --version` and `python3 --version`)
+* Docker CLI
+* AWS CLI
 
 ## System setup
 * `pip3 install coverage`
