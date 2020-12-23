@@ -15,6 +15,9 @@ var/
 .installed.cfg
 *.egg
 node_modules
+.coverage
+.coveragerc.swp
+htmlcov
 
 # Serverless directories
 .serverless

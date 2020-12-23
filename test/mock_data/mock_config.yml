@@ -1,0 +1,37 @@
+aws:
+  account: 028568048704
+  region: us-east-1
+  sns:
+    refreshDiscographyCache:
+      topic: RefreshDiscographyCache
+      arn: arn:aws:sns:us-east-1:028568048704:RefreshDiscographyCache
+
+bandcamp:
+  bcApiUrl: http://api.bandcamp.com/api
+  bcDiscographyPath: /band/3/discography
+  bcAlbumPath: /album/2/info
+  bcTrackPath: /track/3/info
+  bcBandIDs:
+    - 230945364
+
+badges:
+  defaultAlbumIDs:
+    - 3541981135
+    - 1047117555
+    - 3708688148
+  badges:
+    p:
+      code: p
+      enum: Patreon
+    s:
+      code: s
+      enum: Spintunes
+    j:
+      code: j
+      enum: JoCoCruise
+    k:
+      code: k
+      enum: Karaoke
+    w:
+      code: w
+      enum: SafeForWork

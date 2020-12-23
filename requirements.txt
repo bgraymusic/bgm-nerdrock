@@ -2,4 +2,4 @@ deepmerge
 requests
 PyYAML
 cryptography
-cffi
+https://files.pythonhosted.org/packages/66/c8/56efb65bd9fff582c84f11bbfe2cf70c6abcaa852e35be45583e823bb59d/cffi-1.14.4-cp38-cp38-manylinux1_x86_64.whl

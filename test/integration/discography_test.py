@@ -1,7 +1,8 @@
-import json
 import logging
 import unittest
+from unittest.mock import *
 import handlers
+from handler import *
 
 
 class DiscographyTest(unittest.TestCase):
@@ -11,7 +12,7 @@ class DiscographyTest(unittest.TestCase):
         self.good_empty_token = 'gAAAAABd3CqXAwESrtYkIjS-aoKU59DMBPXfGHxAmTYsDekbf9P-DRgrbqASXlG9E3GYflkztalAWl4_zebqQiVkGCVHq6MXdENJ2XzsICdcHZaw6uroMMY='
         self.good_token_with_karaoke = 'gAAAAABd5a9WeZafUy2IwnNGnwbl2Lfp54Hn5mjUal9Hb6XnboLmFqMQGufS5QxDxcai_tZ_pJOREyqRzYgwgidmgAk4pYOxDgkY6j9ZeTDj-7klq6_jB44='
         self.bad_token = 'kjyutbwvityanlskjhtnalksbtlavkjshtkausblktvuabslktuylbkavsutylbkavsuylktybavslkdtbvlkas'
-        handlers.LOG.setLevel('WARN')
+        handlers.LOG = MagicMock()
 
     def test_get_with_no_token(self):
         no_token_result = handlers.handle_discography(event={}, context={})
@@ -35,7 +36,7 @@ class DiscographyTest(unittest.TestCase):
             event={'token': empty_token_result['token']}, context={})
 
     def test_get_with_bad_token(self):
-        with self.assertRaises(handlers.LambdaError):
+        with self.assertRaises(HandlerBase.LambdaError):
             handlers.handle_discography(
                 event={'token': self.bad_token}, context={})
 

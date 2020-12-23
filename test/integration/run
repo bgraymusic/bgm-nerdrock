@@ -1,0 +1,3 @@
+#!/bin/bash
+coverage run -m unittest test/integration/*test.py
+coverage report -m

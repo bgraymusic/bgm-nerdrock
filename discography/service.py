@@ -6,13 +6,13 @@ import os
 
 class DiscographyService:
 
-    def __init__(self, config, LOG):
+    def __init__(self, config, LOG, bandcamp=None, badge_core=None):
         self.config = config
         self.LOG = LOG
         self.band_cache = {}
         self.album_cache = {}
-        self.bandcamp = Bandcamp(config, LOG)
-        self.badge_core = BadgeCore(
+        self.bandcamp = bandcamp if bandcamp else Bandcamp(config, LOG)
+        self.badge_core = badge_core if badge_core else BadgeCore(
             config['badges']['badges'], config['badges']['encryptionKey'], LOG)
 
     def get_discography(self, badges, no_cache):
@@ -48,6 +48,9 @@ class DiscographyService:
             return self.album_cache[album_id]
         else:
             album = self.bandcamp.get_album_from_bc(album_id)
+            for track in album['tracks']:
+                track.update(
+                    self.bandcamp.get_track_from_bc(track['track_id']))
             self.album_cache[album_id] = album
             return album
 
