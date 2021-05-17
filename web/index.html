@@ -1,8 +1,189 @@
+<!DOCTYPE html>
 <html>
-  <head>
-    <title>Index Page</title>
-  </head>
-  <body>
-    <h1>Index Page</h1>
-  </body>
+	<head>
+		<script>if (window.top != window.self) window.top.location.replace(window.top.location.protocol + '//' + window.top.location.host + window.self.location.search);</script>
+		<meta charset="UTF-8">
+
+		<meta name="application-name" content="Brian Gray. Nerd Rock."/>
+		<meta name="msapplication-TileColor" content="#F0F8FF"/>
+		<meta name="msapplication-square70x70logo" content="img/logo_tiny.png"/>
+		<meta name="msapplication-square150x150logo" content="img/logo_square.png"/>
+		<meta name="msapplication-wide310x150logo" content="img/logo_wide.png"/>
+		<meta name="msapplication-square310x310logo" content="img/logo_large.png"/>
+		<meta name="viewport" content="initial-scale=1"/>
+
+		<meta property="og:url" content="http://briangraymusic.com" />
+		<meta property="og:title" content="Brian Gray. Nerd Rock." />
+		<meta property="og:description" content="Nerd rock all up in your tympanic membranes." />
+
+		<!-- Brian playing guitar at the Presidential Suite 2015 -->
+		<meta property="og:image" content="http://briangraymusic.com/img/presidential_suite_show.jpg" />
+
+		<!-- Happy Me -->
+		<meta property="og:image" content="http://briangraymusic.com/img/happy_me.jpg" />
+		<link rel="image_src" href="http://briangraymusic.com/img/happy_me.jpg" />
+		<!-- Code Red -->
+		<meta property="og:image" content="http://briangraymusic.com/img/maximum_overdrive.jpg" />
+		<link rel="image_src" href="http://briangraymusic.com/img/maximum_overdrive.jpg" />
+		<!-- Abernathy Fitzgerald -->
+		<meta property="og:image" content="http://briangraymusic.com/img/abernathy.jpg" />
+		<link rel="image_src" href="http://briangraymusic.com/img/abernathy.jpg" />
+		<!-- Queen of Oz -->
+		<meta property="og:image" content="http://briangraymusic.com/img/mae.jpg" />
+		<!-- Building an Orc Army -->
+		<meta property="og:image" content="http://briangraymusic.com/img/saruman.jpg" />
+		<!-- First One Here -->
+		<meta property="og:image" content="http://briangraymusic.com/img/columbus.jpg" />
+		<!-- π Day pie -->
+		<meta property="og:image" content="http://briangraymusic.com/img/pie.jpg" />
+
+		<title>Brian Gray. Nerd Rock.</title>
+
+<!-- 
+		<link rel="stylesheet" href="http://code.jquery.com/ui/1.12.0/themes/overcast/jquery-ui.css">
+ -->
+		<link rel="stylesheet" href="https://ajax.googleapis.com/ajax/libs/jqueryui/1.12.1/themes/overcast/jquery-ui.css">
+
+		<link rel="stylesheet" href="css/bg-common.css">
+		<link rel="stylesheet" media="screen and (max-width: 520px)" href="css/bg-mobile.css">
+		<link rel="stylesheet" media="screen and (min-width: 520px)" href="css/bg-immobile.css">
+
+		<link rel="stylesheet" media="screen and (max-width: 520px)" href="css/bg-title-full.css">
+		<link rel="stylesheet" media="screen and (min-width: 520px) and (max-width: 670px)" href="css/bg-title-nonerdrock.css">
+		<link rel="stylesheet" media="screen and (min-width: 670px) and (max-width: 790px)" href="css/bg-title-norock.css">
+		<link rel="stylesheet" media="screen and (min-width: 790px)" href="css/bg-title-full.css">
+
+		<link rel="stylesheet" media="screen and (min-width: 520px) and (max-width: 640px)" href="css/bg-noshuttle.css">
+		<link rel="stylesheet" media="screen and (min-width: 640px) and (max-width: 690px)" href="css/bg-smallshuttle.css">
+		<link rel="stylesheet" media="screen and (min-width: 690px) and (max-width: 740px)" href="css/bg-medshuttle.css">
+		<link rel="stylesheet" media="screen and (min-width: 740px) and (max-width: 860px)" href="css/bg-novol.css">
+		<link rel="stylesheet" media="screen and (min-width: 860px)" href="css/bg-full.css">
+
+		<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+		<script src="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.js"></script>
+		<script src="https://cdnjs.cloudflare.com/ajax/libs/jplayer/2.9.2/jplayer/jquery.jplayer.min.js"></script>
+<!-- 
+		<script src="/js/jquery.jplayer.min.js"></script>
+		<script src="https://cdnjs.cloudflare.com/ajax/libs/repo.js/5c0eae0f1b/repo.min.js"></script>
+		<script src="/js/repo.min.js"></script>
+ -->
+		<script src="https://cdnjs.cloudflare.com/ajax/libs/purl/2.3.1/purl.min.js"></script>
+
+		<!-- TODO: all local JS; good candidates for packaging and minifying into a single bgnr.min.js -->
+		<script src="js/track-info.js"></script>
+		<script src="js/bandcamp.js"></script>
+		<script src="js/BGDiscography.js"></script>
+		<script src="js/BGAlbum.js"></script>
+		<script src="js/BGTrack.js"></script>
+		<script src="js/BGBadges.js"></script>
+		<script src="js/BGNag.js"></script>
+		<script src="js/bg.js"></script>
+
+		<!-- Google Analytics -->
+<!--
+		<script>(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)})(window,document,'script','//www.google-analytics.com/analytics.js','ga');ga('create', 'UA-13177210-3', 'auto');ga('send', 'pageview');</script>
+-->
+	</head>
+	<body>
+
+		<div id="bg-nag">
+			<div id="bg-nag-text">
+<p class="bg-greeting">Hey, Brian here.</p>
+<p>Welcome to my web site, for the first time as far as I can tell!
+Unless I wrote defective code, this should be the only time you ever see this message.
+I don't require payment for my music, and I don't host advertising.
+The only way I make any money via songwriting is through voluntary patronage, so please consider buying a song or two via the "shopping cart" buttons and name your price.
+Or even better, visit my Patreon page and browse the various levels of rewards I offer for signing up as a patron.
+I'll stop bothering you now and let you enjoy my site as intended: at full browser window height.<p>
+			</div>
+			<div id="bg-nag-buttons">
+				<button class="bg-patreon-button"><span class="bg-patreon-prefix">Check out my </span><img src="https://s3.amazonaws.com/patreon_public_assets/toolbox/patreon.png"/></button>
+				<button id="bg-nag-dismiss">Close Forever</button>
+			</div>
+		</div>
+		<div id="bg-body" class="ui-widget-header">
+			<!-- Start page content -->
+			<div id="bg-header">
+				<div id="bg-global-stuff" class="bg-hide">
+					<div id="bg-err" class="ui-state-error ui-corner-all" title="Bandcamp failed to respond. Data in the music pane has been pulled from cache and may be stale.">
+						<span class="ui-icon ui-icon-alert"></span>
+					</div>
+					<button id="bg-prefs-button" title="Preferences"></button>
+				</div>
+				<span id="bg-header-title"></span>
+			</div>
+			<div id="bg-shadow-box" class="bg-top-level-tabs">
+				<ul class="bg-vertical-text">
+					<!-- <li><a href="#bg-shadow-blog">News</a></li> -->
+					<li><a href="#bg-shadow-music">Music</a></li>
+<!--
+					<li><a href="#bg-shadow-social">Social</a></li>
+					<li><a href="#bg-shadow-tribbulous">Studio</a></li>
+					<li><a href="#bg-shadow-github">Code</a></li>
+-->
+				</ul>
+			</div>
+			<div id="bg-top-level-tabs" class="bg-top-level-tabs">
+				<ul class="bg-vertical-text">
+					<!-- <li><a href="#bg-blog">News</a></li> -->
+					<li><a href="#bg-music">Music</a></li>
+<!--
+					<li><a href="#bg-social">Social</a></li>
+					<li><a href="#bg-tribbulous">Studio</a></li>
+					<li><a href="#bg-github">Code</a></li>
+-->
+				</ul>
+				<div id="bg-contents">
+					<!-- <div id="bg-blog"><iframe id="bg-blogframe"></iframe></div> -->
+					<div id="bg-music"></div>
+<!--
+					<table id="bg-social"><tr>
+						<td id="bg-facebook"><div class="fb-page" data-href="https://www.facebook.com/bgraymusic" data-width="500" data-small-header="true" data-adapt-container-width="true" data-hide-cover="false" data-show-facepile="true" data-show-posts="true"><div class="fb-xfbml-parse-ignore"><blockquote cite="https://www.facebook.com/bgraymusic"><a href="https://www.facebook.com/bgraymusic">Brian Gray</a></blockquote></div></div></td>
+						<td id="bg-twitter"><a class="twitter-timeline" href="https://twitter.com/BrianGrayMusic" data-widget-id="555018606363561985"></a></td>
+					</table>
+					<div id="bg-tribbulous"><p>This page is to track all the administrative activities required to set up a bona fide business to handle all my music activities. Until I’m up and running officially, legally, let’s consider this page a work in progress. For now, I'm actually doing the most hands-on work with building out my studio, so here we see the progress with that.</p><iframe src="https://trello.com/b/7OmMrxYJ.html"></iframe></div>
+					<div id="bg-github">How meta is this? Here's the code for this web site. Feel free to clone the <a href="https://github.com/bgraymusic/nerdrock" target="_blank">original repo</a>, or just browse inline by clicking the link below.</div>
+-->
+				</div>
+			</div>
+			<div id="bg-footer" class="ui-widget-header">
+				<span id="bg-footer-content">
+					<a href="http://creativecommons.org/licenses/by-nc/3.0/us/" rel="nofollow"><img alt="Creative Commons License" src="http://i.creativecommons.org/l/by-nc/3.0/us/80x15.png" style="border-width:0pt" /></a>
+					All music is licensed under a <a href="http://creativecommons.org/licenses/by-nc/3.0/us/" rel="nofollow">Creative Commons Attribution-Noncommercial 3.0 United States License</a>
+				</span>
+			</div>
+			<div class="bg-social-buttons bg-left">
+				<div class="fb-like" data-href="https://www.facebook.com/bgraymusic" data-layout="button" data-action="like" data-show-faces="true" data-share="true"></div>
+			</div>
+			<div class="bg-social-buttons bg-right">
+				<a href="https://twitter.com/BrianGrayMusic" class="twitter-follow-button" data-show-count="false" data-show-screen-name="false"></a>
+				<button class="bg-patreon-button"><img src="https://s3.amazonaws.com/patreon_public_assets/toolbox/patreon.png"/></button>
+			</div>
+			<div id="bg-badge-stuff">
+				<div id="bg-badges"></div>
+				<button id="bg-add-badge-button" title="Add new badge…"></button>
+				<div id="bg-add-badge-dialog" class="bg-hide">
+					<input id="bg-add-badge-value" type="text" title="Enter the secret code for your badge"/>
+					<button id="bg-add-badge-submit">Add</button>
+				</div>
+			</div>
+			<div id="bg-new-badge-alert" title="Achievement Unlocked">
+				<p><img id="bg-new-badge-icon"/><span id="bg-new-badge-msg"></span></p>
+			</div>
+			<div id="bg-cannot-save-badges-alert" class="ui-state-error" title="Cannot Save Badge(s)">
+				<p><span class="bg-alert-icon ui-icon ui-icon-alert"></span>Your browser does not support local storage, and so cannot save your badges. Please consider upgrading.</p>
+			</div>
+			<div id="bg-nsfw-alert" title="SFW Mode">
+				<p>You are in Safe For (Brian's) Work mode and have requested to hear a NSFW song. Are you sure you want to switch the site to NSFW mode? By doing so you implicitly agree not to hold anything you hear against me, professionally.</p>
+			</div>
+		</div>
+
+		<!-- Facebook JS API -->
+		<script>(function(d, s, id) {var js, fjs = d.getElementsByTagName(s)[0];if (d.getElementById(id)) return;js = d.createElement(s); js.id = id;js.src = "//connect.facebook.net/en_US/sdk.js#xfbml=1&version=v2.5";fjs.parentNode.insertBefore(js, fjs);}(document, 'script', 'facebook-jssdk'));</script>
+		<!-- Twitter JS API -->
+		<a class="twitter-timeline" href="https://twitter.com/BrianGrayMusic?ref_src=twsrc%5Etfw">Tweets by BrianGrayMusic</a> <script async src="https://platform.twitter.com/widgets.js" charset="utf-8"></script>
+		<!-- <script>!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0],p=/^http:/.test(d.location)?'http':'https';if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src=p+'://platform.twitter.com/widgets.js';fjs.parentNode.insertBefore(js,fjs);}}(document, 'script', 'twitter-wjs');</script> -->
+		<!-- <script>var ab=true</script> -->
+		<script src="js/ads.js"></script>
+	</body>
 </html>

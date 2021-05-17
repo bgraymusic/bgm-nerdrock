@@ -1,0 +1,9 @@
+#bg-music .bg-track-shuttle { display: table-cell; float: left; height: 100%; margin-left: 0.5em; margin-right: 0.5em; }
+#bg-music .bg-track-shuttle-table { display: table; height: 100%; }
+#bg-music .bg-track-shuttle-value { display: table-cell; height: 100%; vertical-align: middle; font-size: x-small; font-weight: normal; }
+#bg-music .bg-track-shuttle-slider {
+	display: inline-block; width: 10em; height: 0.4em; top: -0.15em; margin-left: 0.5em; margin-right: 0.5em; border-radius: 0.2em;
+}
+#bg-music .bg-track-shuttle .ui-slider-handle { width: 0.4em; height: 0.9em; margin-left: -0.25em; border-radius: 0.2em; outline-style: none; }
+#bg-music .bg-track-shuttle-max { display: table-cell; height: 100%; vertical-align: middle; font-size: x-small; font-weight: normal; }
+#bg-music .bg-track-volume { display: none; }

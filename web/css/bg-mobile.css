@@ -1,0 +1,55 @@
+#bg-nag { display: none !important }
+#bg-body { box-shadow: 0 0 0.25em 0px black inset; }
+
+.ui-tooltip { display: none !important; }
+
+#bg-badge-stuff { display: none; }
+.bg-social-buttons { display: none; }
+#bg-header { font-size: 1.5em; padding: 0.05em; letter-spacing: 0.05em; }
+#bg-header div { display: none; }
+
+#bg-body>#bg-shadow-box { display: none; }
+
+#bg-contents { top: 2em !important; bottom: 0; width: 100%; padding: 0.25em; box-shadow: 0 0 0.25em 0 black; }
+
+#bg-music .bg-album-meta-cell { display: none; }
+#bg-music .bg-album-art-small { width: 1.25em; height: 1.25em; }
+
+#bg-music .bg-album-accordion { margin-right: 1em;}
+#bg-music .bg-accordion-header { height: 2.5em; padding: 0 0 0 0.5em; margin-bottom: 1px; outline-style: none; }
+#bg-music .bg-accordion-header button {
+	float: left; height: 2.25em; width: 2.25em; margin: 0.1em; vertical-align: middle; border-radius: 6px; outline-style: none;
+}
+#bg-music .bg-accordion-header button .ui-button-text { padding: 0; margin: 0; }
+#bg-music .bg-accordion-body { overflow: hidden }
+#bg-music .bg-accordion-body .ui-tabs-panel { max-height: 25em; padding: 0.5em; overflow: auto; }
+#bg-music .bg-track-name { display: inline-block; margin-top: 0.7em; height: 100%; font-size: medium; }
+/*
+#bg-music .bg-track-name-text { display: inline-block; vertical-align: middle; padding-top: 0.55em }
+*/
+#bg-music .bg-track-controls { display: table-cell; float: right; }
+#bg-music .bg-track-shuttle { display: none; }
+#bg-music .bg-track-volume { display: none; }
+#bg-music .bg-track-download-button { background-position: -224px -48px; }
+#bg-music .bg-track-buy-button { background-position: -48px -112px; }
+#bg-music .bg-accordion-body { padding: 0; border-top-left-radius: 0; border-top-right-radius: 0; }
+#bg-music .bg-accordion-body div { font-size: small; white-space: pre-wrap; }
+#bg-music .bg-tabs-nav {
+	border-top: 0; border-left: 0; border-right: 0; border-top-left-radius: 0; border-top-right-radius: 0;
+	padding-left: 1em; padding-right: 1em; font-size: small;
+}
+#bg-music .bg-tabs-nav a { font-size: medium; padding: 0.1em 0.25em 0.1em 0.25em; outline-style: none; }
+#bg-music .bg-lyrics-now { color: #599fcf; }
+#bg-music .bg-lyrics-elapsed { color: #3383bb; }
+#bg-music .bg-track-notes img { display: block; margin: auto; }
+#bg-music .vex-tabdiv { font-family:"Times New Roman", Times, serif; }
+#bg-music .vex-tabdiv canvas { display: block; max-width: 800px; margin: auto; }
+
+/* MAKE IT SO THE MUSIC IS WHAT'S DISPLAYED */
+#bg-music { display: block !important; }
+#bg-blog { display: none !important; }
+#bg-social { display: none !important; }
+#bg-tribbulous { display: none !important; }
+#bg-github { display: none !important; }
+
+#bg-footer { display: none; }

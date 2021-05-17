@@ -1,0 +1,9 @@
+<html><head>
+	<script src="http://code.jquery.com/jquery-1.10.2.min.js"></script>
+	<script src="/js/purl.js"></script>
+	<script>
+tt=$.url().param('toptab');s=$.url().param('song');st=$.url().param('songtab');
+if (window.top.navigate) window.top.navigate({toptab:tt,song:t,songtab:st});
+else window.self.location='http://briangraymusic.com/?toptab='+tt+'&song='+s+'&songtab='+st;
+	</script>
+</head></html>

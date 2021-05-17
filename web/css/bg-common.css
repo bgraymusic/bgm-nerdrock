@@ -1,0 +1,42 @@
+body { position: fixed; width: 100%; height: 100%; margin: 0; border: none; }
+#bg-body { position: fixed; width: 100%; height: 100%; margin: 0; border: none; }
+#bg-body { background: #c0d8f0; }
+#bg-body .bg-hide { display: none; }
+
+#bg-page-description { display: none; }
+#bg-cannot-save-badges-alert { display: none; }
+#bg-new-badge-alert { display: none; }
+#bg-nsfw-alert { width: 600px; display: none; }
+#bg-cannot-save-badges-alert.ui-dialog-content { display: block; }
+#bg-new-badge-alert.ui-dialog-content { display: block; }
+.ui-dialog .ui-button-text-only { outline-style: none; }
+.ui-dialog .ui-button-text-only .ui-button-text { padding: 0.25em 0.5em; outline-style: none; }
+.ui-dialog .ui-dialog-buttonpane { margin: 0; padding: 0; }
+.bg-alert-icon { float: left; margin: 0 0.5em 3em 0; }
+#bg-new-badge-icon { float: left; margin: 0 0.5em 1em 0; width: 4em; height: 4em; }
+
+#bg-header {
+	position: absolute; width: 100%; text-align: center; text-shadow: 0 0 0.5em aliceblue;
+	font-family: Trebuchet MS,Helvetica,Arial,sans-serif; font-weight: bold
+}
+
+#bg-body>.bg-top-level-tabs {
+	background: none; border: none; z-index: 1; position: relative; top: 0; right: 0; bottom: 0; left: 0; border: none; padding: 0; height: 0;
+}
+#bg-body>.bg-top-level-tabs>ul { display: none; }
+
+#bg-contents { display: block; position: fixed; overflow-x: hidden; overflow-y: auto; border: 1px solid black; font-size: medium; }
+#bg-contents { background-color: aliceblue; }
+#bg-contents>div { padding: 0; }
+#bg-contents>table { padding: 0; }
+
+#bg-music .bg-album { display: table; width: 100%; }
+#bg-music .bg-album-row { display: table-row; }
+#bg-music .bg-album-content-cell { display: table-cell; padding-left: 0.5em;}
+#bg-music .bg-album-title {
+	display: inline; height: 1.5em; vertical-align: top;
+	padding-left: 0.5em; color: black; font-size: large; font-weight: bold;
+}
+#bg-music .bg-track-name-jcc-img { position: absolute; top: 2px; display: inline; width: 1em; height: 1em; margin-left: 0.25em }
+#bg-music .bg-track-jcc fieldset { width: 0; }
+#bg-music .bg-track-jcc iframe { width: 480px; height: 270px; border: 0 }
