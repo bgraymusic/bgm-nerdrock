@@ -20,10 +20,9 @@ class RefreshCacheHandler(HandlerBase):
             else:
                 self.discography_service.trigger_cache_refresh()
                 return RefreshCacheHandler.Result('Discography cache refresh triggered')
-        except Exception as e:
+        except Exception:
             self.LOG.exception("handlers.handle_refresh_discography_cache")
-            raise HandlerBase.LambdaError(HTTPStatus.INTERNAL_SERVER_ERROR, RefreshCacheHandler.Result(
-                'Internal Server Error'), e)
+            raise HandlerBase.InternalError()
 
     def is_refresh_trigger_event(self, event):
         return ('Records' in event and

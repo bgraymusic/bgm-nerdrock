@@ -1,8 +1,9 @@
 import json
 import logging
-from handler import *
-from discography import *
-from badge import *
+import os
+from handler import DiscographyHandler, BadgesHandler, RefreshCacheHandler, init_config
+from discography import DiscographyService
+from badge import BadgeService
 
 
 LOG = logging.getLogger()
@@ -18,6 +19,10 @@ discography_handler = DiscographyHandler(
 refresh_handler = RefreshCacheHandler(config, LOG, discography_service)
 badges_handler = BadgesHandler(config, LOG, badge_service)
 
+
+def handle_test(event, context):
+    LOG.debug(f'handle_test triggered with event {event}')
+    return test_handler.handle(event, context)
 
 def handle_discography(event, context):
     LOG.debug(f'handle_discography triggered with event {event}')

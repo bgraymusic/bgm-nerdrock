@@ -1,9 +1,9 @@
 import json
 import logging
 import unittest
-from unittest.mock import *
+from unittest.mock import MagicMock
 import handlers
-from handler.base import HandlerBase
+from handler import HandlerBase
 
 
 class BadgesTest(unittest.TestCase):
@@ -19,15 +19,13 @@ class BadgesTest(unittest.TestCase):
         self.assertEqual(result['badges'], [])
         self.assertIn('token', result)
         self.assertIsNotNone(result['token'])
-        verify = handlers.handle_badges(
-            event={'token': result['token']}, context={})
+        handlers.handle_badges(event={'token': result['token']}, context={})
 
     def test_validate_good_token(self):
-        result = handlers.handle_badges(
-            event={'token': self.good_empty_token}, context={})
+        handlers.handle_badges(event={'token': self.good_empty_token}, context={})
 
     def test_validate_bad_token(self):
-        with self.assertRaises(HandlerBase.LambdaError):
+        with self.assertRaises(HandlerBase.InvalidTokenError):
             handlers.handle_badges(event={'token': self.bad_token}, context={})
 
     def test_add_badge_to_token(self):

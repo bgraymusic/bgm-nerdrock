@@ -3,12 +3,30 @@ import abc
 
 class HandlerBase:
 
-    class LambdaError(Exception):
-        def __init__(self, status, result, exc=None):
-            result['errorCode'] = status
-            result['message'] = f'[{status}] {result["message"]}'
-            result['exception'] = exc
-            super().__init__(result)
+    class InvalidTokenError(Exception):
+        def __init__(self, badToken, goodToken, badges, discography=None):
+            super().__init__({
+                'error': self.__class__.__name__,
+                'badges': badges,
+                'bad_token': badToken,
+                'good_token': goodToken,
+                'default_discography': discography
+            })
+
+    class InvalidKeyError(Exception):
+        def __init__(self, badKey, token, badges):
+            super().__init__({
+                'error': self.__class__.__name__,
+                'bad_key': badKey,
+                'badges': badges,
+                'token': token
+            })
+
+    class InternalError(Exception):
+        def __init__(self):
+            super().__init__({
+                'error': self.__class__.__name__
+            })
 
     def __init__(self, config, LOG):
         self.config = config

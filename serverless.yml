@@ -4,9 +4,9 @@
 #    docs.serverless.com
 
 service: bgm-nerdrock
-project: nerdrock
+# project: nerdrock
 
-appConfig: $(file(../config.yml))
+# appConfig: $(file(../config.yml))
 
 provider:
   name: aws
@@ -18,6 +18,8 @@ provider:
     project: nerdrock
   tags:
     project: nerdrock
+  apiGateway:
+    shouldStartNameWithService: true
 
 plugins:
   - fullstack-serverless
@@ -26,24 +28,27 @@ plugins:
 custom:
   integration:
     responseTemplate: "$input.json('$')"
+    errorTemplate: "$input.json('$.errorMessage')"
     response:
       headers:
         Content-Type: "'application/json'"
+        Access-Control-Allow-Origin: "'*'"
       template: ${self:custom.integration.responseTemplate}
       statusCodes:
         200:
-          template:
-            application/json: ${self:custom.integration.responseTemplate}
-          pattern: '.*"statusCode":200,.*'
-        400:
-          template: ${self:custom.integration.responseTemplate}
-          pattern: '.*"statusCode":400,.*'
+          pattern: ''
         401:
-          template: ${self:custom.integration.responseTemplate}
-          pattern: ".*401.*"
+          template:
+            application/json: ${self:custom.integration.errorTemplate}
+          pattern: ".*InvalidTokenError.*"
+        403:
+          template:
+            application/json: ${self:custom.integration.errorTemplate}
+          pattern: '.*InvalidKeyError.*'
         500:
-          template: ${self:custom.integration.responseTemplate}
-          pattern: '.*"statusCode":500,.*'
+          template:
+            application/json: ${self:custom.integration.errorTemplate}
+          pattern: '.*InternalError.*'
 
   fullstack:
     bucketName: web
@@ -51,12 +56,14 @@ custom:
     indexDocument: index.html
     errorDocument: error.html
     singlePageApp: true
+    compressWebContent: true
     apiPath: api
     clientSrcPath: client
   pythonRequirements:
     dockerizePip: true
 
 functions:
+
   badges:
     handler: handlers.handle_badges
     timeout: 5
@@ -74,6 +81,8 @@ functions:
           request:
             template:
               application/json: "{}"
+          response: ${self:custom.integration.response}
+          cors: true
       - http:
           path: ${self:custom.fullstack.apiPath}/badges/{token}
           method: get
@@ -83,6 +92,8 @@ functions:
               application/json: '{
                 "token": "$input.params().path[''token'']"
                 }'
+          response: ${self:custom.integration.response}
+          cors: true
       - http:
           path: ${self:custom.fullstack.apiPath}/badges/{token}/{key}
           method: get
@@ -93,6 +104,9 @@ functions:
                 "token": "$input.params().path[''token'']",
                 "key": "$input.params().path[''key'']"
                 }'
+          response: ${self:custom.integration.response}
+          cors: true
+  
   discography:
     handler: handlers.handle_discography
     timeout: 15
@@ -110,6 +124,8 @@ functions:
           request:
             template:
               application/json: "{}"
+          response: ${self:custom.integration.response}
+          cors: true
       - http:
           path: ${self:custom.fullstack.apiPath}/discography/{token}
           method: get
@@ -118,7 +134,9 @@ functions:
             template:
               application/json: '{
                 "token": "$input.params().path[''token'']"
-                }'
+              }'
+          response: ${self:custom.integration.response}
+          cors: true
 
   discographyCacheRefresh:
     handler: handlers.handle_refresh_discography_cache
@@ -137,6 +155,8 @@ functions:
           request:
             template:
               application/json: "{}"
+          response: ${self:custom.integration.response}
+          cors: true
       - sns:
           # topicName: $(self:appConfig.aws.sns.refreshDiscographyCache.topic)
           topicName: RefreshDiscographyCache
@@ -145,11 +165,11 @@ functions:
 # Raw AWS CloudFormation goes in here.
 resources:
   Description: The CloudFormation stack for the bgm-nerdrock project
-  Resources:
-    GatewayResponse401Unauthorized:
-      Type: "AWS::ApiGateway::GatewayResponse"
-      Properties:
-        ResponseType: UNAUTHORIZED
-        RestApiId:
-          Ref: "ApiGatewayRestApi"
-        StatusCode: "401"
+  # Resources:
+  #   GatewayResponse401Unauthorized:
+  #     Type: "AWS::ApiGateway::GatewayResponse"
+  #     Properties:
+  #       ResponseType: UNAUTHORIZED
+  #       RestApiId:
+  #         Ref: "ApiGatewayRestApi"
+  #       StatusCode: "401"

@@ -1,11 +1,11 @@
 import boto3
 import builtins
-from handler import *
+from handler import HandlerBase, BadgesHandler, DiscographyHandler, RefreshCacheHandler, init_config
 import json
 import logging
 import os
 import unittest
-from unittest.mock import *
+from unittest.mock import patch, MagicMock
 import yaml
 
 
@@ -75,11 +75,21 @@ class HandlersUnitTest(unittest.TestCase):
         try:
             result = self.badges_handler.handle({'token': '48484848'}, None)
             self.fail()
-        except HandlerBase.LambdaError as e:
+        except HandlerBase.InvalidTokenError as e:
             self.log_for_systems_under_test.warning.assert_called()
-            self.assertEqual(HTTPStatus.UNAUTHORIZED, e.args[0]['errorCode'])
+            self.assertEqual(e.__class__.__name__, e.args[0]['error'])
             self.assertEqual(0, len(e.args[0]['badges']))
-            self.assertEqual('47474747', e.args[0]['token'])
+            self.assertEqual('47474747', e.args[0]['good_token'])
+
+    def test_internal_error(self):
+        self.badge_service.create_token.return_value = '47474747'
+        self.badge_service.get_badges_from_token.side_effect = Exception()
+        try:
+            result = self.badges_handler.handle({'token': '\uf260'}, None)
+            self.fail()
+        except HandlerBase.InternalError as e:
+            self.log_for_systems_under_test.warning.assert_called()
+            self.assertEqual(e.__class__.__name__, e.args[0]['error'])
 
     def test_successful_add_badge_to_token(self):
         self.badge_service.add_badge_to_token.return_value = (
@@ -96,11 +106,11 @@ class HandlersUnitTest(unittest.TestCase):
             result = self.badges_handler.handle(
                 {'token': '48484848', 'key': 'karaokey'}, None)
             self.fail()
-        except HandlerBase.LambdaError as e:
+        except HandlerBase.InvalidTokenError as e:
             self.log_for_systems_under_test.warning.assert_called()
-            self.assertEqual(HTTPStatus.UNAUTHORIZED, e.args[0]['errorCode'])
+            self.assertEqual(e.__class__.__name__, e.args[0]['error'])
             self.assertEqual(0, len(e.args[0]['badges']))
-            self.assertEqual('47474747', e.args[0]['token'])
+            self.assertEqual('47474747', e.args[0]['good_token'])
 
     def test_add_invalid_badge_to_valid_token(self):
         self.badge_service.add_badge_to_token.side_effect = KeyError()
@@ -109,11 +119,12 @@ class HandlersUnitTest(unittest.TestCase):
             result = self.badges_handler.handle(
                 {'token': '47474747', 'key': 'karaokay'}, None)
             self.fail()
-        except HandlerBase.LambdaError as e:
+        except HandlerBase.InvalidKeyError as e:
             self.log_for_systems_under_test.warning.assert_called()
-            self.assertEqual(HTTPStatus.BAD_REQUEST, e.args[0]['errorCode'])
+            self.assertEqual(e.__class__.__name__, e.args[0]['error'])
             self.assertEqual(1, len(e.args[0]['badges']))
             self.assertIn('k', e.args[0]['badges'])
+            self.assertEqual('karaokay', e.args[0]['bad_key'])
             self.assertEqual('47474747', e.args[0]['token'])
 
     def test_get_discography_no_token(self):
@@ -138,14 +149,15 @@ class HandlersUnitTest(unittest.TestCase):
             result = self.discography_handler.handle(
                 {'token': '48484848'}, None)
             self.fail()
-        except HandlerBase.LambdaError as e:
+        except HandlerBase.InvalidTokenError as e:
             self.log_for_systems_under_test.warning.assert_called()
-            self.assertEqual(HTTPStatus.UNAUTHORIZED, e.args[0]['errorCode'])
+            self.assertEqual(e.__class__.__name__, e.args[0]['error'])
             self.assertEqual(0, len(e.args[0]['badges']))
-            self.assertEqual('47474747', e.args[0]['token'])
-            self.assertEqual(1, len(e.args[0]['discography']))
+            self.assertEqual('48484848', e.args[0]['bad_token'])
+            self.assertEqual('47474747', e.args[0]['good_token'])
+            self.assertEqual(1, len(e.args[0]['default_discography']))
             self.assertEqual(
-                1234567890, e.args[0]['discography'][0]['albumId'])
+                1234567890, e.args[0]['default_discography'][0]['albumId'])
 
     def test_get_discography_internal_error(self):
         self.badge_service.create_token.return_value = '47474747'
@@ -155,13 +167,12 @@ class HandlersUnitTest(unittest.TestCase):
             result = self.discography_handler.handle(
                 {'token': 'ƒøøßå®'}, None)
             self.fail()
-        except HandlerBase.LambdaError as e:
+        except HandlerBase.InternalError as e:
             self.log_for_systems_under_test.exception.assert_called()
-            self.assertEqual(HTTPStatus.INTERNAL_SERVER_ERROR,
-                             e.args[0]['errorCode'])
-            self.assertEqual(0, len(e.args[0]['badges']))
-            self.assertEqual('ƒøøßå®', e.args[0]['token'])
-            self.assertIsNone(e.args[0]['discography'])
+            self.assertEqual(e.__class__.__name__, e.args[0]['error'])
+            # self.assertEqual(0, len(e.args[0]['badges']))
+            # self.assertEqual('ƒøøßå®', e.args[0]['token'])
+            # self.assertIsNone(e.args[0]['discography'])
 
     def test_trigger_cache_refresh(self):
         self.refresh_handler.handle({}, None)
@@ -172,10 +183,9 @@ class HandlersUnitTest(unittest.TestCase):
         try:
             self.refresh_handler.handle({}, None)
             self.fail()
-        except HandlerBase.LambdaError as e:
+        except HandlerBase.InternalError as e:
             self.log_for_systems_under_test.exception.assert_called()
-            self.assertEqual(HTTPStatus.INTERNAL_SERVER_ERROR,
-                             e.args[0]['errorCode'])
+            self.assertEqual(e.__class__.__name__, e.args[0]['error'])
 
     def test_refresh_cache(self):
         event = {

@@ -36,7 +36,7 @@ class DiscographyTest(unittest.TestCase):
             event={'token': empty_token_result['token']}, context={})
 
     def test_get_with_bad_token(self):
-        with self.assertRaises(HandlerBase.LambdaError):
+        with self.assertRaises(HandlerBase.InvalidTokenError):
             handlers.handle_discography(
                 event={'token': self.bad_token}, context={})
 

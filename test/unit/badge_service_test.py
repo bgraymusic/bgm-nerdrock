@@ -1,6 +1,6 @@
 import logging
 import unittest
-from badge import *
+from badge import BadgeService
 
 # This badge stuff doesn't have any external dependencies that run remotely or
 # would in any way take the kind of time that exceeds spec for a "unit" test.
@@ -56,7 +56,7 @@ class BadgeServiceTest(unittest.TestCase):
         try:
             self.badge_service.get_badges_from_token(token)
             self.fail()
-        except ValueError as e:
+        except ValueError:
             pass
 
     def test_bad_code_in_token(self):
@@ -64,13 +64,13 @@ class BadgeServiceTest(unittest.TestCase):
         try:
             self.badge_service.get_badges_from_token(token)
             self.fail()
-        except ValueError as e:
+        except ValueError:
             pass
         try:
             self.badge_service.add_badge_to_token(
                 token, self.config['badges']['badges']['k']['key'])
             self.fail()
-        except ValueError as e:
+        except ValueError:
             pass
 
     def test_bad_key_added(self):
@@ -79,8 +79,8 @@ class BadgeServiceTest(unittest.TestCase):
         self.assertEqual(0, len(badges))
         self.assertEqual(0, len(badge_codes))
         try:
-            new_badges, new_token = self.badge_service.add_badge_to_token(
+            _, _ = self.badge_service.add_badge_to_token(
                 token, 'BAD_KEY')
             self.fail()
-        except KeyError as e:
+        except KeyError:
             pass

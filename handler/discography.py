@@ -32,9 +32,11 @@ class DiscographyHandler(HandlerBase):
             token = self.badge_service.create_token()
             discography = self.discography_service.get_discography(
                 [], no_cache=False)
-            raise HandlerBase.LambdaError(HTTPStatus.UNAUTHORIZED, DiscographyHandler.Result(
-                'Invalid token, creating default', [], token, discography))
+            raise HandlerBase.InvalidTokenError(
+                badToken=event['token'],
+                goodToken=self.badge_service.create_token(),
+                badges=[],
+                discography=discography)
         except Exception as e:
-            self.LOG.exception("handlers.handle_discography")
-            raise HandlerBase.LambdaError(HTTPStatus.INTERNAL_SERVER_ERROR, DiscographyHandler.Result(
-                'Internal Server Error', [], event['token'] if 'token' in event else None, None), e)
+            self.LOG.exception("DiscographyHandler.handle")
+            raise HandlerBase.InternalError()
