@@ -30,6 +30,8 @@ class BadgeService:
         else:
             badge_codes = self.core.token_to_badge_codes(token)
             spec = self.core.get_spec_for_key(key)
+            addedCode = None
             if not spec['code'] in badge_codes:
                 badge_codes.append(spec['code'])
-            return badge_codes, self.core.badge_codes_to_token(badge_codes)
+                addedCode = spec['code']
+            return badge_codes, self.core.badge_codes_to_token(badge_codes), addedCode

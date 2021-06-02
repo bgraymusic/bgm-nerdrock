@@ -8,21 +8,20 @@ var debugLyricTimings = false;
 // If history.state exists, assume browser isn't going to fire initial popstate.
 var popped = ('state' in window.history && window.history.state !== null), initialURL = location.href;
 
-$(function() {
-	nag = new BG.Nag({
-		container: $('#bg-nag'),
-		heightDetermined: function(height) {
-			console.log('Nag height: ' + height);
-			$('#bg-contents').css('top', height + 80 + 'px');
-		},
-		close: function() {
-			$('#bg-contents').css('top', 80 + 'px');
-		}
-	});
-	BG.Badges.getInstance().bootstrap();
-	if (bc.getBandcampData(onDataComplete, BG.Badges.getInstance())) { $('.bg-err').removeClass('bg-hide'); }
-	// BG.Badges.getInstance().validateToken('uyasegfkawygfkasjhfgds');
-});
+// $(function() {
+// 	nag = new BG.Nag({
+// 		container: $('#bg-nag'),
+// 		heightDetermined: function(height) {
+// 			console.log('Nag height: ' + height);
+// 			$('#bg-contents').css('top', height + 80 + 'px');
+// 		},
+// 		close: function() {
+// 			$('#bg-contents').css('top', 80 + 'px');
+// 		}
+// 	});
+// 	BG.Badges.getInstance().bootstrap();
+// 	if (bc.getBandcampData(onDataComplete, BG.Badges.getInstance())) { $('.bg-err').removeClass('bg-hide'); }
+// });
 
 function onDataComplete(bcData) {
 	discography.addAlbums(bcData, true);

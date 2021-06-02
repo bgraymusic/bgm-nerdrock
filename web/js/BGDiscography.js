@@ -1,56 +1,73 @@
 var BG = BG || {};
 
-BG.Discography = function() {
-	this.drawAlbums = [];
-	this.bgAlbums = [];
+///////////////////////////////////////////////////
+// Load and display discography
+
+BG.Discography = class {
+	drawAlbums = [];
+	bgAlbums = [];
 
 	// Important HTML DOM elements
-	this.cont = undefined;
+	cont = undefined;
 
-	return this;
-}
+    constructor() {}
 
-// Classes applied to elements for styling
-BG.Discography.css = { cont: 'bg-music' }
+	// Classes applied to elements for styling
+	static css = { cont: 'bg-music' }
 
-BG.Discography.getInstance = function(element) {
-	var discography = $('#'+BG.Discography.css.cont);
-	if (discography.length) return discography.data().discography;
-	else return null;
-}
+	static discographyURL = 'https://94iml3erc4.execute-api.us-east-1.amazonaws.com/dev/api/discography';
+	static discographyWithTokenURL = 'https://94iml3erc4.execute-api.us-east-1.amazonaws.com/dev/api/discography/{token}';
 
-BG.Discography.prototype.buildDOM = function(musicDiv) {
-	this.cont = musicDiv;
-	$(this.cont).empty();
-	$(this.cont).data().discography = this;
-	var discography = this;
-	$(this.drawAlbums.sort(function(a,b) {
-		for (idx in albumOrder) {
-			if (albumOrder[idx] == a.album_id) return -1;
-			if (albumOrder[idx] == b.album_id) return 1;
+	static registerJQueryUI() {
+		BG.Album.registerJQueryUI();
+	}
+
+	async bootstrap(token) {
+		let musicDiv = document.getElementById(BG.Discography.css.cont);
+		[...musicDiv.childNodes].forEach(el => el.remove());
+		this.drawAlbums = [];
+		this.bgAlbums = [];
+        let discData = await this.fetchDiscography(token);
+        this.addAlbums(discData.discography);
+    	this.buildDOM(musicDiv);
+    	BG.Discography.registerJQueryUI();
+	}
+
+	async fetchDiscography(token) {
+		if (!token) {
+			let response = await fetch(BG.Discography.discographyURL);
+			let result = await response.json();
+			return result;
+		} else {
+			let response = await fetch(BG.Discography.discographyWithTokenURL.replace('{token}', token))
+			let result = await response.json();
+			return result;
 		}
-		return 0;
-	})).each(function() {
-		if (this.tracks.length) {
-			if ($('.'+BG.Album.css.cont).length) $(musicDiv).append($('<hr/>'));
-			var album = new BG.Album(discography, this);
-			discography.bgAlbums.push(album);
-			var albumDiv = $('<div/>').addClass(BG.Album.css.cont);
-			$(musicDiv).append(albumDiv);
-			album.buildDOM(albumDiv);
-		}
-	});
-}
+	}
 
-BG.Discography.registerJQueryUI = function() {
-	BG.Album.registerJQueryUI();
-}
+	buildDOM(musicDiv) {
+		this.cont = musicDiv;
+		$(this.cont).empty();
+		$(this.cont).data().discography = this;
+		var discography = this;
+		$(this.drawAlbums).each(function() {
+			if (this.tracks.length) {
+				if ($('.'+BG.Album.css.cont).length) $(musicDiv).append($('<hr/>'));
+				var album = new BG.Album(discography, this);
+				discography.bgAlbums.push(album);
+				var albumDiv = $('<div/>').addClass(BG.Album.css.cont);
+				$(musicDiv).append(albumDiv);
+				album.buildDOM(albumDiv);
+			}
+		});
+	}
 
-BG.Discography.prototype.addAlbums = function(albums) {
-	var discography = this;
-	$(albums).each(function() { discography.drawAlbums.push(this); });
-}
+	addAlbums(albums) {
+		var discography = this;
+		$(albums).each(function() { discography.drawAlbums.push(this); });
+	}
 
-BG.Discography.prototype.addAlbum = function(album) {
-	this.drawAlbums.push(album);
+	addAlbum(album) {
+		this.drawAlbums.push(album);
+	}
 }

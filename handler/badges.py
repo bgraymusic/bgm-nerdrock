@@ -8,10 +8,11 @@ class BadgesHandler(HandlerBase):
         self.badge_service = badge_service
 
     class Result(dict):
-        def __init__(self, message, badges, token):
+        def __init__(self, message, badges, token, addedCode=None):
             self['message'] = message
             self['badges'] = badges
             self['token'] = token
+            self['added_code'] = addedCode
 
     def handle(self, event, context):
         super().handle(event, context)
@@ -23,9 +24,9 @@ class BadgesHandler(HandlerBase):
                     event['token'])
                 return BadgesHandler.Result(f'Token {event["token"]} is valid', badgeCodes, event['token'])
             else:
-                badges, token = self.badge_service.add_badge_to_token(
+                badges, token, addedCode = self.badge_service.add_badge_to_token(
                     event['token'], event['key'])
-                return BadgesHandler.Result('Badge added to token', badges, token)
+                return BadgesHandler.Result('Badge added to token', badges, token, addedCode)
         except ValueError as e:
             self.LOG.warning(e.with_traceback)
             raise HandlerBase.InvalidTokenError(

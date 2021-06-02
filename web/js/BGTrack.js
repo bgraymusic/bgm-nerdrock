@@ -62,8 +62,8 @@ BG.Track.prototype.buildHeader = function() {
 
 	var name = $('<div/>').addClass(BG.Track.css.hdr.name);
 	name.append($('<span/>').addClass(BG.Track.css.hdr.name_text).text(this.title));
-	if (this.jcc && BG.Badges.getInstance().hasBadge('jcc'))
-		name.append($('<img/>').addClass(BG.Track.css.hdr.jcc_img).attr('src', BG.Badges.getBadgeSpec('jcc').img));
+	if (this.jcc && BG.NerdRock.getInstance().badges.hasBadge('j'))
+		name.append($('<img/>').addClass(BG.Track.css.hdr.jcc_img).attr('src', BG.Badges.SPEC['j'].img));
 	this.hdr.append(name);
 }
 
@@ -183,17 +183,18 @@ BG.Track.prototype.buildBody = function() {
 			.attr('id', this.track_id + 'notes').addClass(BG.Track.css.body.notes).html(this.about));
 	}
 
-// 	if (this.media) {
-// 		tabs.append($('<li/>').append($('<a/>').attr('href', '#' + this.track_id + 'media').text('Media')));
-// 		var media = $('<div/>').attr('id', this.track_id + 'media').addClass(BG.Track.css.body.media);
-// 		$(this.media).each(function() {
-// 			media.append($('<p/>').text(this.label)).append($('<iframe/>').attr('width', 560).attr('height', 315)
-// 				.attr('src', 'https://www.youtube.com/embed/' + this.ytId));
-// 		});
-// 		this.body.append(media);
-// 	}
+	if (this.media) {
+		tabs.append($('<li/>').append($('<a/>').attr('href', '#' + this.track_id + 'media').text('Media')));
+		var media = $('<div/>').attr('id', this.track_id + 'media').addClass(BG.Track.css.body.media);
+		// $(this.media).each(function() {
+		// 	media.append($('<p/>').text(this.label)).append($('<iframe/>').attr('width', 560).attr('height', 315)
+		// 		.attr('src', 'https://www.youtube.com/embed/' + this.ytId));
+		// });
+		media.append($('<p/>').html(this.media));
+		this.body.append(media);
+	}
 
-	if (this.jcc && BG.Badges.getInstance().hasBadge('jcc')) {
+	if (this.jcc && BG.NerdRock.getInstance().badges.hasBadge('j')) {
 		tabs.append($('<li/>').append($('<a/>').attr('href', '#' + this.track_id + 'jcc').text('SeaMonkeys')));
 		var jcc = $('<div/>').attr('id', this.track_id + 'jcc').addClass(BG.Track.css.body.jcc);
 		$(this.jcc).each(function() {
@@ -281,7 +282,7 @@ BG.Track.markElapsedLyrics = function(player, time) {
 	elapsedLyrics.html(tokens.slice(0, highTime).join(''));
 	currentLyrics.html(tokens[highTime]);
 	futureLyrics.html(tokens.slice(highTime + 1).join(''));
-	if (debugLyricTimings) { console.log(info.timing[highTime] + ': ' + tokens[highTime]); }
+	// if (debugLyricTimings) { console.log(info.timing[highTime] + ': ' + tokens[highTime]); }
 }
 
 BG.Track.registerJQueryUI = function() {
@@ -324,5 +325,5 @@ BG.Track.registerJQueryUI = function() {
 		window.open($(this).data().href);
 	});
 
-	$('.bg-accordion-body').tabs({ activate: function(event, ui) { saveState(); } });
+	$('.bg-accordion-body').tabs({ activate: function(event, ui) { BG.NerdRock.getInstance().saveState(); } });
 }

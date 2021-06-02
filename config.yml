@@ -16,22 +16,22 @@ bandcamp:
 
 badges:
   defaultAlbumIDs:
+    - 3708688148
     - 3541981135
     - 1047117555
-    - 3708688148
   badges:
-    p:
-      code: p
-      enum: Patreon
-    s:
-      code: s
-      enum: Spintunes
-    j:
-      code: j
-      enum: JoCoCruise
     k:
       code: k
       enum: Karaoke
+    p:
+      code: p
+      enum: Patreon
+    j:
+      code: j
+      enum: JoCoCruise
+    s:
+      code: s
+      enum: Spintunes
     w:
       code: w
       enum: SafeForWork

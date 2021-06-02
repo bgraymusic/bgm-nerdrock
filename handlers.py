@@ -24,6 +24,7 @@ def handle_test(event, context):
     LOG.debug(f'handle_test triggered with event {event}')
     return test_handler.handle(event, context)
 
+
 def handle_discography(event, context):
     LOG.debug(f'handle_discography triggered with event {event}')
     return discography_handler.handle(event, context)

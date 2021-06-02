@@ -39,6 +39,9 @@
 
 		<title>Brian Gray. Nerd Rock.</title>
 
+<!-- 
+		<link rel="stylesheet" href="http://code.jquery.com/ui/1.12.0/themes/overcast/jquery-ui.css">
+ -->
 		<link rel="stylesheet" href="https://ajax.googleapis.com/ajax/libs/jqueryui/1.12.1/themes/overcast/jquery-ui.css">
 
 		<link rel="stylesheet" href="css/bg-common.css">
@@ -56,26 +59,30 @@
 		<link rel="stylesheet" media="screen and (min-width: 740px) and (max-width: 860px)" href="css/bg-novol.css">
 		<link rel="stylesheet" media="screen and (min-width: 860px)" href="css/bg-full.css">
 
-		<script defer src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
-		<script defer src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.js"></script>
-		<script defer src="https://cdnjs.cloudflare.com/ajax/libs/jplayer/2.9.2/jplayer/jquery.jplayer.min.js"></script>
-		<script defer src="https://cdnjs.cloudflare.com/ajax/libs/purl/2.3.1/purl.min.js"></script>
-
-		<script defer src="https://cdnjs.cloudflare.com/ajax/libs/repo.js/5c0eae0f1b/repo.min.js"></script>
-		<!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/github-repo-widget/e23d85ab8f/jquery.githubRepoWidget.min.js" integrity="sha512-E30r/BSv6/3ayNNGJlD5kMwLvXANkUKs7yV7YB4Uwz+XerKQtAoUHSQSNqDXTsiIpxU4IqeYjv9Mgf9k/ZwMYA==" crossorigin="anonymous" referrerpolicy="no-referrer"></script> -->
+		<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+		<script src="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.js"></script>
+		<script src="https://cdnjs.cloudflare.com/ajax/libs/jplayer/2.9.2/jplayer/jquery.jplayer.min.js"></script>
+<!-- 
+		<script src="/js/jquery.jplayer.min.js"></script>
+		<script src="https://cdnjs.cloudflare.com/ajax/libs/repo.js/5c0eae0f1b/repo.min.js"></script>
+		<script src="/js/repo.min.js"></script>
+ -->
+		<script src="https://cdnjs.cloudflare.com/ajax/libs/purl/2.3.1/purl.min.js"></script>
 
 		<!-- TODO: all local JS; good candidates for packaging and minifying into a single bgnr.min.js -->
-		<script defer src="js/track-info.js"></script>
-		<script defer src="js/bandcamp.js"></script>
-		<script defer src="js/BGDiscography.js"></script>
-		<script defer src="js/BGAlbum.js"></script>
-		<script defer src="js/BGTrack.js"></script>
-		<script defer src="js/BGBadges.js"></script>
-		<script defer src="js/BGNag.js"></script>
-		<!-- <script defer src="js/bg.js"></script> -->
-		<script defer src="js/BGNerdRock.js"></script>
+		<script src="js/track-info.js"></script>
+		<script src="js/bandcamp.js"></script>
+		<script src="js/BGDiscography.js"></script>
+		<script src="js/BGAlbum.js"></script>
+		<script src="js/BGTrack.js"></script>
+		<script src="js/BGBadges.js"></script>
+		<script src="js/BGNag.js"></script>
+		<script src="js/bg.js"></script>
 
-		<script defer src="js/ads.js"></script>
+		<!-- Google Analytics -->
+<!--
+		<script>(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)})(window,document,'script','//www.google-analytics.com/analytics.js','ga');ga('create', 'UA-13177210-3', 'auto');ga('send', 'pageview');</script>
+-->
 	</head>
 	<body>
 
@@ -90,11 +97,10 @@ Or even better, visit my Patreon page and browse the various levels of rewards I
 I'll stop bothering you now and let you enjoy my site as intended: at full browser window height.<p>
 			</div>
 			<div id="bg-nag-buttons">
-				<button class="bg-patreon-button"><span class="bg-patreon-prefix">Check out my </span><img src="https://s3.amazonaws.com/patreon_public_assets/toolbox/patreon.png" width="60" height="14"/></button>
+				<button class="bg-patreon-button"><span class="bg-patreon-prefix">Check out my </span><img src="https://s3.amazonaws.com/patreon_public_assets/toolbox/patreon.png"/></button>
 				<button id="bg-nag-dismiss">Close Forever</button>
 			</div>
 		</div>
-
 		<div id="bg-body" class="ui-widget-header">
 			<!-- Start page content -->
 			<div id="bg-header">
@@ -106,42 +112,52 @@ I'll stop bothering you now and let you enjoy my site as intended: at full brows
 				</div>
 				<span id="bg-header-title"></span>
 			</div>
-			<div class="bg-social-buttons bg-left">
-				<div class="fb-like" data-href="https://www.facebook.com/bgraymusic" data-layout="button" data-action="like" data-show-faces="true" data-share="true"></div>
-				<!-- <script>(function(d, s, id) {var js, fjs = d.getElementsByTagName(s)[0];if (d.getElementById(id)) return;js = d.createElement(s); js.id = id;js.src = "//connect.facebook.net/en_US/sdk.js#xfbml=1&version=v2.5";fjs.parentNode.insertBefore(js, fjs);}(document, 'script', 'facebook-jssdk'));</script> -->
-			</div>
-			<div class="bg-social-buttons bg-right">
-				<a href="https://twitter.com/BrianGrayMusic" class="twitter-follow-button" data-show-count="false" data-show-screen-name="false"></a>
-				<script src="https://platform.twitter.com/widgets.js" charset="utf-8"></script>
-				<button class="bg-patreon-button"><img src="https://s3.amazonaws.com/patreon_public_assets/toolbox/patreon.png" width="60" height="14"/></button>
-			</div>
 			<div id="bg-shadow-box" class="bg-top-level-tabs">
 				<ul class="bg-vertical-text">
-					<li><a href="#bg-shadow-blog">News</a></li>
+					<!-- <li><a href="#bg-shadow-blog">News</a></li> -->
 					<li><a href="#bg-shadow-music">Music</a></li>
+<!--
+					<li><a href="#bg-shadow-social">Social</a></li>
 					<li><a href="#bg-shadow-tribbulous">Studio</a></li>
 					<li><a href="#bg-shadow-github">Code</a></li>
+-->
 				</ul>
 			</div>
 			<div id="bg-top-level-tabs" class="bg-top-level-tabs">
 				<ul class="bg-vertical-text">
-					<li><a href="#bg-blog">News</a></li>
+					<!-- <li><a href="#bg-blog">News</a></li> -->
 					<li><a href="#bg-music">Music</a></li>
+<!--
+					<li><a href="#bg-social">Social</a></li>
 					<li><a href="#bg-tribbulous">Studio</a></li>
 					<li><a href="#bg-github">Code</a></li>
+-->
 				</ul>
 				<div id="bg-contents">
-					<div id="bg-blog"><iframe id="bg-blogframe"></iframe></div>
+					<!-- <div id="bg-blog"><iframe id="bg-blogframe"></iframe></div> -->
 					<div id="bg-music"></div>
-					<div id="bg-tribbulous"><p>Yeah, so I'm building a recording studio in my basement. It's fully operational and currently being used to record music and podcasts, so here we see the progress with that.</p><iframe src="https://trello.com/b/7OmMrxYJ.html"></iframe></div>
-					<div id="bg-github">How meta is this? Here's the code for this web site. Feel free to clone the <a href="https://github.com/bgraymusic/bgm-nerdrock" target="_blank">original repo</a>, or just browse inline by clicking the link below.</div>
+<!--
+					<table id="bg-social"><tr>
+						<td id="bg-facebook"><div class="fb-page" data-href="https://www.facebook.com/bgraymusic" data-width="500" data-small-header="true" data-adapt-container-width="true" data-hide-cover="false" data-show-facepile="true" data-show-posts="true"><div class="fb-xfbml-parse-ignore"><blockquote cite="https://www.facebook.com/bgraymusic"><a href="https://www.facebook.com/bgraymusic">Brian Gray</a></blockquote></div></div></td>
+						<td id="bg-twitter"><a class="twitter-timeline" href="https://twitter.com/BrianGrayMusic" data-widget-id="555018606363561985"></a></td>
+					</table>
+					<div id="bg-tribbulous"><p>This page is to track all the administrative activities required to set up a bona fide business to handle all my music activities. Until I’m up and running officially, legally, let’s consider this page a work in progress. For now, I'm actually doing the most hands-on work with building out my studio, so here we see the progress with that.</p><iframe src="https://trello.com/b/7OmMrxYJ.html"></iframe></div>
+					<div id="bg-github">How meta is this? Here's the code for this web site. Feel free to clone the <a href="https://github.com/bgraymusic/nerdrock" target="_blank">original repo</a>, or just browse inline by clicking the link below.</div>
+-->
 				</div>
 			</div>
 			<div id="bg-footer" class="ui-widget-header">
 				<span id="bg-footer-content">
-					<a href="https://creativecommons.org/licenses/by-nc/3.0/us/" rel="nofollow"><img alt="Creative Commons License" src="https://i.creativecommons.org/l/by-nc/3.0/us/80x15.png" width="80" height="15" style="border-width:0pt" /></a>
-					All music is licensed under a <a href="https://creativecommons.org/licenses/by-nc/3.0/us/" rel="nofollow">Creative Commons Attribution-Noncommercial 3.0 United States License</a>
+					<a href="http://creativecommons.org/licenses/by-nc/3.0/us/" rel="nofollow"><img alt="Creative Commons License" src="http://i.creativecommons.org/l/by-nc/3.0/us/80x15.png" style="border-width:0pt" /></a>
+					All music is licensed under a <a href="http://creativecommons.org/licenses/by-nc/3.0/us/" rel="nofollow">Creative Commons Attribution-Noncommercial 3.0 United States License</a>
 				</span>
+			</div>
+			<div class="bg-social-buttons bg-left">
+				<div class="fb-like" data-href="https://www.facebook.com/bgraymusic" data-layout="button" data-action="like" data-show-faces="true" data-share="true"></div>
+			</div>
+			<div class="bg-social-buttons bg-right">
+				<a href="https://twitter.com/BrianGrayMusic" class="twitter-follow-button" data-show-count="false" data-show-screen-name="false"></a>
+				<button class="bg-patreon-button"><img src="https://s3.amazonaws.com/patreon_public_assets/toolbox/patreon.png"/></button>
 			</div>
 			<div id="bg-badge-stuff">
 				<div id="bg-badges"></div>
@@ -162,5 +178,12 @@ I'll stop bothering you now and let you enjoy my site as intended: at full brows
 			</div>
 		</div>
 
+		<!-- Facebook JS API -->
+		<script>(function(d, s, id) {var js, fjs = d.getElementsByTagName(s)[0];if (d.getElementById(id)) return;js = d.createElement(s); js.id = id;js.src = "//connect.facebook.net/en_US/sdk.js#xfbml=1&version=v2.5";fjs.parentNode.insertBefore(js, fjs);}(document, 'script', 'facebook-jssdk'));</script>
+		<!-- Twitter JS API -->
+		<a class="twitter-timeline" href="https://twitter.com/BrianGrayMusic?ref_src=twsrc%5Etfw">Tweets by BrianGrayMusic</a> <script async src="https://platform.twitter.com/widgets.js" charset="utf-8"></script>
+		<!-- <script>!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0],p=/^http:/.test(d.location)?'http':'https';if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src=p+'://platform.twitter.com/widgets.js';fjs.parentNode.insertBefore(js,fjs);}}(document, 'script', 'twitter-wjs');</script> -->
+		<!-- <script>var ab=true</script> -->
+		<script src="js/ads.js"></script>
 	</body>
 </html>

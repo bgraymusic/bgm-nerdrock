@@ -19,6 +19,8 @@ Bandcamp.prototype = {
 			cb(Bandcamp.discography);
 		});
 		oReq.open("GET", Bandcamp.apiURL.replace('{token}', badges.getToken()));
+		// oReq.setRequestHeader('Accept_Encoding', 'gzip');
+		// oReq.setRequestHeader('Accept_Encoding', 'br');
 		oReq.send();
 	}
 }

@@ -78,7 +78,7 @@ BG.Album.prototype.buildAlbumAccordion = function(albumAccordion) {
 		}}}
 		var track = new BG.Track(album, this, bgInfo);
 		album.masterTracks.unshift(track);
-		if (BG.Badges.getInstance().hasBadge('sfw') && track.nsfw) return true;
+		if (BG.NerdRock.getInstance().badges.hasBadge('sfw') && track.nsfw) return true;
 		($.inArray(album.album_id, oldestFirst) > -1) ? album.workingTracks.push(track) : album.workingTracks.unshift(track);
 	});
 	$(album.workingTracks).each(function() {
@@ -116,15 +116,15 @@ BG.Album.registerJQueryUI = function() {
 			$('.'+BG.Album.css.content.accordion).each(function() {
 				if (this != event.target) $(this).accordion('option', 'active', false);
 			});
-// 			var mediaTab = ui.newPanel.find('.'+BG.Track.css.body.media+':empty');
-// 			if (mediaTab.length) mediaTab.html(BG.Track.getFromElement(mediaTab).media);
+			var mediaTab = ui.newPanel.find('.'+BG.Track.css.body.media+':empty');
+			if (mediaTab.length) mediaTab.html(BG.Track.getFromElement(mediaTab).media);
 			ui.newPanel.find('.'+BG.Track.css.body.media+':empty').each(function() {
 				$(this).html(BG.Track.getFromElement(this).media);
 			});
 		}, beforeActivate(event, ui) {
 			return $($(this).data().lmd).closest('.ui-slider').length == 0;
 		}, activate: function(event, ui) {
-			saveState();
+			BG.NerdRock.getInstance().saveState();
 		}
 	}).mousedown(function(event) {
 		$(this).closest('.ui-accordion').data('lmd', event.target);

@@ -13,22 +13,27 @@ provider:
   runtime: python3.8
   stage: ${opt:stage, 'dev'}
   region: ${opt:region, 'us-east-1'}
-  role: arn:aws:iam::028568048704:role/service-role/bgmMicroserviceRole
+  iam:
+    role: arn:aws:iam::028568048704:role/service-role/bgmMicroserviceRole
   stackTags:
     project: nerdrock
   tags:
     project: nerdrock
   apiGateway:
     shouldStartNameWithService: true
+    minimumCompressionSize: 1024
+  lambdaHashingVersion: 20201221
+
 
 plugins:
+  - serverless-api-compression
   - fullstack-serverless
   - serverless-python-requirements
 
 custom:
   integration:
     responseTemplate: "$input.json('$')"
-    errorTemplate: "$input.json('$.errorMessage')"
+    errorTemplate: "$input.path('$.errorMessage').replaceAll(\"'\", '\"').replaceAll('None', '\"\"')"
     response:
       headers:
         Content-Type: "'application/json'"
@@ -49,6 +54,7 @@ custom:
           template:
             application/json: ${self:custom.integration.errorTemplate}
           pattern: '.*InternalError.*'
+  contentCompression: 1024
 
   fullstack:
     bucketName: web
@@ -57,6 +63,8 @@ custom:
     errorDocument: error.html
     singlePageApp: true
     compressWebContent: true
+    defaultCacheBehavior:
+      CachePolicyId: Managed-CachingOptimized
     apiPath: api
     clientSrcPath: client
   pythonRequirements:
