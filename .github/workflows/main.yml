@@ -18,9 +18,9 @@ jobs:
           - stage: 'dev'
             AWS_SECRET_ACCESS_KEY: 'AWS_SECRET_ACCESS_KEY_DEV'
             AWS_ACCESS_KEY_ID: 'AWS_ACCESS_KEY_ID_DEV'
-          - stage: 'prod'
-            AWS_SECRET_ACCESS_KEY: 'AWS_SECRET_ACCESS_KEY_PROD'
-            AWS_ACCESS_KEY_ID: 'AWS_ACCESS_KEY_ID_PROD'
+#           - stage: 'prod'
+#             AWS_SECRET_ACCESS_KEY: 'AWS_SECRET_ACCESS_KEY_PROD'
+#             AWS_ACCESS_KEY_ID: 'AWS_ACCESS_KEY_ID_PROD'
     steps:
     - name: Checkout
       uses: actions/checkout@v2
