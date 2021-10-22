@@ -36,18 +36,17 @@ class BadgeServiceTest(unittest.TestCase):
         badges, badge_codes = self.badge_service.get_badges_from_token(token)
         self.assertEqual(0, len(badges))
         self.assertEqual(0, len(badge_codes))
-        new_badges, new_token = self.badge_service.add_badge_to_token(
-            token, self.config['badges']['badges']['k']['key'])
+        key = self.config['badges']['badges']['k']['key']
+        new_badges, new_token, added_key = self.badge_service.add_badge_to_token(token, key)
         self.assertIn('k', new_badges)
-        check_new_badges, check_new_badge_codes = self.badge_service.get_badges_from_token(
-            new_token)
+        self.assertEqual('k', added_key)
+        check_new_badges, check_new_badge_codes = self.badge_service.get_badges_from_token(new_token)
         self.assertEqual('k', check_new_badges[0]['code'])
         self.assertIn('k', check_new_badge_codes)
-        new_badges, new_token = self.badge_service.add_badge_to_token(
-            new_token, self.config['badges']['badges']['k']['key'])
+        new_badges, new_token, added_key = self.badge_service.add_badge_to_token(new_token, self.config['badges']['badges']['k']['key'])
         self.assertIn('k', new_badges)
-        check_new_badges, check_new_badge_codes = self.badge_service.get_badges_from_token(
-            new_token)
+        self.assertEqual(None, added_key)
+        check_new_badges, check_new_badge_codes = self.badge_service.get_badges_from_token(new_token)
         self.assertEqual('k', check_new_badges[0]['code'])
         self.assertIn('k', check_new_badge_codes)
 

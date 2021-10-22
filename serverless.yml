@@ -1,20 +1,11 @@
-# This file is the main config file for your service.
-#
-# For full config options, check the docs:
-#    docs.serverless.com
-
 service: bgm-nerdrock
-# project: nerdrock
-
-# appConfig: $(file(../config.yml))
 
 provider:
   name: aws
   runtime: python3.8
   stage: ${opt:stage, 'dev'}
-  region: ${opt:region, 'us-east-1'}
-  iam:
-    role: arn:aws:iam::028568048704:role/service-role/bgmMicroserviceRole
+  region: ${opt:region, '${file(config.yml):aws.region}'}
+  role: arn:aws:iam::${file(config.yml):aws.account}:role/service-role/${file(config.yml):aws.role}
   stackTags:
     project: nerdrock
   tags:
@@ -24,13 +15,18 @@ provider:
     minimumCompressionSize: 1024
   lambdaHashingVersion: 20201221
 
-
 plugins:
   - serverless-api-compression
   - fullstack-serverless
   - serverless-python-requirements
 
 custom:
+  environment:
+    stackName: ${self:service}-${self:provider.stage}
+    config: config.yml
+    secretsBucket: ${self:custom.environment.stackName}-secrets
+    secretsFile: secrets.yml
+    log_level: DEBUG
   integration:
     responseTemplate: "$input.json('$')"
     errorTemplate: "$input.path('$.errorMessage').replaceAll(\"'\", '\"').replaceAll('None', '\"\"')"
@@ -61,12 +57,13 @@ custom:
     distributionFolder: web
     indexDocument: index.html
     errorDocument: error.html
-    singlePageApp: true
+    singlePageApp: false
     compressWebContent: true
     defaultCacheBehavior:
       CachePolicyId: Managed-CachingOptimized
     apiPath: api
     clientSrcPath: client
+    noConfirm: true
   pythonRequirements:
     dockerizePip: true
 
@@ -76,11 +73,7 @@ functions:
     handler: handlers.handle_badges
     timeout: 5
     memorySize: 128
-    environment:
-      config: config.yml
-      secretsBucket: bgm-nerdrock-dev-secrets
-      secretsFile: secrets.yml
-      log_level: DEBUG
+    environment: ${self:custom.environment}
     events:
       - http: # Get new token with no badges
           path: ${self:custom.fullstack.apiPath}/badges
@@ -119,11 +112,7 @@ functions:
     handler: handlers.handle_discography
     timeout: 15
     memorySize: 128
-    environment:
-      config: config.yml
-      secretsBucket: bgm-nerdrock-dev-secrets
-      secretsFile: secrets.yml
-      log_level: DEBUG
+    environment: ${self:custom.environment}
     events:
       - http:
           path: ${self:custom.fullstack.apiPath}/discography
@@ -146,18 +135,14 @@ functions:
           response: ${self:custom.integration.response}
           cors: true
 
-  discographyCacheRefresh:
-    handler: handlers.handle_refresh_discography_cache
-    timeout: 15
+  databaseRefresh:
+    handler: handlers.handle_database_refresh
+    timeout: 60
     memorySize: 128
-    environment:
-      config: config.yml
-      secretsBucket: bgm-nerdrock-dev-secrets
-      secretsFile: secrets.yml
-      log_level: DEBUG
+    environment: ${self:custom.environment}
     events:
       - http:
-          path: ${self:custom.fullstack.apiPath}/discography/refresh
+          path: ${self:custom.fullstack.apiPath}/database/refresh
           method: get
           integration: lambda
           request:
@@ -165,19 +150,50 @@ functions:
               application/json: "{}"
           response: ${self:custom.integration.response}
           cors: true
-      - sns:
-          # topicName: $(self:appConfig.aws.sns.refreshDiscographyCache.topic)
-          topicName: RefreshDiscographyCache
-          displayName: Force reload of discography data from BandCamp
 
 # Raw AWS CloudFormation goes in here.
 resources:
   Description: The CloudFormation stack for the bgm-nerdrock project
-  # Resources:
-  #   GatewayResponse401Unauthorized:
-  #     Type: "AWS::ApiGateway::GatewayResponse"
-  #     Properties:
-  #       ResponseType: UNAUTHORIZED
-  #       RestApiId:
-  #         Ref: "ApiGatewayRestApi"
-  #       StatusCode: "401"
+  Resources:
+    albumInfoTable:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        TableName: bgm-nerdrock-${self:provider.stage}-${file(config.yml):aws.albumTable}
+        AttributeDefinitions:
+          - AttributeName: album_id
+            AttributeType: N
+        KeySchema:
+          - AttributeName: album_id
+            KeyType: HASH
+        ProvisionedThroughput:
+          ReadCapacityUnits: 5
+          WriteCapacityUnits: 5
+    trackInfoTable:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        TableName: bgm-nerdrock-${self:provider.stage}-${file(config.yml):aws.trackTable}
+        AttributeDefinitions:
+          - AttributeName: album_id
+            AttributeType: N
+          - AttributeName: number
+            AttributeType: N
+        KeySchema:
+          - AttributeName: album_id
+            KeyType: HASH
+          - AttributeName: number
+            KeyType: RANGE
+        ProvisionedThroughput:
+          ReadCapacityUnits: 5
+          WriteCapacityUnits: 5
+    ResourceGroup:
+      Type: "AWS::ResourceGroups::Group" 
+      Properties:
+        Name: "bgm-nerdrock-resources-${self:provider.stage}"
+        Description: "All ${self:provider.stage} resources in the NerdRock project"
+        Tags:
+          -
+            Key: project
+            Value: ${self:provider.stackTags.project}
+          -
+            Key: STAGE
+            Value: ${self:provider.stage}

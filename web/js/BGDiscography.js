@@ -15,8 +15,8 @@ BG.Discography = class {
 	// Classes applied to elements for styling
 	static css = { cont: 'bg-music' }
 
-	static discographyURL = 'https://94iml3erc4.execute-api.us-east-1.amazonaws.com/dev/api/discography';
-	static discographyWithTokenURL = 'https://94iml3erc4.execute-api.us-east-1.amazonaws.com/dev/api/discography/{token}';
+	static discographyURL = 'api/discography';
+	static discographyWithTokenURL = 'api/discography/{token}';
 
 	static registerJQueryUI() {
 		BG.Album.registerJQueryUI();

@@ -1,4 +1,4 @@
-from discography import *
+from database import *
 from http import HTTPStatus
 import json
 import logging

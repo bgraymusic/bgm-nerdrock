@@ -12,10 +12,10 @@ albumOrder = [
 	1047117555  // Also This Other Stuff
 ]
 
-oldestFirst = [
-	444214854,  // Operation SpinTunes
-	3708688148 // The Gleeble Chronicles
-]
+// oldestFirst = [
+// 	444214854,  // Operation SpinTunes
+// 	3708688148 // The Gleeble Chronicles
+// ]
 
 maxComputedTimeOffset = 0.55;
 

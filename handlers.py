@@ -1,7 +1,8 @@
-import json
+import boto3
 import logging
 import os
-from handler import DiscographyHandler, BadgesHandler, RefreshCacheHandler, init_config
+from handler import DatabaseHandler, DiscographyHandler, BadgesHandler, init_config
+from database import DatabaseService
 from discography import DiscographyService
 from badge import BadgeService
 
@@ -12,27 +13,26 @@ LOG.addHandler(logging.StreamHandler())
 
 config = init_config(LOG)
 
-discography_service = DiscographyService(config, LOG)
+album_table = boto3.resource('dynamodb').Table(f'{os.getenv("stackName")}-{config["aws"]["albumTable"]}')
+track_table = boto3.resource('dynamodb').Table(f'{os.getenv("stackName")}-{config["aws"]["trackTable"]}')
+
 badge_service = BadgeService(config, LOG)
-discography_handler = DiscographyHandler(
-    config, LOG, discography_service, badge_service)
-refresh_handler = RefreshCacheHandler(config, LOG, discography_service)
+database_service = DatabaseService(config, LOG, album_table, track_table)
+discography_service = DiscographyService(config, LOG, album_table, track_table, badge_service.core)
+
 badges_handler = BadgesHandler(config, LOG, badge_service)
+database_handler = DatabaseHandler(config, LOG, database_service)
+discography_handler = DiscographyHandler(config, LOG, discography_service, badge_service)
 
 
-def handle_test(event, context):
-    LOG.debug(f'handle_test triggered with event {event}')
-    return test_handler.handle(event, context)
+def handle_database_refresh(event, context):
+    LOG.debug(f'handle_database triggered with event {event}')
+    return database_handler.handle(event, context)
 
 
 def handle_discography(event, context):
     LOG.debug(f'handle_discography triggered with event {event}')
     return discography_handler.handle(event, context)
-
-
-def handle_refresh_discography_cache(event, context):
-    LOG.debug(f'handle_refresh_discography_cachs triggered with event {event}')
-    return refresh_handler.handle(event, context)
 
 
 def handle_badges(event, context):

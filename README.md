@@ -12,6 +12,7 @@
 * `npm install -g serverless`
 * `npm install --save-dev fullstack-serverless`
 * `npm install --save-dev serverless-python-requirements`
+* `npm install --save-dev serverless-api-compression`
 
 ## Deployment
 * `sls deploy --no-confirm`

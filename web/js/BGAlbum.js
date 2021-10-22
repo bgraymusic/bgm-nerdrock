@@ -79,7 +79,8 @@ BG.Album.prototype.buildAlbumAccordion = function(albumAccordion) {
 		var track = new BG.Track(album, this, bgInfo);
 		album.masterTracks.unshift(track);
 		if (BG.NerdRock.getInstance().badges.hasBadge('sfw') && track.nsfw) return true;
-		($.inArray(album.album_id, oldestFirst) > -1) ? album.workingTracks.push(track) : album.workingTracks.unshift(track);
+		album.workingTracks.push(track)
+		// ($.inArray(album.album_id, oldestFirst) > -1) ? album.workingTracks.push(track) : album.workingTracks.unshift(track);
 	});
 	$(album.workingTracks).each(function() {
 		var track = this;

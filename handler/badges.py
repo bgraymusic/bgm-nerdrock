@@ -3,7 +3,7 @@ from http import HTTPStatus
 
 
 class BadgesHandler(HandlerBase):
-    def __init__(self, config, LOG, badge_service=None):
+    def __init__(self, config, LOG, badge_service):
         super().__init__(config, LOG)
         self.badge_service = badge_service
 
@@ -16,6 +16,10 @@ class BadgesHandler(HandlerBase):
 
     def handle(self, event, context):
         super().handle(event, context)
+
+        if 'keep_warm' in event:
+            return BadgesHandler.Result('Badges handler triggered with keep_warm', None, None)
+
         try:
             if 'token' not in event:
                 return BadgesHandler.Result('New, empty token created', [], self.badge_service.create_token())

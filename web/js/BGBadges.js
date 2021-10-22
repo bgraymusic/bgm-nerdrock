@@ -20,9 +20,9 @@ BG.Badges = class {
 		this.dialog.submit = $('#bg-add-badge-submit');
 	}
 
-	static generateURL = 'https://94iml3erc4.execute-api.us-east-1.amazonaws.com/dev/api/badges';
-	static validateURL = 'https://94iml3erc4.execute-api.us-east-1.amazonaws.com/dev/api/badges/{token}';
-	static addURL = 'https://94iml3erc4.execute-api.us-east-1.amazonaws.com/dev/api/badges/{token}/{key}';
+	static generateURL = 'api/badges';
+	static validateURL = 'api/badges/{token}';
+	static addURL = 'api/badges/{token}/{key}';
 
 	static SPEC = {
 		'j': { id: 'jcc',       img: 'img/jcc_boat.svg',            title: 'Sea Monkey' },
@@ -72,9 +72,6 @@ BG.Badges = class {
 		this.badges.forEach(badge => {
 			$(instance.badgesDiv).append($('<img/>').attr('id', 'badge-' + spec[badge].id).attr('src', spec[badge].img).attr('title', spec[badge].title));
 		});
-		// $.each(this.badges, function() {
-		// 	$(this.badgesDiv).append($('<img/>').attr('id', 'badge-' + spec[this].id).attr('src', spec[this].img).attr('title', spec[this].title));
-		// });
 	}
 
 	registerJQueryUI() {
@@ -152,24 +149,9 @@ BG.Badges = class {
 
 	hasBadges() { return !!this.badges.length; }
 
-	hasBadge(id) { return BG.Badges.SPEC.hasOwnProperty(id); }
+	hasBadge(id) { return this.badges.includes(id); }
 
 	async addNewBadge(key) {
-		// var hash = BG.Badges.getHashForCode(key);
-		// if (this.badges.indexOf(hash) === -1 && BG.Badges.SPEC[hash]) {
-		// 	this.badges.push(hash);
-		// 	this.store();
-		// 	this.close();
-		// 	this.draw();
-		// 	$('#bg-new-badge-alert').data('badge', BG.Badges.SPEC[hash]);
-		// 	$('#bg-new-badge-alert').dialog('open');
-
-		// 	$(discography.allAlbums).each(function() {
-		// 		if (this.album_id == BG.Badges.SPEC[hash].aid) discography.drawAlbums.push(this);
-		// 	});
-
-		// 	return true;
-		// } else { return false; }
 		let response = await this.addBadgeToToken(this.token, key);
         let tuple = {
             token: response.token,
@@ -183,10 +165,6 @@ BG.Badges = class {
 			$(this.alert).dialog('open');
 		}
 		BG.NerdRock.getInstance().discography.bootstrap(tuple.token);
-        // let discData = await BG.NerdRock.getInstance().fetchDiscography(tuple.token);
-        // BG.NerdRock.getInstance().discography.addAlbums(discData);
-    	// BG.NerdRock.getInstance().discography.buildDOM(document.getElementById(BG.Discography.css.cont));
-    	// BG.Discography.registerJQueryUI();
 	}
 
 	// Client/server interactions
