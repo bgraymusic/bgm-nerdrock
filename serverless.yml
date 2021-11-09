@@ -5,7 +5,8 @@ provider:
   runtime: python3.8
   stage: ${opt:stage, 'dev'}
   region: ${opt:region, '${file(config.yml):aws.region}'}
-  role: arn:aws:iam::${file(config.yml):aws.account}:role/service-role/${file(config.yml):aws.role}
+  iam:
+    role: arn:aws:iam::${file(config.yml):aws.account}:role/service-role/${file(config.yml):aws.role}
   stackTags:
     project: nerdrock
   tags:
@@ -29,7 +30,7 @@ custom:
     log_level: DEBUG
   integration:
     responseTemplate: "$input.json('$')"
-    errorTemplate: "$input.path('$.errorMessage').replaceAll(\"'\", '\"').replaceAll('None', '\"\"')"
+    errorTemplate: '$input.path(''$.errorMessage'').replaceAll("''", ''"'').replaceAll(''None'', ''""'')'
     response:
       headers:
         Content-Type: "'application/json'"
@@ -37,7 +38,7 @@ custom:
       template: ${self:custom.integration.responseTemplate}
       statusCodes:
         200:
-          pattern: ''
+          pattern: ""
         401:
           template:
             application/json: ${self:custom.integration.errorTemplate}
@@ -45,11 +46,11 @@ custom:
         403:
           template:
             application/json: ${self:custom.integration.errorTemplate}
-          pattern: '.*InvalidKeyError.*'
+          pattern: ".*InvalidKeyError.*"
         500:
           template:
             application/json: ${self:custom.integration.errorTemplate}
-          pattern: '.*InternalError.*'
+          pattern: ".*InternalError.*"
   contentCompression: 1024
 
   fullstack:
@@ -68,7 +69,6 @@ custom:
     dockerizePip: true
 
 functions:
-
   badges:
     handler: handlers.handle_badges
     timeout: 5
@@ -107,7 +107,7 @@ functions:
                 }'
           response: ${self:custom.integration.response}
           cors: true
-  
+
   discography:
     handler: handlers.handle_discography
     timeout: 15
@@ -131,13 +131,13 @@ functions:
             template:
               application/json: '{
                 "token": "$input.params().path[''token'']"
-              }'
+                }'
           response: ${self:custom.integration.response}
           cors: true
 
   databaseRefresh:
     handler: handlers.handle_database_refresh
-    timeout: 60
+    timeout: 30
     memorySize: 128
     environment: ${self:custom.environment}
     events:
@@ -186,14 +186,12 @@ resources:
           ReadCapacityUnits: 5
           WriteCapacityUnits: 5
     ResourceGroup:
-      Type: "AWS::ResourceGroups::Group" 
+      Type: "AWS::ResourceGroups::Group"
       Properties:
         Name: "bgm-nerdrock-resources-${self:provider.stage}"
         Description: "All ${self:provider.stage} resources in the NerdRock project"
         Tags:
-          -
-            Key: project
+          - Key: project
             Value: ${self:provider.stackTags.project}
-          -
-            Key: STAGE
+          - Key: STAGE
             Value: ${self:provider.stage}
