@@ -13,18 +13,21 @@ class DiscographyService:
     def get_discography(self, badges):
         album_ids = self.get_album_ids_for_badges(badges)
         self.LOG.debug(f'Fetching discography for albums: {album_ids}')
-        return self.get_selected_albums(album_ids)
+        return self.get_selected_albums(album_ids, 'w' in badges)
 
-    def get_selected_albums(self, album_ids):
+    def get_selected_albums(self, album_ids, sfw=False):
         albums = []
         for album_id in album_ids:
             album = self.album_table.get_item(Key={'album_id': int(album_id)})['Item']
             forwardSorted = album_id in self.config['albums']['forwardSorted']
             tracks = self.track_table.query(
                 KeyConditionExpression=boto3.dynamodb.conditions.Key('album_id').eq(int(album_id)),
-                ScanIndexForward = album_id in self.config['albums']['forwardSorted']
+                ScanIndexForward=album_id in self.config['albums']['forwardSorted']
             )['Items']
-            album['tracks'] = tracks
+            if sfw:
+                album['tracks'] = list(filter(lambda track: 'nsfw' not in track or not track['nsfw'], tracks))
+            else:
+                album['tracks'] = tracks
             albums.append(album)
         return albums
 
