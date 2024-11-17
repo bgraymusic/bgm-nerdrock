@@ -1,5 +1,5 @@
 aws:
-  account: 028568048704
+  account: "028568048704"
   role: bgmMicroserviceRole
   region: us-east-1
   albumTable: albuminfo
