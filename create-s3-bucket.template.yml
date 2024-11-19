@@ -8,20 +8,20 @@ Resources:
       WebsiteConfiguration:
         IndexDocument: index.html
         ErrorDocument: error.html
-  WebAppS3BucketPolicy:
-    Type: AWS::S3::BucketPolicy
-    Properties:
-      Bucket: bgm-nerdrock-gh-actions-test
-      PolicyDocument:
-        Statement:
-          - Sid: AllowPublicRead
-            Effect: Allow
-            Principal:
-              AWS: '*'
-            Action:
-              - s3:GetObject
-            Resource: !Join
-              - ''
-              - - 'arn:aws:s3:::'
-                - !Ref WebAppS3Bucket
-                - /*
+  # WebAppS3BucketPolicy:
+  #   Type: AWS::S3::BucketPolicy
+  #   Properties:
+  #     Bucket: bgm-nerdrock-gh-actions-test
+  #     PolicyDocument:
+  #       Statement:
+  #         - Sid: AllowPublicRead
+  #           Effect: Allow
+  #           Principal:
+  #             AWS: '*'
+  #           Action:
+  #             - s3:GetObject
+  #           Resource: !Join
+  #             - ''
+  #             - - 'arn:aws:s3:::'
+  #               - !Ref WebAppS3Bucket
+  #               - /*
