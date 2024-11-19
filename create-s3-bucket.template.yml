@@ -12,13 +12,13 @@ Resources:
     Type: AWS::S3::BucketPolicy
     Properties:
       Bucket: !Ref WebAppS3Bucket
-      # PolicyDocument:
-      #   Version: 2012-10-17
-      #   Statement:
-      #     - Effect: Allow
-      #       Principal: '*'
-      #       Action:
-      #         - s3:GetObject
+      PolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Effect: Allow
+            Principal: '*'
+            Action:
+              - s3:GetObject
       #       Resource: !Join
       #         - ''
       #         - - 'arn:aws:s3:::'
