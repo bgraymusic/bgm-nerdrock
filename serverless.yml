@@ -1,8 +1,10 @@
+# "org" ensures this Service is used with the correct Serverless Framework Access Key.
+org: briangraymusic
 service: bgm-nerdrock
 
 provider:
   name: aws
-  runtime: python3.8
+  runtime: python3.12
   stage: ${opt:stage, 'dev'}
   region: ${opt:region, '${file(config.yml):aws.region}'}
   iam:
@@ -67,6 +69,11 @@ custom:
     noConfirm: true
   pythonRequirements:
     dockerizePip: true
+    # dockerImage: public.ecr.aws/sam/build-python3.12:latest
+    dockerImage: public.ecr.aws/lambda/python:3.12-x86_64
+    # dockerImage: public.ecr.aws/lambda/python:3.12
+    dockerRunCmdExtraArgs: ['--platform', 'linux/amd64']
+
 
 functions:
   badges:

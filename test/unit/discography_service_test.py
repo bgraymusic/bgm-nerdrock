@@ -48,7 +48,7 @@ class DiscographyServiceTest(unittest.TestCase):
         cls.LOG = logging.getLogger('DiscographyServiceTest')
 
     @patch('discography.Bandcamp')
-    @patch('badges.BadgeCore')
+    @patch('badge.BadgeCore')
     def setUp(self, bandcamp, badge_core):
         self.bandcamp = bandcamp
         self.badge_core = badge_core
