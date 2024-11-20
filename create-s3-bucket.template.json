@@ -53,7 +53,7 @@
     "ResourceGroup": {
       "Type": "AWS::ResourceGroups::Group",
       "Properties": {
-        "Name": "bgm-nerdrock-resources-dev",
+        "Name": "bgm-nerdrock-resources-exp",
         "Description": "All experimental resources in the NerdRock project",
         "Tags": [
           {
