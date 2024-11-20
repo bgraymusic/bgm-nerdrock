@@ -10,12 +10,13 @@ env:
   ORG: bgm
   PROJECT: nerdrock
   STAGE: experimental
-  STACK: ${{ env.ORG }}-${{ env.PROJECT }}-${{ env.STAGE }}
-  BUCKET_NAME: ${{ env.ORG }}-${{ env.PROJECT }}-${{ env.STAGE }}-web
 
 jobs:
   deploy:
     runs-on: ubuntu-latest
+    env:
+      STACK: ${{ env.ORG }}-${{ env.PROJECT }}-${{ env.STAGE }}
+      BUCKET_NAME: ${{ env.ORG }}-${{ env.PROJECT }}-${{ env.STAGE }}-web
 
     steps:
     - name: Checkout Web Directory
