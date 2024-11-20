@@ -1,10 +1,12 @@
 AWSTemplateFormatVersion: '2010-09-09'
 Description: Test creating a S3 bucket from a GH Action
+Parameters:
+  BucketName: undefined
 Resources:
   WebAppS3Bucket:
     Type: AWS::S3::Bucket
     Properties:
-      BucketName: bgm-nerdrock-gh-actions-test
+      BucketName: !Sub ${BucketName}
       PublicAccessBlockConfiguration:
         BlockPublicAcls: false
         BlockPublicPolicy: false
@@ -16,7 +18,7 @@ Resources:
   WebAppS3BucketPolicy:
     Type: AWS::S3::BucketPolicy
     Properties:
-      Bucket: bgm-nerdrock-gh-actions-test
+      Bucket: !Sub ${BucketName}
       PolicyDocument:
         Statement:
           - Sid: AllowPublicRead
