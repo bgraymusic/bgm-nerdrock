@@ -17,6 +17,55 @@
           "ErrorDocument": "error.html"
         }
       }
+    },
+    "WebAppS3BucketPolicy": {
+      "Type": "AWS::S3::BucketPolicy",
+      "Properties": {
+        "Bucket": "bgm-nerdrock-gh-actions-test",
+        "PolicyDocument": {
+          "Statement": [
+            {
+              "Sid": "AllowPublicRead",
+              "Effect": "Allow",
+              "Principal": {
+                "AWS": "*"
+              },
+              "Action": [
+                "s3:GetObject"
+              ],
+              "Resource": {
+                "Fn::Join": [
+                  "",
+                  [
+                    "arn:aws:s3:::",
+                    {
+                      "Ref": "WebAppS3Bucket"
+                    },
+                    "/*"
+                  ]
+                ]
+              }
+            }
+          ]
+        }
+      }
+    },
+    "ResourceGroup": {
+      "Type": "AWS::ResourceGroups::Group",
+      "Properties": {
+        "Name": "bgm-nerdrock-resources-dev",
+        "Description": "All experimental resources in the NerdRock project",
+        "Tags": [
+          {
+            "Key": "project",
+            "Value": "nerdrock"
+          },
+          {
+            "Key": "STAGE",
+            "Value": "exp"
+          }
+        ]
+      }
     }
   }
 }
