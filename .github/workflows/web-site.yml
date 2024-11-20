@@ -27,8 +27,7 @@ jobs:
       uses: aws-actions/aws-cloudformation-github-deploy@v1
       with:
         name: test-s3
-        # template: ./create-s3-bucket.template.yml
-        template: ./create-s3-bucket.template.json
+        template: ./create-s3-bucket.template.yml
         no-fail-on-empty-changeset: "1"
         tags: "project=nerdrock,STAGE=exp"
 
