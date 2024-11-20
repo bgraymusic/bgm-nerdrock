@@ -1,0 +1,18 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: Create a resource group for resources deployed to project nerdrock
+Parameters:
+  Project:
+    Type: String
+  Stage:
+    Type: String
+Resources:
+  ResourceGroup:
+    Type: AWS::ResourceGroups::Group
+    Properties:
+      Name: !Sub bgm-${Project}-resources-${Stage}
+      Description: All resources in the project for this stage
+      Tags:
+        - Key: project
+          Value: !Sub ${Project}
+        - Key: STAGE
+          Value: !Sub ${Stage}
