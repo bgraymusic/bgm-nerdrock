@@ -7,9 +7,11 @@ on:
   #   - main
 
 env:
-  PROJECT: GH-Actions-CI
+  ORG: bgm
+  PROJECT: nerdrock
   STAGE: experimental
-  BUCKET_NAME: bg-gh-actions-test-site
+  STACK: ${{ env.ORG }}-${{ env.PROJECT }}-${{ env.STAGE }}
+  BUCKET_NAME: ${{ env.ORG }}-${{ env.PROJECT }}-${{ env.STAGE }}-web
 
 jobs:
   deploy:
@@ -32,11 +34,20 @@ jobs:
     - name: Create S3 bucket
       uses: aws-actions/aws-cloudformation-github-deploy@v1
       with:
-        name: test-s3
+        name: ${{ env.STACK }}
         template: ./create-s3-bucket.template.yml
         no-fail-on-empty-changeset: "1"
         tags: '[{"Key":"project","Value":"${{ env.PROJECT }}"},{"Key":"STAGE","Value":"${{ env.STAGE }}"}]'
         parameter-overrides: BucketName=${{ env.BUCKET_NAME }}
+
+    - name: Create ResourceGroup
+      uses: aws-actions/aws-cloudformation-github-deploy@v1
+      with:
+        name: ${{ env.STACK }}
+        template: ./create-resource-group.template.yml
+        no-fail-on-empty-changeset: "1"
+        tags: '[{"Key":"project","Value":"${{ env.PROJECT }}"},{"Key":"STAGE","Value":"${{ env.STAGE }}"}]'
+        parameter-overrides: Org=${{ env.ORG }},Project=${{ env.PROJECT }},Stage=${{ env.STAGE }}
 
     - name: Deploy static site to S3 bucket
       run: aws s3 sync ./web/ s3://${{ env.BUCKET_NAME }} --delete --exclude serve
