@@ -29,7 +29,7 @@ jobs:
         name: test-s3
         template: ./create-s3-bucket.template.yml
         no-fail-on-empty-changeset: "1"
-        tags: "project=nerdrock,STAGE=exp"
+        tags: "[project=nerdrock,STAGE=exp]"
 
     - name: Deploy static site to S3 bucket
       run: echo "Deploy web site to S3 bucket TBD"
