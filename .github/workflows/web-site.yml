@@ -34,7 +34,7 @@ jobs:
         name: test-s3
         template: ./create-s3-bucket.template.yml
         no-fail-on-empty-changeset: "1"
-        tags: '[{"Key":"project","Value":"$PROJECT"},{"Key":"STAGE","Value":"$STAGE"}]'
+        tags: "[{\"Key\":\"project\",\"Value\":\"$PROJECT\"},{\"Key\":\"STAGE\",\"Value\":\"$STAGE\"}]"
 
     - name: Deploy static site to S3 bucket
       run: aws s3 sync ./web/ s3://bgm-nerdrock-gh-actions-test --delete --exclude serve
