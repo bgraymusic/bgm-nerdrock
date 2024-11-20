@@ -27,7 +27,8 @@ jobs:
       uses: aws-actions/aws-cloudformation-github-deploy@v1
       with:
         name: test-s3
-        template: ./create-s3-bucket.template.yml
+        # template: ./create-s3-bucket.template.yml
+        template: ./create-s3-bucket.template.json
         no-fail-on-empty-changeset: "1"
 
     - name: Deploy static site to S3 bucket
