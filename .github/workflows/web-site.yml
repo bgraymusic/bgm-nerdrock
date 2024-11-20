@@ -9,6 +9,7 @@ on:
 env:
   PROJECT: GH-Actions-CI
   STAGE: experimental
+  BUCKET_NAME: bg-gh-actions-test-site
 
 jobs:
   deploy:
@@ -35,6 +36,7 @@ jobs:
         template: ./create-s3-bucket.template.yml
         no-fail-on-empty-changeset: "1"
         tags: '[{"Key":"project","Value":"${{ env.PROJECT }}"},{"Key":"STAGE","Value":"${{ env.STAGE }}"}]'
+        parameter-overrides: BucketName=${{ BUCKET_NAME }}
 
     - name: Deploy static site to S3 bucket
-      run: aws s3 sync ./web/ s3://bgm-nerdrock-gh-actions-test --delete --exclude serve
+      run: aws s3 sync ./web/ s3://${{ env.BUCKET_NAME }} --delete --exclude serve
