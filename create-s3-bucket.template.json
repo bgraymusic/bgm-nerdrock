@@ -6,6 +6,12 @@
       "Type": "AWS::S3::Bucket",
       "Properties": {
         "BucketName": "bgm-nerdrock-gh-actions-test",
+        "PublicAccessBlockConfiguration" : {
+          "BlockPublicAcls" : false,
+          "BlockPublicPolicy" : false,
+          "IgnorePublicAcls" : false,
+          "RestrictPublicBuckets" : false
+        },
         "WebsiteConfiguration": {
           "IndexDocument": "index.html",
           "ErrorDocument": "error.html"
@@ -42,6 +48,23 @@
             }
           ]
         }
+      }
+    },
+    "ResourceGroup": {
+      "Type": "AWS::ResourceGroups::Group",
+      "Properties": {
+        "Name": "bgm-nerdrock-resources-exp",
+        "Description": "All experimental resources in the NerdRock project",
+        "Tags": [
+          {
+            "Key": "project",
+            "Value": "nerdrock"
+          },
+          {
+            "Key": "STAGE",
+            "Value": "exp"
+          }
+        ]
       }
     }
   }
