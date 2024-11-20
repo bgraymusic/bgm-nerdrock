@@ -5,22 +5,28 @@ Resources:
     Type: AWS::S3::Bucket
     Properties:
       BucketName: bgm-nerdrock-gh-actions-test
+      PublicAccessBlockConfiguration:
+        BlockPublicAcls: false
+        BlockPublicPolicy: false
+        IgnorePublicAcls: false
+        RestrictPublicBuckets: false
       WebsiteConfiguration:
         IndexDocument: index.html
         ErrorDocument: error.html
   WebAppS3BucketPolicy:
     Type: AWS::S3::BucketPolicy
     Properties:
-      Bucket: !Ref WebAppS3Bucket
+      Bucket: bgm-nerdrock-gh-actions-test
       PolicyDocument:
-        Version: 2012-10-17
         Statement:
-          - Effect: Allow
-            Principal: '*'
+          - Sid: AllowPublicRead
+            Effect: Allow
+            Principal:
+              AWS: '*'
             Action:
               - s3:GetObject
-      #       Resource: !Join
-      #         - ''
-      #         - - 'arn:aws:s3:::'
-      #           - !Ref WebAppS3Bucket
-      #           - /*
+            Resource: !Join
+              - ''
+              - - 'arn:aws:s3:::'
+                - !Ref WebAppS3Bucket
+                - /*
