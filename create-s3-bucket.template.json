@@ -6,6 +6,12 @@
       "Type": "AWS::S3::Bucket",
       "Properties": {
         "BucketName": "bgm-nerdrock-gh-actions-test",
+        "PublicAccessBlockConfiguration" : {
+          "BlockPublicAcls" : false,
+          "BlockPublicPolicy" : false,
+          "IgnorePublicAcls" : false,
+          "RestrictPublicBuckets" : false
+        },
         "WebsiteConfiguration": {
           "IndexDocument": "index.html",
           "ErrorDocument": "error.html"
