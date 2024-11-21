@@ -29,23 +29,27 @@ jobs:
         aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
         aws-region: us-east-1
 
-    - name: Create S3 bucket
+    - name: Deploy project
       uses: aws-actions/aws-cloudformation-github-deploy@v1
       with:
         name: ${{ env.ORG }}-${{ env.PROJECT }}-${{ env.STAGE }}
-        template: ./create-s3-bucket.template.yml
+        template: ./create-${{ env.PROJECT }}.template.yml
         no-fail-on-empty-changeset: "1"
         tags: '[{"Key":"project","Value":"${{ env.PROJECT }}"},{"Key":"STAGE","Value":"${{ env.STAGE }}"}]'
-        parameter-overrides: BucketName=${{ env.ORG }}-${{ env.PROJECT }}-${{ env.STAGE }}-web
+        parameter-overrides: >-
+          Org=${{ env.ORG }},
+          Project=${{ env.PROJECT }},
+          Stage=${{ env.STAGE }},
+          BucketName=${{ env.ORG }}-${{ env.PROJECT }}-${{ env.STAGE }}-web
 
-    - name: Create ResourceGroup
-      uses: aws-actions/aws-cloudformation-github-deploy@v1
-      with:
-        name: ${{ env.ORG }}-${{ env.PROJECT }}-${{ env.STAGE }}
-        template: ./create-resource-group.template.yml
-        no-fail-on-empty-changeset: "1"
-        tags: '[{"Key":"project","Value":"${{ env.PROJECT }}"},{"Key":"STAGE","Value":"${{ env.STAGE }}"}]'
-        parameter-overrides: Org=${{ env.ORG }},Project=${{ env.PROJECT }},Stage=${{ env.STAGE }}
+    # - name: Create ResourceGroup
+    #   uses: aws-actions/aws-cloudformation-github-deploy@v1
+    #   with:
+    #     name: ${{ env.ORG }}-${{ env.PROJECT }}-${{ env.STAGE }}
+    #     template: ./create-resource-group.template.yml
+    #     no-fail-on-empty-changeset: "1"
+    #     tags: '[{"Key":"project","Value":"${{ env.PROJECT }}"},{"Key":"STAGE","Value":"${{ env.STAGE }}"}]'
+    #     parameter-overrides: Org=${{ env.ORG }},Project=${{ env.PROJECT }},Stage=${{ env.STAGE }}
 
     - name: Deploy static site to S3 bucket
       run: aws s3 sync ./web/ s3://${{ env.ORG }}-${{ env.PROJECT }}-${{ env.STAGE }}-web --delete --exclude serve
