@@ -1,6 +1,12 @@
 AWSTemplateFormatVersion: '2010-09-09'
 Description: Test creating a S3 bucket from a GH Action
 Parameters:
+  Org:
+    Type: String
+  Project:
+    Type: String
+  Stage:
+    Type: String
   BucketName:
     Type: String
 Resources:
@@ -33,6 +39,16 @@ Resources:
               - - 'arn:aws:s3:::'
                 - !Ref WebAppS3Bucket
                 - /*
+  ResourceGroup:
+    Type: AWS::ResourceGroups::Group
+    Properties:
+      Name: !Sub ${Org}-${Project}-resources-${Stage}
+      Description: !Sub All ${Stage} resources in the ${Project} project
+      Tags:
+        - Key: project
+          Value: !Sub ${Project}
+        - Key: STAGE
+          Value: !Sub ${Stage}
 Outputs:
   WebsiteURL:
     Value: !GetAtt 
