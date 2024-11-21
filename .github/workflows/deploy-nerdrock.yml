@@ -1,4 +1,4 @@
-name: Deploy Web Site to S3
+name: Deploy Nerdrock (experimental)
 
 on:
   workflow_dispatch
