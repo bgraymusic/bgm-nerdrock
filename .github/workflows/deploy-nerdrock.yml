@@ -33,7 +33,7 @@ jobs:
       uses: aws-actions/aws-cloudformation-github-deploy@v1
       with:
         name: ${{ env.ORG }}-${{ env.PROJECT }}-${{ env.STAGE }}
-        template: ./create-${{ env.PROJECT }}.template.yml
+        template: ./iac/create-${{ env.PROJECT }}.template.yml
         no-fail-on-empty-changeset: "1"
         tags: '[{"Key":"project","Value":"${{ env.PROJECT }}"},{"Key":"STAGE","Value":"${{ env.STAGE }}"}]'
         parameter-overrides: >-
