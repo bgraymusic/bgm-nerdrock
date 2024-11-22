@@ -37,14 +37,14 @@ jobs:
     #     --schema-handler-package s3://${{ env.ORG }}-${{ env.PROJECT }}-cf-modules/${{ env.ORG }}-${{ env.PROJECT }}-s3-website.zip
 
     - name: Register modules
-      run: >-
-        for module in `ls ./iac | grep module`
-        do
+      run: |-
+        for module in `ls ./iac | grep module`; do
           cd "iac/$module
           cfn generate
           cfn submit
           cd ../..
         done
+
   deploy:
     runs-on: ubuntu-latest
 
