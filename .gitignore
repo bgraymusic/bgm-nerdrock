@@ -34,3 +34,7 @@ secrets.yml
 scratch.py
 cf-from-aws.yml
 db_test.py
+
+# IaC
+iac/*/rpdk.log
+iac/*/schema.json
