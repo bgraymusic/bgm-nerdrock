@@ -57,6 +57,7 @@ jobs:
       uses: actions/checkout@v4
       with:
         sparse-checkout: |
+          iac
           web
 
     - name: Configure AWS Credentials
