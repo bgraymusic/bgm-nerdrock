@@ -36,8 +36,10 @@ jobs:
     #     --type-name ${{ env.ORG }}::${{ env.PROJECT }}::s3-website
     #     --schema-handler-package s3://${{ env.ORG }}-${{ env.PROJECT }}-cf-modules/${{ env.ORG }}-${{ env.PROJECT }}-s3-website.zip
 
-    - name: Register modules
+    - name: Install cfn
       run: pip install cloudformation-cli
+
+    - name: Register modules
       run: |-
         for module in `ls ./iac | grep module`; do
           cd "iac/$module"
