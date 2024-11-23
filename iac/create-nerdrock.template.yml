@@ -53,7 +53,7 @@ Resources:
           Value: !Sub ${Project}
         - Key: STAGE
           Value: !Sub ${Stage}
-Outputs:
+# Outputs:
   # Should propagate out from module
   # WebsiteURL:
   #   Value: !GetAtt 

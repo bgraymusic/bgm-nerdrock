@@ -38,5 +38,4 @@ Outputs:
     Value: !GetAtt 
       - WebAppS3Bucket
       - WebsiteURL
-    # Description: !Sub ${BucketName}
     Description: URL for the website served from the newly-created bucket
