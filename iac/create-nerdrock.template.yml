@@ -54,8 +54,9 @@ Resources:
         - Key: STAGE
           Value: !Sub ${Stage}
 Outputs:
-  WebsiteURL:
-    Value: !GetAtt 
-      - WebAppS3Bucket
-      - WebsiteURL
-    Description: URL for website served from the ${BucketName} bucket
+  # Should propagate out from module
+  # WebsiteURL:
+  #   Value: !GetAtt 
+  #     - WebAppS3Bucket
+  #     - WebsiteURL
+  #   Description: URL for website served from the ${BucketName} bucket
