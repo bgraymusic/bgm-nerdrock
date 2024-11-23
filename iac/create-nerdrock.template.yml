@@ -14,35 +14,6 @@ Resources:
     Type: bgm::nerdrock::s3website::MODULE
     Properties:
       BucketName: !Sub ${BucketName}
-  # WebAppS3Bucket:
-  #   Type: AWS::S3::Bucket
-  #   Properties:
-  #     BucketName: !Sub ${BucketName}
-  #     PublicAccessBlockConfiguration:
-  #       BlockPublicAcls: false
-  #       BlockPublicPolicy: false
-  #       IgnorePublicAcls: false
-  #       RestrictPublicBuckets: false
-  #     WebsiteConfiguration:
-  #       IndexDocument: index.html
-  #       ErrorDocument: error.html
-  # WebAppS3BucketPolicy:
-  #   Type: AWS::S3::BucketPolicy
-  #   Properties:
-  #     Bucket: !Sub ${BucketName}
-  #     PolicyDocument:
-  #       Statement:
-  #         - Sid: AllowPublicRead
-  #           Effect: Allow
-  #           Principal:
-  #             AWS: '*'
-  #           Action:
-  #             - s3:GetObject
-  #           Resource: !Join
-  #             - ''
-  #             - - 'arn:aws:s3:::'
-  #               - !Ref WebAppS3Bucket
-  #               - /*
   ResourceGroup:
     Type: AWS::ResourceGroups::Group
     Properties:
@@ -53,10 +24,3 @@ Resources:
           Value: !Sub ${Project}
         - Key: STAGE
           Value: !Sub ${Stage}
-# Outputs:
-  # Should propagate out from module
-  # WebsiteURL:
-  #   Value: !GetAtt 
-  #     - WebAppS3Bucket
-  #     - WebsiteURL
-  #   Description: URL for website served from the ${BucketName} bucket
