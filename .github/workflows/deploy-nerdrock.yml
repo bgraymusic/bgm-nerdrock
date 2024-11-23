@@ -44,7 +44,7 @@ jobs:
         for module in `ls ./iac | grep module`; do
           cd "iac/$module"
           cfn generate
-          cfn submit
+          cfn submit --set-default
           cd ../..
         done
 
