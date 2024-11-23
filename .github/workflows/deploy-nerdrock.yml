@@ -39,7 +39,7 @@ jobs:
     - name: Register modules
       run: |-
         for module in `ls ./iac | grep module`; do
-          cd "iac/$module
+          cd "iac/$module"
           cfn generate
           cfn submit
           cd ../..
