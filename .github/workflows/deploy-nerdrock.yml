@@ -35,15 +35,6 @@ jobs:
     - name: Register modules
       run: iac/deploy-modules.py
 
-    # - name: Register modules
-    #   run: |-
-    #     for module in `ls ./iac | grep module`; do
-    #       cd "iac/$module"
-    #       cfn generate
-    #       cfn submit --set-default
-    #       cd ../..
-    #     done
-
   deploy:
     runs-on: ubuntu-latest
     needs: prepare-modules
