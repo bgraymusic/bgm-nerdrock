@@ -24,7 +24,7 @@ def collectRegisteredModules():
 def collectLocalModules():
   localModules = []
   print(f'CWD: {os.getcwd()}')
-  print(f'Current git branch: {os.system("git branch --show-current")}')
+  print(f'Current git branch: {subprocess.check_output("git branch --show-current")}')
   for rpdkConfigPath in Path('.').rglob('.rpdk-config'):
     typeName = None
     with open(rpdkConfigPath) as configFile:
