@@ -33,7 +33,7 @@ jobs:
       run: pip install cloudformation-cli
 
     - name: Register modules
-      run: iac/deploy-modules.py
+      run: python3 -u iac/deploy-modules.py
 
   deploy:
     runs-on: ubuntu-latest
