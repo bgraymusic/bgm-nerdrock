@@ -30,6 +30,7 @@ def collectLocalModules():
     moduleDirPath = rpdkConfigPath.parent
     lastModSeconds = 0
     for fragmentPath in Path(moduleDirPath).rglob('fragments/*.yml'):
+      subprocess.check_output(f'git log -1 {fragmentPath}', shell=True)
       lastModSeconds = max(lastModSeconds, int(subprocess.check_output(f'git log -1 --format=%ct {fragmentPath}', shell=True)))
     localModules.append({'typeName': typeName, 'moduleDir': moduleDirPath, 'lastMod': lastModSeconds})
   return localModules
