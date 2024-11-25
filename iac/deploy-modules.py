@@ -10,6 +10,7 @@ __email__ = "bgraymusic@gmail.com"
 __status__ = "Development"
 
 import os
+import subprocess
 import boto3
 from pathlib import Path
 import json
@@ -29,7 +30,7 @@ def collectLocalModules():
     moduleDirPath = rpdkConfigPath.parent
     lastModSeconds = 0
     for fragmentPath in Path(moduleDirPath).rglob('fragments/*.yml'):
-      lastModSeconds = max(lastModSeconds, fragmentPath.stat().st_mtime)
+      lastModSeconds = max(lastModSeconds, int(subprocess.check_output(f'git log -1 --format=%ct {fragmentPath}', shell=True)))
     localModules.append({'typeName': typeName, 'moduleDir': moduleDirPath, 'lastMod': lastModSeconds})
   return localModules
 
