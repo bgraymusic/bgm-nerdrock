@@ -23,6 +23,7 @@ def collectRegisteredModules():
 
 def collectLocalModules():
   localModules = []
+  print(f'CWD: {os.getcwd()}')
   for rpdkConfigPath in Path('.').rglob('.rpdk-config'):
     typeName = None
     with open(rpdkConfigPath) as configFile:
