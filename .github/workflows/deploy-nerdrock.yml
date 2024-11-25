@@ -29,24 +29,20 @@ jobs:
         aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
         aws-region: us-east-1
 
-    # - name: Create CloudFormation module bucket
-    #   run: aws s3api create-bucket --bucket ${{ env.ORG }}-${{ env.PROJECT }}-cf-modules
-    #   run: aws cloudformation register-type >-
-    #     --type RESOURCE
-    #     --type-name ${{ env.ORG }}::${{ env.PROJECT }}::s3-website
-    #     --schema-handler-package s3://${{ env.ORG }}-${{ env.PROJECT }}-cf-modules/${{ env.ORG }}-${{ env.PROJECT }}-s3-website.zip
-
     - name: Install cfn
       run: pip install cloudformation-cli
 
     - name: Register modules
-      run: |-
-        for module in `ls ./iac | grep module`; do
-          cd "iac/$module"
-          cfn generate
-          cfn submit --set-default
-          cd ../..
-        done
+      run: iac/deploy-modules.py
+
+    # - name: Register modules
+    #   run: |-
+    #     for module in `ls ./iac | grep module`; do
+    #       cd "iac/$module"
+    #       cfn generate
+    #       cfn submit --set-default
+    #       cd ../..
+    #     done
 
   deploy:
     runs-on: ubuntu-latest

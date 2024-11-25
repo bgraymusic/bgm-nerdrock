@@ -1,0 +1,20 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: Creates a S3 bucket that serves its content as a static web site
+Parameters:
+  Org:
+    Type: String
+  Project:
+    Type: String
+  Stage:
+    Type: String
+Resources:
+  ResourceGroup:
+    Type: AWS::ResourceGroups::Group
+    Properties:
+      Name: !Sub ${Org}-${Project}-resources-${Stage}
+      Description: !Sub All ${Stage} resources in the ${Project} project
+      Tags:
+        - Key: project
+          Value: !Sub ${Project}
+        - Key: STAGE
+          Value: !Sub ${Stage}
