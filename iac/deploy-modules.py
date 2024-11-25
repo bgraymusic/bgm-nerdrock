@@ -47,10 +47,10 @@ for localModule in localModules:
   typeName, moduleDir, lastMod = localModule.values()
   if typeName in registeredModules:
     if lastMod > registeredModules[typeName]:
-      print(f'Local module {typeName} has changed, resubmitting…')
+      print(f'Local module {typeName} ({lastMod}) is newer than AWS version ({registeredModules[typeName]}), updating…')
       submitModule(moduleDir)
     else:
       print(f'Local module {typeName} is up to date.')
   else:
-    print(f'Local module {typeName} is new, submitting…')
+    print(f'Local module {typeName} is new, creating…')
     submitModule(moduleDir)
