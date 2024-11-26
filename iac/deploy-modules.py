@@ -40,12 +40,12 @@ def getModulesToSubmit():
     if typeName in registeredModules:
       if lastMod > registeredModules[typeName]:
         print(f'Local module {typeName} ({lastMod}) is newer than AWS version ({registeredModules[typeName]}), updating…')
-        modulesToSubmit.append(moduleDir)
+        modulesToSubmit.append(str(moduleDir))
       else:
         print(f'Registered module {typeName} is up to date.')
     else:
       print(f'Local module {typeName} is new, creating…')
-      modulesToSubmit.append(moduleDir)
+      modulesToSubmit.append(str(moduleDir))
   jsonModuleList = json.dumps(modulesToSubmit)
   print(f'Adding {jsonModuleList} to env')
   with open(os.environ['GITHUB_OUTPUT'], 'a') as env:
