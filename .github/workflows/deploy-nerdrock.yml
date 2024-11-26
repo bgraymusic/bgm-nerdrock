@@ -46,10 +46,6 @@ jobs:
       if: steps.module-finder.outputs.MODULES_TO_SUBMIT == '[]'
       run: echo "Match with single quotes"
 
-    - name: Test with double quotes
-      if: steps.module-finder.outputs.MODULES_TO_SUBMIT == "[]"
-      run: echo "Match with double quotes"
-
     - name: Install cfn
       if: steps.module-finder.outputs.MODULES_TO_SUBMIT != '[]'
       run: |-
