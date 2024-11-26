@@ -18,10 +18,10 @@ jobs:
     steps:
     - name: Checkout IaC Directory
       uses: actions/checkout@v4
+      fetch-depth: 0
       with:
         sparse-checkout: |
           iac
-      fetch-depth: "0"
 
     - name: Configure AWS Credentials
       uses: aws-actions/configure-aws-credentials@v4
