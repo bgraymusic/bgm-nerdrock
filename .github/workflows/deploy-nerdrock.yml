@@ -21,6 +21,7 @@ jobs:
       with:
         sparse-checkout: |
           iac
+      fetch-depth: "0"
 
     - name: Configure AWS Credentials
       uses: aws-actions/configure-aws-credentials@v4
