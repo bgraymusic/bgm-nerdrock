@@ -18,8 +18,8 @@ jobs:
     steps:
     - name: Checkout IaC Directory
       uses: actions/checkout@v4
-      fetch-depth: 0
       with:
+        fetch-depth: 0
         sparse-checkout: |
           iac
 
