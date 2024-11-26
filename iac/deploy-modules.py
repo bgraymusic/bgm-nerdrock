@@ -9,12 +9,10 @@ __maintainer__ = "Brian Gray"
 __email__ = "bgraymusic@gmail.com"
 __status__ = "Development"
 
-import os
-import subprocess
+import os, sys, subprocess
 import boto3
 from pathlib import Path
 import json
-from datetime import datetime
 
 def collectRegisteredModules():
   cf = boto3.client('cloudformation')
@@ -34,24 +32,33 @@ def collectLocalModules():
     localModules.append({'typeName': typeName, 'moduleDir': moduleDirPath, 'lastMod': lastModSeconds})
   return localModules
 
-def submitModule(moduleDirPath):
-  cwd = os.getcwd()
-  os.chdir(moduleDirPath)
-  os.system('cfn generate')
-  os.system('cfn submit --set-default')
-  os.chdir(cwd)
-
-registeredModules = collectRegisteredModules()
-localModules = collectLocalModules()
-
-for localModule in localModules:
-  typeName, moduleDir, lastMod = localModule.values()
-  if typeName in registeredModules:
-    if lastMod > registeredModules[typeName]:
-      print(f'Local module {typeName} ({lastMod}) is newer than AWS version ({registeredModules[typeName]}), updating…')
-      submitModule(moduleDir)
+def getModulesToSubmit():
+  registeredModules = collectRegisteredModules()
+  modulesToSubmit = []
+  for localModule in collectLocalModules():
+    typeName, moduleDir, lastMod = localModule.values()
+    if typeName in registeredModules:
+      if lastMod > registeredModules[typeName]:
+        print(f'Local module {typeName} ({lastMod}) is newer than AWS version ({registeredModules[typeName]}), updating…')
+        modulesToSubmit.append(moduleDir)
+      else:
+        print(f'Registered module {typeName} is up to date.')
     else:
-      print(f'Registered module {typeName} is up to date.')
-  else:
-    print(f'Local module {typeName} is new, creating…')
-    submitModule(moduleDir)
+      print(f'Local module {typeName} is new, creating…')
+      modulesToSubmit.append(moduleDir)
+  with open(os.environ['GITHUB_OUTPUT'], 'a') as env:
+    print(f'MODULES_TO_SUBMIT="{json.dumps(modulesToSubmit)}"', file=env)
+  return modulesToSubmit
+
+def submitModules(modulesToSubmit):
+  moduleDirs = json.loads(modulesToSubmit)
+  print(f'Submitting {len(moduleDirs)} modules…')
+  for moduleDir in moduleDirs:
+    cwd = os.getcwd()
+    os.chdir(moduleDir)
+    os.system('cfn generate')
+    os.system('cfn submit --set-default')
+    os.chdir(cwd)
+
+if __name__ == '__main__':
+    globals()[sys.argv[1]](*sys.argv[2:])
