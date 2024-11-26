@@ -42,6 +42,18 @@ jobs:
       id: module-finder
       run: python3 -u iac/deploy-modules.py getModulesToSubmit
 
+    - name: Test without quotes
+      if: ${{ steps.module-finder.outputs.MODULES_TO_SUBMIT }} == []
+      run: echo "Match without quotes"
+
+    - name: Test with single quotes
+      if: ${{ steps.module-finder.outputs.MODULES_TO_SUBMIT }} == '[]'
+      run: echo "Match with single quotes"
+
+    - name: Test with double quotes
+      if: ${{ steps.module-finder.outputs.MODULES_TO_SUBMIT }} == "[]"
+      run: echo "Match with double quotes"
+
     - name: Install cfn
       if: ${{ steps.module-finder.outputs.MODULES_TO_SUBMIT }} != []
       run: |-
