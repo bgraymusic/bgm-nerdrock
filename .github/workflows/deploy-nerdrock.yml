@@ -72,6 +72,7 @@ jobs:
         aws-region: us-east-1
 
     - name: Deploy project
+      id: deploy-project
       uses: aws-actions/aws-cloudformation-github-deploy@v1
       with:
         name: ${{ env.ORG }}-${{ env.PROJECT }}-${{ env.STAGE }}
@@ -91,4 +92,4 @@ jobs:
           BucketName=${{ env.ORG }}-${{ env.PROJECT }}-${{ env.STAGE }}-web
 
     - name: Deploy static site to S3 bucket
-      run: aws s3 sync ./web/ s3://${{ env.ORG }}-${{ env.PROJECT }}-${{ env.STAGE }}-web --delete --exclude serve
+      run: aws s3 sync ./web/ s3://${{ steps.deploy-project.outputs.WebsiteBucketName }} --delete --exclude serve
