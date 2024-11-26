@@ -45,7 +45,7 @@ jobs:
     - name: Install cfn
       if: steps.module-finder.outputs.MODULES_TO_SUBMIT != '[]'
       run: |-
-        pip install --upgrade cloudformation-cli pkg_resources
+        pip install --upgrade cloudformation-cli setuptools
 
     - name: Submit Modules
       if: steps.module-finder.outputs.MODULES_TO_SUBMIT != '[]'
