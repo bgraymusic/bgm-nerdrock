@@ -30,8 +30,6 @@ def collectLocalModules():
     moduleDirPath = rpdkConfigPath.parent
     lastModSeconds = 0
     for fragmentPath in Path(moduleDirPath).rglob('fragments/*.yml'):
-      print(f'git log -n 1 -- {fragmentPath}')
-      os.system(f'git log -n 1 -- {fragmentPath}')
       lastModSeconds = max(lastModSeconds, int(subprocess.check_output(f'git log -1 --format=%ct {fragmentPath}', shell=True)))
     localModules.append({'typeName': typeName, 'moduleDir': moduleDirPath, 'lastMod': lastModSeconds})
   return localModules
@@ -53,7 +51,7 @@ for localModule in localModules:
       print(f'Local module {typeName} ({lastMod}) is newer than AWS version ({registeredModules[typeName]}), updating…')
       submitModule(moduleDir)
     else:
-      print(f'Local module {typeName} is up to date.')
+      print(f'Registered module {typeName} is up to date.')
   else:
     print(f'Local module {typeName} is new, creating…')
     submitModule(moduleDir)
