@@ -43,11 +43,11 @@ jobs:
       run: python3 -u iac/deploy-modules.py getModulesToSubmit
 
     - name: Install cfn
-      if: ${{ steps.module-finder.outputs.MODULES_TO_SUBMIT }} != '[]'
+      if: ${{ steps.module-finder.outputs.MODULES_TO_SUBMIT }} != []
       run: pip install --upgrade cloudformation-cli
 
     - name: Submit Modules
-      if: ${{ steps.module-finder.outputs.MODULES_TO_SUBMIT }} != '[]'
+      if: ${{ steps.module-finder.outputs.MODULES_TO_SUBMIT }} != []
       run: python3 -u iac/deploy-modules.py submitModules '${{ steps.module-finder.outputs.MODULES_TO_SUBMIT }}'
 
   deploy:
