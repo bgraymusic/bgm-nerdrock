@@ -30,13 +30,21 @@ jobs:
         aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
         aws-region: us-east-1
 
+    - name: Setup Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.13'
+
+    - name: Install Python Modules
+      run: python -m pip install --upgrade boto3
+
     - name: Get List of Modules to Submit
       id: module-finder
       run: python3 -u iac/deploy-modules.py getModulesToSubmit
 
     - name: Install cfn
       if: ${{ steps.module-finder.outputs.MODULES_TO_SUBMIT }} != '[]'
-      run: pip install cloudformation-cli
+      run: pip install --upgrade cloudformation-cli
 
     - name: Submit Modules
       if: ${{ steps.module-finder.outputs.MODULES_TO_SUBMIT }} != '[]'
