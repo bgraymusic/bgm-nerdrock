@@ -15,12 +15,8 @@ Resources:
     Properties:
       BucketName: !Sub ${BucketName}
   ResourceGroup:
-    Type: AWS::ResourceGroups::Group
+    Type: bgm::nerdrock::resourcegroup::MODULE
     Properties:
-      Name: !Sub ${Org}-${Project}-resources-${Stage}
-      Description: !Sub All ${Stage} resources in the ${Project} project
-      Tags:
-        - Key: project
-          Value: !Sub ${Project}
-        - Key: STAGE
-          Value: !Sub ${Stage}
+      Org: !Sub ${Org}
+      Project: !Sub ${Project}
+      Stage: !Sub ${Stage}
