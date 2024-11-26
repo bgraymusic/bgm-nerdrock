@@ -40,9 +40,7 @@ Resources:
 Outputs:
   URL:
     Description: URL for the website served from the newly-created bucket
-    Value: !GetAtt 
-      - WebAppS3Bucket
-      - WebsiteURL
+    Value: !GetAtt WebAppS3Bucket.WebsiteURL
   Bucket:
     Description: The bucket that holds the static website
     Value: !Ref WebAppS3Bucket
