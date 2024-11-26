@@ -1,13 +1,17 @@
 AWSTemplateFormatVersion: '2010-09-09'
 Description: Creates a S3 bucket that serves its content as a static web site
 Parameters:
-  BucketName:
+  Org:
+    Type: String
+  Project:
+    Type: String
+  Stage:
     Type: String
 Resources:
   WebAppS3Bucket:
     Type: AWS::S3::Bucket
     Properties:
-      BucketName: !Sub ${BucketName}
+      BucketName: !Sub ${ORG}-${PROJECT}-${STAGE}-web
       PublicAccessBlockConfiguration:
         BlockPublicAcls: false
         BlockPublicPolicy: false
@@ -19,7 +23,7 @@ Resources:
   WebAppS3BucketPolicy:
     Type: AWS::S3::BucketPolicy
     Properties:
-      Bucket: !Sub ${BucketName}
+      Bucket: !Sub ${ORG}-${PROJECT}-${STAGE}-web
       PolicyDocument:
         Statement:
           - Sid: AllowPublicRead

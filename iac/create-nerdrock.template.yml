@@ -1,5 +1,5 @@
 AWSTemplateFormatVersion: '2010-09-09'
-Description: Test creating a S3 bucket from a GH Action
+Description: Nerdrock Website Deployment Configuration
 Parameters:
   Org:
     Type: String
@@ -7,13 +7,13 @@ Parameters:
     Type: String
   Stage:
     Type: String
-  BucketName:
-    Type: String
 Resources:
   NerdrockWebsite:
     Type: bgm::nerdrock::s3website::MODULE
     Properties:
-      BucketName: !Sub ${BucketName}
+      Org: !Sub ${Org}
+      Project: !Sub ${Project}
+      Stage: !Sub ${Stage}
   ResourceGroup:
     Type: bgm::nerdrock::resourcegroup::MODULE
     Properties:

@@ -1,5 +1,5 @@
 AWSTemplateFormatVersion: '2010-09-09'
-Description: Creates a S3 bucket that serves its content as a static web site
+Description: Creates a resource group that shows all resources from this org/project/stage
 Parameters:
   Org:
     Type: String
