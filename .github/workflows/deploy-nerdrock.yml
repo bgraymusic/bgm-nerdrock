@@ -34,28 +34,23 @@ jobs:
       uses: actions/setup-python@v5
       with:
         python-version: '3.13'
-
-    - name: Install Python Modules
       run: python -m pip install --upgrade boto3
+
+    # - name: Install Python Modules
+    #   run: python -m pip install --upgrade boto3
 
     - name: Get List of Modules to Submit
       id: module-finder
       run: python3 -u iac/deploy-modules.py getModulesToSubmit
 
-    - name: Test with single quotes
-      if: steps.module-finder.outputs.MODULES_TO_SUBMIT == '[]'
-      run: echo "Match with single quotes"
-
     - name: Install cfn
       if: steps.module-finder.outputs.MODULES_TO_SUBMIT != '[]'
       run: |-
-        echo "MODULES_TO_SUBMIT does not equal '[]' (${{ steps.module-finder.outputs.MODULES_TO_SUBMIT }})"
         pip install --upgrade cloudformation-cli
 
     - name: Submit Modules
       if: steps.module-finder.outputs.MODULES_TO_SUBMIT != '[]'
       run: |-
-        echo "MODULES_TO_SUBMIT does not equal '[]' (${{ steps.module-finder.outputs.MODULES_TO_SUBMIT }})"
         python3 -u iac/deploy-modules.py submitModules '${{ steps.module-finder.outputs.MODULES_TO_SUBMIT }}'
 
   deploy:
