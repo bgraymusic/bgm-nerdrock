@@ -46,8 +46,10 @@ def getModulesToSubmit():
     else:
       print(f'Local module {typeName} is new, creating…')
       modulesToSubmit.append(moduleDir)
+  jsonModuleList = json.dumps(modulesToSubmit)
+  print(f'Adding {jsonModuleList} to env')
   with open(os.environ['GITHUB_OUTPUT'], 'a') as env:
-    print(f'MODULES_TO_SUBMIT={json.dumps(modulesToSubmit)}', file=env)
+    print(f'MODULES_TO_SUBMIT={jsonModuleList}', file=env)
   return modulesToSubmit
 
 def submitModules(modulesToSubmit):
