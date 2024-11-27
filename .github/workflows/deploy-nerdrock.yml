@@ -91,7 +91,7 @@ jobs:
       run: |
         pip install -r requirements.txt --target .
         zip -r ${{ env.ORG }}-${{ env.PROJECT }}-${{ env.STAGE }}.zip .
-        aws s3 cp ${{ env.ORG }}-${{ env.PROJECT }}-${{ env.STAGE }}.zip s3://${{ env.ORG }}-${{ env.PROJECT}}-${{ env.STAGE}}-deploy --delete
+        aws s3 cp ${{ env.ORG }}-${{ env.PROJECT }}-${{ env.STAGE }}.zip s3://${{ env.ORG }}-${{ env.PROJECT}}-${{ env.STAGE}}-deploy
 
     - name: Deploy project
       id: deploy-project
