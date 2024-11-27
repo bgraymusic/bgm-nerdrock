@@ -10,28 +10,28 @@ Parameters:
   LambdaName:
     Type: String
 Resources:
-  ${LambdaName}LogGroup:
+  !Sub ${LambdaName}LogGroup:
     Type: AWS::Logs::LogGroup
     Properties:
-      LogGroupName: /aws/lambda/${Org}-${Project}-${Stage}-${LambdaName}
-  ${LambdaName}LambdaFunction:
+      LogGroupName: !Sub /aws/lambda/${Org}-${Project}-${Stage}-${LambdaName}
+  !Sub ${LambdaName}LambdaFunction:
     Type: AWS::Lambda::Function
     Properties:
       Code:
-        S3Bucket: ${Org}-${Project}-${Stage}-deploy
-        S3Key: ${Org}-${Project}-${Stage}.zip
-      Handler: handlers.handle_${LambdaName}
+        S3Bucket: !Sub ${Org}-${Project}-${Stage}-deploy
+        S3Key: !Sub ${Org}-${Project}-${Stage}.zip
+      Handler: !Sub handlers.handle_${LambdaName}
       Runtime: python3.12
-      FunctionName: ${Org}-${Project}-${Stage}-${LambdaName}
+      FunctionName: !Sub ${Org}-${Project}-${Stage}-${LambdaName}
       MemorySize: 128
       Timeout: 5
       Environment:
         Variables:
-          stackName: ${Org}-${Project}-${Stage}
+          stackName: !Sub ${Org}-${Project}-${Stage}
           config: config.yml
-          secretsBucket: ${Org}-${Project}-${Stage}-secrets
+          secretsBucket: !Sub ${Org}-${Project}-${Stage}-secrets
           secretsFile: secrets.yml
           log_level: DEBUG
-      Role: arn:aws:iam::028568048704:role/service-role/${Org}MicroserviceRole
+      Role: !Sub arn:aws:iam::028568048704:role/service-role/${Org}MicroserviceRole
     DependsOn:
-      - ${LambdaName}LogGroup
+      - !Sub ${LambdaName}LogGroup
