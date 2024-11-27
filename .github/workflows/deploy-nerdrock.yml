@@ -12,6 +12,20 @@ env:
   STAGE: experimental
 
 jobs:
+  prepare-deployment-bucket:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Configure AWS Credentials
+      uses: aws-actions/configure-aws-credentials@v4
+      with:
+        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        aws-region: us-east-1
+
+    - name: Create Deployment Bucket for Lambda Code
+      run: aws s3api create-bucket --bucket ${{ env.ORG }}-${{ env.PROJECT}}-${{ env.STAGE}}-deploy
+
   prepare-modules:
     runs-on: ubuntu-latest
 
@@ -22,6 +36,9 @@ jobs:
         fetch-depth: 0
         sparse-checkout: |
           iac
+
+    - name: Create Deployment Bucket
+      run: aws s3api create-bucket --bucket ${{ env.ORG}}-${{ env.PROJECT }}-${{ env.STAGE }}-deploy
 
     - name: Configure AWS Credentials
       uses: aws-actions/configure-aws-credentials@v4
@@ -54,7 +71,7 @@ jobs:
 
   deploy:
     runs-on: ubuntu-latest
-    needs: prepare-modules
+    needs: [prepare-modules, prepare-deployment-bucket]
 
     steps:
     - name: Checkout Web Directory
@@ -82,8 +99,9 @@ jobs:
           CAPABILITY_AUTO_EXPAND
         tags: >-
           [
+            {"Key":"org","Value":"${{ env.ORG }}"},
             {"Key":"project","Value":"${{ env.PROJECT }}"},
-            {"Key":"STAGE","Value":"${{ env.STAGE }}"}
+            {"Key":"stage","Value":"${{ env.STAGE }}"}
           ]
         parameter-overrides: >-
           Org=${{ env.ORG }},
