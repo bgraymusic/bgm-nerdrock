@@ -10,11 +10,11 @@ Parameters:
   LambdaName:
     Type: String
 Resources:
-  !Sub ${LambdaName}LogGroup:
+  LogGroup:
     Type: AWS::Logs::LogGroup
     Properties:
       LogGroupName: !Sub /aws/lambda/${Org}-${Project}-${Stage}-${LambdaName}
-  !Sub ${LambdaName}LambdaFunction:
+  LambdaFunction:
     Type: AWS::Lambda::Function
     Properties:
       Code:
@@ -34,4 +34,4 @@ Resources:
           log_level: DEBUG
       Role: !Sub arn:aws:iam::028568048704:role/service-role/${Org}MicroserviceRole
     DependsOn:
-      - !Sub ${LambdaName}LogGroup
+      - LogGroup
