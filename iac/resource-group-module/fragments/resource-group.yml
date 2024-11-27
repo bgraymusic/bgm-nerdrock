@@ -14,7 +14,9 @@ Resources:
       Name: !Sub ${Org}-${Project}-resources-${Stage}
       Description: !Sub All ${Stage} resources in the ${Project} project
       Tags:
+        - Key: org
+          Value: !Sub ${Org}
         - Key: project
           Value: !Sub ${Project}
-        - Key: STAGE
+        - Key: stage
           Value: !Sub ${Stage}
