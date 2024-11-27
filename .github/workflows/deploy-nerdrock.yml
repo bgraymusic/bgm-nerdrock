@@ -89,7 +89,7 @@ jobs:
 
     - name: Upload Lambda Deployment Package
       run: |
-        pip install -r requirements.txt
+        pip install -r requirements.txt --target .
         zip -r ${{ env.ORG }}-${{ env.PROJECT }}-${{ env.STAGE }}.zip .
         aws s3 sync ${{ env.ORG }}-${{ env.PROJECT }}-${{ env.STAGE }}.zip s3://${{ env.ORG }}-${{ env.PROJECT}}-${{ env.STAGE}}-deploy --delete
 
