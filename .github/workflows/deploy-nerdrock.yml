@@ -37,9 +37,6 @@ jobs:
         sparse-checkout: |
           iac
 
-    - name: Create Deployment Bucket
-      run: aws s3api create-bucket --bucket ${{ env.ORG}}-${{ env.PROJECT }}-${{ env.STAGE }}-deploy
-
     - name: Configure AWS Credentials
       uses: aws-actions/configure-aws-credentials@v4
       with:
@@ -61,13 +58,11 @@ jobs:
 
     - name: Install cfn
       if: steps.module-finder.outputs.MODULES_TO_SUBMIT != '[]'
-      run: |-
-        pip install --upgrade cloudformation-cli setuptools
+      run: pip install --upgrade cloudformation-cli setuptools
 
     - name: Submit Modules
       if: steps.module-finder.outputs.MODULES_TO_SUBMIT != '[]'
-      run: |-
-        python3 -u iac/deploy-modules.py submitModules '${{ steps.module-finder.outputs.MODULES_TO_SUBMIT }}'
+      run: python3 -u iac/deploy-modules.py submitModules '${{ steps.module-finder.outputs.MODULES_TO_SUBMIT }}'
 
   deploy:
     runs-on: ubuntu-latest
@@ -79,6 +74,10 @@ jobs:
       with:
         sparse-checkout: |
           iac
+          handler
+          badge
+          database
+          discography
           web
 
     - name: Configure AWS Credentials
@@ -87,6 +86,12 @@ jobs:
         aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
         aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
         aws-region: us-east-1
+
+    - name: Upload Lambda Deployment Package
+      run: |
+        pip install -r requirements.txt
+        zip -r ${{ env.ORG }}-${{ env.PROJECT }}-${{ env.STAGE }}.zip .
+        aws s3 sync ${{ env.ORG }}-${{ env.PROJECT }}-${{ env.STAGE }}.zip s3://${{ env.ORG }}-${{ env.PROJECT}}-${{ env.STAGE}}-deploy --delete
 
     - name: Deploy project
       id: deploy-project
