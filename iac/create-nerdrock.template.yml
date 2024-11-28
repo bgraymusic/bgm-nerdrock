@@ -8,23 +8,16 @@ Parameters:
   Stage:
     Type: String
 Resources:
-  # 'Fn::ForEach::Lambdas':
-  #   - LambdaName
-  #   - [Badges, Discography, DatabaseRefresh]
-  #   - '${LambdaName}Lambda':
-  #     Type: bgm::nerdrock::lambda::MODULE
-  #     Properties:
-  #       Org: !Sub ${Org}
-  #       Project: !Sub ${Project}
-  #       Stage: !Sub ${Stage}
-  #       LambdaName: !Sub ${LambdaName}Lambda
-  BadgesLambda:
-    Type: bgm::nerdrock::lambda::MODULE
-    Properties:
-      Org: !Sub ${Org}
-      Project: !Sub ${Project}
-      Stage: !Sub ${Stage}
-      LambdaName: BadgesLambda
+  'Fn::ForEach::LambdaLoop':
+    - LambdaName
+    - [badges, discography, databaseRefresh]
+    - '${LambdaName}Lambda':
+        Type: bgm::nerdrock::lambda::MODULE
+        Properties:
+          Org: !Sub ${Org}
+          Project: !Sub ${Project}
+          Stage: !Sub ${Stage}
+          LambdaName: !Sub ${LambdaName}
   NerdrockWebsite:
     Type: bgm::nerdrock::s3website::MODULE
     Properties:
