@@ -8,16 +8,44 @@ Parameters:
   Stage:
     Type: String
 Resources:
+  # 'Fn::ForEach::LambdaLoop':
+  #   - LambdaName
+  #   - [badges, discography, databaseRefresh]
+  #   - '${LambdaName}Lambda':
+  #       Type: bgm::nerdrock::lambda::MODULE
+  #       Properties:
+  #         Org: !Sub ${Org}
+  #         Project: !Sub ${Project}
+  #         Stage: !Sub ${Stage}
+  #         LambdaName: !Sub ${LambdaName}
   'Fn::ForEach::LambdaLoop':
-    - LambdaName
+    - FuncName
     - [badges, discography, databaseRefresh]
-    - '${LambdaName}Lambda':
-        Type: bgm::nerdrock::lambda::MODULE
+    - '${FuncName}LogGroup':
+        Type: AWS::Logs::LogGroup
         Properties:
-          Org: !Sub ${Org}
-          Project: !Sub ${Project}
-          Stage: !Sub ${Stage}
-          LambdaName: !Sub ${LambdaName}
+          LogGroupName: !Sub /aws/lambda/${Org}-${Project}-${Stage}-${FuncName}
+      '${FuncName}Lambda':
+        Type: AWS::Lambda::Function
+        Properties:
+          Code:
+            S3Bucket: !Sub ${Org}-${Project}-${Stage}-deploy
+            S3Key: !Sub ${Org}-${Project}-${Stage}.zip
+          Handler: !Sub handlers.handle_${FuncName}
+          Runtime: python3.12
+          FunctionName: !Sub ${Org}-${Project}-${Stage}-${FuncName}
+          MemorySize: 128
+          Timeout: 5
+          Environment:
+            Variables:
+              stackName: !Sub ${Org}-${Project}-${Stage}
+              config: config.yml
+              secretsBucket: !Sub ${Org}-${Project}-${Stage}-secrets
+              secretsFile: secrets.yml
+              log_level: DEBUG
+          Role: !Sub arn:aws:iam::028568048704:role/service-role/${Org}MicroserviceRole
+        DependsOn:
+          - !Sub ${FuncName}LogGroup
   NerdrockWebsite:
     Type: bgm::nerdrock::s3website::MODULE
     Properties:
