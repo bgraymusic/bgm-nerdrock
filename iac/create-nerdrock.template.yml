@@ -30,7 +30,7 @@ Resources:
       Org: !Sub ${Org}
       Project: !Sub ${Project}
       Stage: !Sub ${Stage}
-      LambdaName: databaserefresh
+      LambdaName: databaseRefresh
 
   NerdrockWebsite:
     Type: bgm::nerdrock::s3website::MODULE
@@ -38,6 +38,38 @@ Resources:
       Org: !Sub ${Org}
       Project: !Sub ${Project}
       Stage: !Sub ${Stage}
+
+  AlbumInfoTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      TableName: !Sub $(Org)-$(Project)-$(Stage)-albuminfo
+      AttributeDefinitions:
+        - AttributeName: album_id
+          AttributeType: 'N'
+      KeySchema:
+        - AttributeName: album_id
+          KeyType: HASH
+      ProvisionedThroughput:
+        ReadCapacityUnits: 5
+        WriteCapacityUnits: 5
+
+  TrackInfoTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      TableName: !Sub $(Org)-$(Project)-$(Stage)-trackinfo
+      AttributeDefinitions:
+        - AttributeName: album_id
+          AttributeType: 'N'
+        - AttributeName: number
+          AttributeType: 'N'
+      KeySchema:
+        - AttributeName: album_id
+          KeyType: HASH
+        - AttributeName: number
+          KeyType: RANGE
+      ProvisionedThroughput:
+        ReadCapacityUnits: 5
+        WriteCapacityUnits: 5
 
   ResourceGroup:
     Type: bgm::nerdrock::resourcegroup::MODULE
