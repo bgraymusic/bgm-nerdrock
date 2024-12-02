@@ -1,5 +1,5 @@
 AWSTemplateFormatVersion: '2010-09-09'
-Transform: 'AWS::LanguageExtensions'
+Transform: AWS::LanguageExtensions
 
 Description: Nerdrock Website Deployment Configuration
 
@@ -47,8 +47,10 @@ Resources:
 
   'Fn::ForEach::Lambdas':
     - LambdaName
-    - [badges, discography, refreshDatabase]
-    - '${LambdaName}Lambda':
+    - - badges
+      - discography
+      - refreshDatabase
+    - ${LambdaName}Lambda:
         Type: bgm::nerdrock::lambda::MODULE
         Properties:
           Org: !Sub ${Org}
