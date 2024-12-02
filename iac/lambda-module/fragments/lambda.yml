@@ -12,6 +12,8 @@ Parameters:
 Resources:
   LogGroup:
     Type: AWS::Logs::LogGroup
+    DeletionPolicy: Delete
+    UpdateReplacePolicy: Delete
     Properties:
       LogGroupName: !Sub /aws/lambda/${Org}-${Project}-${Stage}-${LambdaName}
   LambdaFunction:
@@ -32,6 +34,6 @@ Resources:
           secretsBucket: !Sub ${Org}-${Project}-${Stage}-secrets
           secretsFile: secrets.yml
           log_level: DEBUG
-      Role: !Sub arn:aws:iam::028568048704:role/service-role/${Org}MicroserviceRole
+      Role: !Sub arn:${AWS::Partition}:iam:${AWS::Region}:${AWS::AccountId}:role/service-role/${Org}MicroserviceRole
     DependsOn:
       - LogGroup
