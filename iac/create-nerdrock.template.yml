@@ -54,7 +54,7 @@ Resources:
           Org: !Sub ${Org}
           Project: !Sub ${Project}
           Stage: !Sub ${Stage}
-          LambdaName: ${LambdaName}
+          LambdaName: !Sub ${LambdaName}
 
   NerdrockWebsite:
     Type: bgm::nerdrock::s3website::MODULE
