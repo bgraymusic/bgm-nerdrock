@@ -45,29 +45,16 @@ Resources:
         ReadCapacityUnits: 5
         WriteCapacityUnits: 5
 
-  BadgesLambda:
-    Type: bgm::nerdrock::lambda::MODULE
-    Properties:
-      Org: !Sub ${Org}
-      Project: !Sub ${Project}
-      Stage: !Sub ${Stage}
-      LambdaName: badges
-
-  DiscographyLambda:
-    Type: bgm::nerdrock::lambda::MODULE
-    Properties:
-      Org: !Sub ${Org}
-      Project: !Sub ${Project}
-      Stage: !Sub ${Stage}
-      LambdaName: discography
-
-  DatabaseRefreshLambda:
-    Type: bgm::nerdrock::lambda::MODULE
-    Properties:
-      Org: !Sub ${Org}
-      Project: !Sub ${Project}
-      Stage: !Sub ${Stage}
-      LambdaName: databaseRefresh
+  'Fn::ForEach::Lambdas':
+    - LambdaName
+    - [badges, discography, refreshDatabase]
+    - '${LambdaName}Lambda':
+        Type: bgm::nerdrock::lambda::MODULE
+        Properties:
+          Org: !Sub ${Org}
+          Project: !Sub ${Project}
+          Stage: !Sub ${Stage}
+          LambdaName: ${LambdaName}
 
   NerdrockWebsite:
     Type: bgm::nerdrock::s3website::MODULE
@@ -79,7 +66,7 @@ Resources:
   NerdrockRestApi:
     Type: AWS::ApiGateway::RestApi
     Properties:
-      Name: ${Org}-${Project}-${Stage}
+      Name: !Sub ${Org}-${Project}-${Stage}
 
   NerdrockResourceApi:
     Type: AWS::ApiGateway::Resource
