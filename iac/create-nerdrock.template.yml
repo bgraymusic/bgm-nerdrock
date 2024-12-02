@@ -1,5 +1,8 @@
 AWSTemplateFormatVersion: '2010-09-09'
+Transform: 'AWS::LanguageExtensions'
+
 Description: Nerdrock Website Deployment Configuration
+
 Parameters:
   Org:
     Type: String
@@ -7,37 +10,8 @@ Parameters:
     Type: String
   Stage:
     Type: String
+
 Resources:
-  BadgesLambda:
-    Type: bgm::nerdrock::lambda::MODULE
-    Properties:
-      Org: !Sub ${Org}
-      Project: !Sub ${Project}
-      Stage: !Sub ${Stage}
-      LambdaName: badges
-
-  DiscographyLambda:
-    Type: bgm::nerdrock::lambda::MODULE
-    Properties:
-      Org: !Sub ${Org}
-      Project: !Sub ${Project}
-      Stage: !Sub ${Stage}
-      LambdaName: discography
-
-  DatabaseRefreshLambda:
-    Type: bgm::nerdrock::lambda::MODULE
-    Properties:
-      Org: !Sub ${Org}
-      Project: !Sub ${Project}
-      Stage: !Sub ${Stage}
-      LambdaName: databaseRefresh
-
-  NerdrockWebsite:
-    Type: bgm::nerdrock::s3website::MODULE
-    Properties:
-      Org: !Sub ${Org}
-      Project: !Sub ${Project}
-      Stage: !Sub ${Stage}
 
   AlbumInfoTable:
     Type: AWS::DynamoDB::Table
@@ -70,6 +44,56 @@ Resources:
       ProvisionedThroughput:
         ReadCapacityUnits: 5
         WriteCapacityUnits: 5
+
+  BadgesLambda:
+    Type: bgm::nerdrock::lambda::MODULE
+    Properties:
+      Org: !Sub ${Org}
+      Project: !Sub ${Project}
+      Stage: !Sub ${Stage}
+      LambdaName: badges
+
+  DiscographyLambda:
+    Type: bgm::nerdrock::lambda::MODULE
+    Properties:
+      Org: !Sub ${Org}
+      Project: !Sub ${Project}
+      Stage: !Sub ${Stage}
+      LambdaName: discography
+
+  DatabaseRefreshLambda:
+    Type: bgm::nerdrock::lambda::MODULE
+    Properties:
+      Org: !Sub ${Org}
+      Project: !Sub ${Project}
+      Stage: !Sub ${Stage}
+      LambdaName: databaseRefresh
+
+  NerdrockWebsite:
+    Type: bgm::nerdrock::s3website::MODULE
+    Properties:
+      Org: !Sub ${Org}
+      Project: !Sub ${Project}
+      Stage: !Sub ${Stage}
+
+  NerdrockRestApi:
+    Type: AWS::ApiGateway::RestApi
+    Properties:
+      Name: ${Org}-${Project}-${Stage}
+
+  NerdrockResourceApi:
+    Type: AWS::ApiGateway::Resource
+    Properties:
+      ParentId: !GetAtt NerdrockRestApi.RootResourceId
+      PathPart: api
+      RestApiId: !Ref NerdrockRestApi
+
+  ApiGatewayResourceApiBadges:
+    Type: AWS::ApiGateway::Resource
+    Properties:
+      ParentId: !Ref ApiGatewayResourceApi
+      PathPart: badges
+      RestApiId: !Ref ApiGatewayRestApi
 
   ResourceGroup:
     Type: bgm::nerdrock::resourcegroup::MODULE
