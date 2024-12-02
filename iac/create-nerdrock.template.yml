@@ -16,7 +16,7 @@ Resources:
   AlbumInfoTable:
     Type: AWS::DynamoDB::Table
     Properties:
-      TableName: !Sub $(Org)-$(Project)-$(Stage)-albuminfo
+      TableName: !Sub ${Org}-${Project}-${Stage}-albuminfo
       AttributeDefinitions:
         - AttributeName: album_id
           AttributeType: 'N'
@@ -30,7 +30,7 @@ Resources:
   TrackInfoTable:
     Type: AWS::DynamoDB::Table
     Properties:
-      TableName: !Sub $(Org)-$(Project)-$(Stage)-trackinfo
+      TableName: !Sub ${Org}-${Project}-${Stage}-trackinfo
       AttributeDefinitions:
         - AttributeName: album_id
           AttributeType: 'N'
