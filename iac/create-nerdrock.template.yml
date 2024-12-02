@@ -91,9 +91,9 @@ Resources:
   ApiGatewayResourceApiBadges:
     Type: AWS::ApiGateway::Resource
     Properties:
-      ParentId: !Ref ApiGatewayResourceApi
+      ParentId: !Ref NerdrockResourceApi
       PathPart: badges
-      RestApiId: !Ref ApiGatewayRestApi
+      RestApiId: !Ref NerdrockRestApi
 
   ResourceGroup:
     Type: bgm::nerdrock::resourcegroup::MODULE
