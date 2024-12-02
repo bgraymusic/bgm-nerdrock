@@ -57,9 +57,9 @@ Resources:
     - ${LambdaName}Lambda:
         Type: bgm::nerdrock::lambda::MODULE
         Properties:
-          Org: !Sub ${Org}
-          Project: !Sub ${Project}
-          Stage: !Sub ${Stage}
+          Org: !Ref Org
+          Project: !Ref Project
+          Stage: !Ref Stage
           LambdaName: !Ref LambdaName
 
   NerdrockWebsite:
