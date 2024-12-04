@@ -34,6 +34,6 @@ Resources:
           secretsBucket: !Sub ${Org}-${Project}-${Stage}-secrets
           secretsFile: secrets.yml
           log_level: DEBUG
-      Role: !Sub arn:${AWS::Partition}:iam:${AWS::Region}:${AWS::AccountId}:role/service-role/${Org}MicroserviceRole
+      Role: !Sub arn:${AWS::Partition}:iam::${AWS::AccountId}:role/service-role/${Org}MicroserviceRole
     DependsOn:
       - LogGroup
