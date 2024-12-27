@@ -18,6 +18,7 @@ node_modules
 .coverage
 .coveragerc.swp
 htmlcov
+.venv
 
 # Serverless directories
 .serverless
@@ -26,15 +27,16 @@ htmlcov
 __pycache__
 *.pyc
 .*project
-.vscode/settings.json
+.vscode
 package-lock.json
+.pytest_cache
 
 # Security
 secrets.yml
 scratch.py
-cf-from-aws.yml
-db_test.py
 
 # IaC
-iac/*/rpdk.log
-iac/*/schema.json
+cdk.out
+
+# Anything designated "local"
+local

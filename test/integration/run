@@ -1,3 +1,0 @@
-#!/bin/bash
-coverage run --omit=test/*,test/integration/* -m unittest test/integration/*test.py
-coverage report -m

@@ -1,5 +1,0 @@
-deepmerge
-requests
-pyyaml
-cryptography
-cffi
