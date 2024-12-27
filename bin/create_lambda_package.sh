@@ -1,8 +1,8 @@
 #!/bin/bash
 
 rm -rf pkg
-python3 -m venv tmp_deploy
-source tmp_deploy/bin/activate
+python3 -m venv .venv_deploy
+source .venv_deploy/bin/activate
 pip uninstall -y -r <(pip freeze)
 pip cache purge
 pip install --upgrade pip

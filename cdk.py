@@ -13,8 +13,9 @@ from web import WebConstruct
 
 
 class CdkStack(Stack):
-    def __init__(self, scope: Construct, construct_id: str, context: BgmContext, **kwargs) -> None:
-        super().__init__(scope, construct_id, **kwargs)
+    def __init__(self, scope: Construct, construct_id: str, stack_name: str,
+                 context: BgmContext, env: Environment) -> None:
+        super().__init__(scope, construct_id, stack_name=stack_name, env=env)
         self.context: BgmContext = context
         self.projectDirectory: pathlib.Path = pathlib.Path(__file__).parent
         DbConstruct(self, id=context.logicalIdFor('db'), context=context)
@@ -37,7 +38,7 @@ context: BgmContext = BgmContext(stage)
 for tag, val in context.getTags().items():
     Tags.of(app).add(tag, val)
 
-CdkStack(app, context.logicalIdFor('stack'), context,
+CdkStack(app, context.logicalIdFor('stack'), context.physicalIdFor('stack'), context,
          env=Environment(account=os.getenv('CDK_DEFAULT_ACCOUNT'), region=os.getenv('CDK_DEFAULT_REGION')))
 
 app.synth()
