@@ -11,13 +11,14 @@ from constructs import Construct
 
 
 class BgmContext():
-    def __init__(self, stage: str = 'dev'):
+    def __init__(self, stage: str = 'dev', webPackage: str = None, lambdaPackage: str = None):
         self.org = 'bgm'
         self.project = 'nerdrock'
         self.stage = stage
         self.logicalIdPrefix = ''.join([BgmConstruct.capitalize(x) for x in [self.org, self.project, self.stage]])
         self.physicalIdPrefix = f'{self.org.lower()}-{self.project.lower()}-{self.stage.lower()}'
-        self.lambdaPackage = f'./{self.physicalIdPrefix}-lambdas.zip'
+        self.lambdaPackage = lambdaPackage if lambdaPackage else f'./{self.physicalIdPrefix}-lambdas.zip'
+        self.webPackage = webPackage if webPackage else f'./{self.physicalIdPrefix}-web.zip'
 
     def logicalIdFor(self, id: str):
         return f'{self.logicalIdPrefix}{BgmConstruct.capitalize(id)}'

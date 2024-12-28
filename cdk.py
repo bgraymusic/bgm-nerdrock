@@ -27,14 +27,16 @@ class CdkStack(Stack):
         web.deployWebSite(distribution=distribution.distribution)
 
 
-app = App()
+app: App = App()
 stage = app.node.try_get_context('stage')
 # Avoid accidentally deploying anywhere if stage has not been explicitly passed via --context stage=xxxx
 if not stage:
     print('Stage must be explicitly passed via `--context stage=xxxx`', file=sys.stderr)
     sys.exit(-1)
 
-context: BgmContext = BgmContext(stage)
+webPackage = app.node.try_get_context('webPackage')
+lambdaPackage = app.node.try_get_context('lambdaPackage')
+context: BgmContext = BgmContext(stage, webPackage, lambdaPackage)
 for tag, val in context.getTags().items():
     Tags.of(app).add(tag, val)
 

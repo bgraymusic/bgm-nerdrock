@@ -9,6 +9,6 @@ pip install --upgrade pip
 pip install --platform manylinux1_x86_64 --platform manylinux2014_x86_64 --only-binary=:all: --upgrade . -t pkg
 deactivate
 cd pkg
-zip -qr ../bgm-nerdrock-experimental-lambdas *
+zip -qr ../$1-lambdas *
 cd ..
 # rm -rf pkg

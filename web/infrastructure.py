@@ -1,4 +1,3 @@
-import os
 from aws_cdk import (
   RemovalPolicy,
   aws_s3 as S3, aws_s3_deployment as S3Deploy,
@@ -20,9 +19,6 @@ class WebConstruct(BgmConstruct):
             public_read_access=True, removal_policy=RemovalPolicy.DESTROY)
 
     def deployWebSite(self, distribution: CloudFront.IDistribution):
-        # Zip contents of the web directory - using zipfile is absurdly complicated for what we need to do here
-        os.system('zip -qr web.zip web/*')
-
         # Deploy Website to Bucket
         S3Deploy.BucketDeployment(
             self, 'Deploy', destination_bucket=self.website_bucket,
