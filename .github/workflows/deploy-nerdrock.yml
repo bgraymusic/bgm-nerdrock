@@ -31,68 +31,74 @@ jobs:
     - name: Run tests
       run: bin/test_api.sh
 
-  prepare-web-deployment-package:
-    runs-on: ubuntu-latest
-    outputs:
-      web-package: ${{ steps.create-web-package.outputs.pkg }}
+#   prepare-web-deployment-package:
+#     runs-on: ubuntu-latest
+#     outputs:
+#       web-package: ${{ steps.create-web-package.outputs.pkg }}
 
-    steps:
-    - name: Checkout Website
-      uses: actions/checkout@v4
-      with:
-        sparse-checkout: |
-          web
-          bin
+#     steps:
+#     - name: Checkout Website
+#       uses: actions/checkout@v4
+#       with:
+#         sparse-checkout: |
+#           web
+#           bin
 
-    - name: Run package creation script
-      id: create-web-package
-      run: |
-        bin/create_web_package.sh ${{ env.ORG }}-${{ env.PROJECT }}-${{ env.STAGE }}
-        echo "pkg=${{ env.ORG }}-${{ env.PROJECT }}-${{ env.STAGE }}-web.zip" >> "$GITHUB_OUTPUT"
+#     - name: Run package creation script
+#       id: create-web-package
+#       run: |
+#         bin/create_web_package.sh ${{ env.ORG }}-${{ env.PROJECT }}-${{ env.STAGE }}
+#         echo "pkg=${{ env.ORG }}-${{ env.PROJECT }}-${{ env.STAGE }}-web.zip" >> "$GITHUB_OUTPUT"
 
-  prepare-lambda-deployment-package:
-    runs-on: ubuntu-latest
-    outputs:
-      lambda-package: ${{ steps.create-lambda-package.outputs.pkg }}
+#   prepare-lambda-deployment-package:
+#     runs-on: ubuntu-latest
+#     outputs:
+#       lambda-package: ${{ steps.create-lambda-package.outputs.pkg }}
 
-    steps:
-    - name: Checkout Lambda Code
-      uses: actions/checkout@v4
-      with:
-        sparse-checkout: |
-          api
-          bin
+#     steps:
+#     - name: Checkout Lambda Code
+#       uses: actions/checkout@v4
+#       with:
+#         sparse-checkout: |
+#           api
+#           bin
 
-    - name: Configure AWS Credentials
-      uses: aws-actions/configure-aws-credentials@v4
-      with:
-        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-        aws-region: us-east-1
+#     - name: Configure AWS Credentials
+#       uses: aws-actions/configure-aws-credentials@v4
+#       with:
+#         aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+#         aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+#         aws-region: us-east-1
 
-    - name: Setup Python
-      uses: actions/setup-python@v5
-      with:
-        python-version: '3.13'
+#     - name: Setup Python
+#       uses: actions/setup-python@v5
+#       with:
+#         python-version: '3.13'
 
-    - name: Run package creation script
-      id: create-lambda-package
-      run: |
-        bin/create_lambda_package.sh ${{ env.ORG }}-${{ env.PROJECT }}-${{ env.STAGE }}
-        echo "pkg=${{ env.ORG }}-${{ env.PROJECT }}-${{ env.STAGE }}-lambdas.zip" >> "$GITHUB_OUTPUT"
+#     - name: Run package creation script
+#       id: create-lambda-package
+#       run: |
+#         bin/create_lambda_package.sh ${{ env.ORG }}-${{ env.PROJECT }}-${{ env.STAGE }}
+#         echo "pkg=${{ env.ORG }}-${{ env.PROJECT }}-${{ env.STAGE }}-lambdas.zip" >> "$GITHUB_OUTPUT"
 
   deploy:
     runs-on: ubuntu-latest
-    needs: [test-api, prepare-web-deployment-package, prepare-lambda-deployment-package]
+    needs: [test-api]
 
     steps:
-    - name: Checkout CDK Code from Api, Db, and Web Directories
+    - name: Checkout Everything Needed for Web, API, and CDK
       uses: actions/checkout@v4
       with:
         sparse-checkout: |
           api
           db
           web
+          bin
+
+    - name: Setup Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.13'
 
     - name: Configure AWS Credentials
       uses: aws-actions/configure-aws-credentials@v4
@@ -101,10 +107,17 @@ jobs:
         aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
         aws-region: us-east-1
 
-    - name: Setup Python
-      uses: actions/setup-python@v5
-      with:
-        python-version: '3.13'
+    - name: Run Web Package Creation Script
+      id: create-web-package
+      run: |
+        bin/create_web_package.sh ${{ env.ORG }}-${{ env.PROJECT }}-${{ env.STAGE }}
+        echo "pkg=${{ env.ORG }}-${{ env.PROJECT }}-${{ env.STAGE }}-web.zip" >> "$GITHUB_OUTPUT"
+
+    - name: Run Lambda Package Creation Script
+      id: create-lambda-package
+      run: |
+        bin/create_lambda_package.sh ${{ env.ORG }}-${{ env.PROJECT }}-${{ env.STAGE }}
+        echo "pkg=${{ env.ORG }}-${{ env.PROJECT }}-${{ env.STAGE }}-lambdas.zip" >> "$GITHUB_OUTPUT"
 
     - name: Setup Deployment Tools
       run: |
@@ -115,5 +128,5 @@ jobs:
       run: >
         cdk deploy
         --context stage=${{ env.STAGE }}
-        --context webPackage=${{ needs.prepare-web-deployment-package.outputs.web-package }}
-        --context lambdaPackage=${{ needs.prepare-lambda-deployment-package.outputs.lambda-package }}
+        --context webPackage=${{ steps.create-web-package.outputs.pkg }}
+        --context lambdaPackage=${{ steps.create-lambda-package.outputs.pkg }}
