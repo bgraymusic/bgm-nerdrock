@@ -9,6 +9,7 @@ eggs/
 .eggs/
 lib64/
 parts/
+pkg/
 sdist/
 var/
 *.egg-info/
@@ -19,6 +20,8 @@ node_modules
 .coveragerc.swp
 htmlcov
 .venv
+*-web.zip
+*-lambdas.zip
 
 # Serverless directories
 .serverless
