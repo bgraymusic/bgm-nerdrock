@@ -143,6 +143,11 @@ jobs:
 
     - name: Deploy Nerdrock
       run: >
+        cdk bootstrap
+        --context stage=${{ env.STAGE }}
+        --context webPackage=${{ needs.prepare-web-deployment-package.outputs.web-package-file }}
+        --context lambdaPackage=${{ needs.prepare-lambda-deployment-package.outputs.lambda-package-file }}
+
         cdk deploy
         --context stage=${{ env.STAGE }}
         --context webPackage=${{ needs.prepare-web-deployment-package.outputs.web-package-file }}
