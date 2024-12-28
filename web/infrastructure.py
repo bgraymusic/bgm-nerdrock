@@ -18,9 +18,9 @@ class WebConstruct(BgmConstruct):
             block_public_access=S3.BlockPublicAccess(),  # counterintuitively allows public access
             public_read_access=True, removal_policy=RemovalPolicy.DESTROY)
 
-    def deployWebSite(self, distribution: CloudFront.IDistribution):
+    def deployWebSite(self, distribution: CloudFront.IDistribution, context: BgmContext):
         # Deploy Website to Bucket
         S3Deploy.BucketDeployment(
             self, 'Deploy', destination_bucket=self.website_bucket,
-            sources=[S3Deploy.Source.asset(f'{self.projectDirectory}/web.zip')],
+            sources=[S3Deploy.Source.asset(context.webPackage)],
             distribution=distribution, extract=True)

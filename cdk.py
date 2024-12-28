@@ -24,7 +24,7 @@ class CdkStack(Stack):
         distribution = DistributionConstruct(
             self, id=context.logicalIdFor('distro'),
             stage=context.stage, bucket=web.website_bucket, api=api.restApi)
-        web.deployWebSite(distribution=distribution.distribution)
+        web.deployWebSite(distribution=distribution.distribution, context=context)
 
 
 app: App = App()
