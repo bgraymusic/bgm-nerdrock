@@ -31,69 +31,84 @@ jobs:
     - name: Run tests
       run: bin/test_api.sh
 
-#   prepare-web-deployment-package:
-#     runs-on: ubuntu-latest
-#     outputs:
-#       web-package: ${{ steps.create-web-package.outputs.pkg }}
+  prepare-web-deployment-package:
+    runs-on: ubuntu-latest
+    outputs:
+      web-package-artifact-id: ${{ steps.upload-web-package-artifact.outputs.artifact-id}}
+      web-package-file: ${{ steps.create-web-package.outputs.pkg }}
 
-#     steps:
-#     - name: Checkout Website
-#       uses: actions/checkout@v4
-#       with:
-#         sparse-checkout: |
-#           web
-#           bin
+    steps:
+    - name: Checkout Website
+      uses: actions/checkout@v4
+      with:
+        sparse-checkout: |
+          web
+          bin
 
-#     - name: Run package creation script
-#       id: create-web-package
-#       run: |
-#         bin/create_web_package.sh ${{ env.ORG }}-${{ env.PROJECT }}-${{ env.STAGE }}
-#         echo "pkg=${{ env.ORG }}-${{ env.PROJECT }}-${{ env.STAGE }}-web.zip" >> "$GITHUB_OUTPUT"
+    - name: Run package creation script
+      id: create-web-package
+      run: |
+        bin/create_web_package.sh ${{ env.ORG }}-${{ env.PROJECT }}-${{ env.STAGE }}
+        echo "pkg=${{ env.ORG }}-${{ env.PROJECT }}-${{ env.STAGE }}-web.zip" >> "$GITHUB_OUTPUT"
 
-#   prepare-lambda-deployment-package:
-#     runs-on: ubuntu-latest
-#     outputs:
-#       lambda-package: ${{ steps.create-lambda-package.outputs.pkg }}
+    - name: Upload Web Package Artifact
+      id: upload-web-package-artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: web-package-artifact
+        path: ${{ steps.create-web-package.outputs.pkg }}
 
-#     steps:
-#     - name: Checkout Lambda Code
-#       uses: actions/checkout@v4
-#       with:
-#         sparse-checkout: |
-#           api
-#           bin
+  prepare-lambda-deployment-package:
+    runs-on: ubuntu-latest
+    outputs:
+      lambda-package-artifact-id: ${{ steps.upload-lambda-package-artifact.outputs.artifact-id}}
+      lambda-package-file: ${{ steps.create-lambda-package.outputs.pkg }}
 
-#     - name: Configure AWS Credentials
-#       uses: aws-actions/configure-aws-credentials@v4
-#       with:
-#         aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-#         aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-#         aws-region: us-east-1
+    steps:
+    - name: Checkout Lambda Code
+      uses: actions/checkout@v4
+      with:
+        sparse-checkout: |
+          api
+          bin
 
-#     - name: Setup Python
-#       uses: actions/setup-python@v5
-#       with:
-#         python-version: '3.13'
+    - name: Configure AWS Credentials
+      uses: aws-actions/configure-aws-credentials@v4
+      with:
+        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        aws-region: us-east-1
 
-#     - name: Run package creation script
-#       id: create-lambda-package
-#       run: |
-#         bin/create_lambda_package.sh ${{ env.ORG }}-${{ env.PROJECT }}-${{ env.STAGE }}
-#         echo "pkg=${{ env.ORG }}-${{ env.PROJECT }}-${{ env.STAGE }}-lambdas.zip" >> "$GITHUB_OUTPUT"
+    - name: Setup Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.13'
+
+    - name: Run package creation script
+      id: create-lambda-package
+      run: |
+        bin/create_lambda_package.sh ${{ env.ORG }}-${{ env.PROJECT }}-${{ env.STAGE }}
+        echo "pkg=${{ env.ORG }}-${{ env.PROJECT }}-${{ env.STAGE }}-lambdas.zip" >> "$GITHUB_OUTPUT"
+
+    - name: Upload Lambda Package Artifact
+      id: upload-lambda-package-artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: lambda-package-artifact
+        path: ${{ steps.create-lambda-package.outputs.pkg }}
 
   deploy:
     runs-on: ubuntu-latest
-    needs: [test-api]
+    needs: [test-api, prepare-web-deployment-package, prepare-lambda-deployment-package]
 
     steps:
-    - name: Checkout Everything Needed for Web, API, and CDK
+    - name: Checkout Everything Needed for CDK
       uses: actions/checkout@v4
       with:
         sparse-checkout: |
           api
           db
           web
-          bin
 
     - name: Setup Python
       uses: actions/setup-python@v5
@@ -107,26 +122,26 @@ jobs:
         aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
         aws-region: us-east-1
 
-    - name: Run Web Package Creation Script
-      id: create-web-package
-      run: |
-        bin/create_web_package.sh ${{ env.ORG }}-${{ env.PROJECT }}-${{ env.STAGE }}
-        echo "pkg=${{ env.ORG }}-${{ env.PROJECT }}-${{ env.STAGE }}-web.zip" >> "$GITHUB_OUTPUT"
-
-    - name: Run Lambda Package Creation Script
-      id: create-lambda-package
-      run: |
-        bin/create_lambda_package.sh ${{ env.ORG }}-${{ env.PROJECT }}-${{ env.STAGE }}
-        echo "pkg=${{ env.ORG }}-${{ env.PROJECT }}-${{ env.STAGE }}-lambdas.zip" >> "$GITHUB_OUTPUT"
-
     - name: Setup Deployment Tools
       run: |
         npm install -g aws-cdk
         pip install '.[cdk]'
 
+    - name: Download Web Package Artifact
+      uses: actions/download-artifact@v4
+      with:
+        name: ${{ needs.prepare-web-deployment-package.outputs.web-package-artifact-id }}
+        path: ${{ needs.prepare-web-deployment-package.outputs.web-package-file }}
+
+    - name: Download Lambda Package Artifact
+      uses: actions/download-artifact@v4
+      with:
+        name: ${{ needs.prepare-lambda-deployment-package.outputs.lambda-package-artifact-id }}
+        path: ${{ needs.prepare-lambda-deployment-package.outputs.lambda-package-file }}
+
     - name: Deploy Nerdrock
       run: >
         cdk deploy
         --context stage=${{ env.STAGE }}
-        --context webPackage=${{ steps.create-web-package.outputs.pkg }}
-        --context lambdaPackage=${{ steps.create-lambda-package.outputs.pkg }}
+        --context webPackage=${{ needs.prepare-web-deployment-package.outputs.web-package-file }}
+        --context lambdaPackage=${{ needs.prepare-lambda-deployment-package.outputs.lambda-package-file }}
