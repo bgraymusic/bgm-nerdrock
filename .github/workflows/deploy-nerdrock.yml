@@ -34,7 +34,7 @@ jobs:
   prepare-web-deployment-package:
     runs-on: ubuntu-latest
     outputs:
-      web-package-artifact-id: ${{ steps.upload-web-package-artifact.outputs.artifact-id}}
+      web-package-artifact-key: ${{ steps.create-web-package.outputs.key }}
       web-package-file: ${{ steps.create-web-package.outputs.pkg }}
 
     steps:
@@ -49,19 +49,20 @@ jobs:
       id: create-web-package
       run: |
         bin/create_web_package.sh ${{ env.ORG }}-${{ env.PROJECT }}-${{ env.STAGE }}
+        echo "key=${{ env.ORG }}-${{ env.PROJECT }}-${{ env.STAGE }}-web-pkg" >> "$GITHUB_OUTPUT"
         echo "pkg=${{ env.ORG }}-${{ env.PROJECT }}-${{ env.STAGE }}-web.zip" >> "$GITHUB_OUTPUT"
 
     - name: Upload Web Package Artifact
       id: upload-web-package-artifact
       uses: actions/upload-artifact@v4
       with:
-        name: web-package-artifact
+        name: ${{ steps.create-web-package.outputs.key }}
         path: ${{ steps.create-web-package.outputs.pkg }}
 
   prepare-lambda-deployment-package:
     runs-on: ubuntu-latest
     outputs:
-      lambda-package-artifact-id: ${{ steps.upload-lambda-package-artifact.outputs.artifact-id}}
+      lambda-package-artifact-key: ${{ steps.create-lambda-package.outputs.key }}
       lambda-package-file: ${{ steps.create-lambda-package.outputs.pkg }}
 
     steps:
@@ -88,13 +89,14 @@ jobs:
       id: create-lambda-package
       run: |
         bin/create_lambda_package.sh ${{ env.ORG }}-${{ env.PROJECT }}-${{ env.STAGE }}
+        echo "key=${{ env.ORG }}-${{ env.PROJECT }}-${{ env.STAGE }}-lambdas-pkg" >> "$GITHUB_OUTPUT"
         echo "pkg=${{ env.ORG }}-${{ env.PROJECT }}-${{ env.STAGE }}-lambdas.zip" >> "$GITHUB_OUTPUT"
 
     - name: Upload Lambda Package Artifact
       id: upload-lambda-package-artifact
       uses: actions/upload-artifact@v4
       with:
-        name: lambda-package-artifact
+        name: ${{ steps.create-lambda-package.outputs.key }}
         path: ${{ steps.create-lambda-package.outputs.pkg }}
 
   deploy:
@@ -130,13 +132,13 @@ jobs:
     - name: Download Web Package Artifact
       uses: actions/download-artifact@v4
       with:
-        name: ${{ needs.prepare-web-deployment-package.outputs.web-package-artifact-id }}
+        name: ${{ needs.prepare-web-deployment-package.outputs.web-package-artifact-key }}
         path: ${{ needs.prepare-web-deployment-package.outputs.web-package-file }}
 
     - name: Download Lambda Package Artifact
       uses: actions/download-artifact@v4
       with:
-        name: ${{ needs.prepare-lambda-deployment-package.outputs.lambda-package-artifact-id }}
+        name: ${{ needs.prepare-lambda-deployment-package.outputs.lambda-package-artifact-key }}
         path: ${{ needs.prepare-lambda-deployment-package.outputs.lambda-package-file }}
 
     - name: Deploy Nerdrock
