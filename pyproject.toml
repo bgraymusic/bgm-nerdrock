@@ -45,7 +45,7 @@ packages = [
 ]
 
 [tool.setuptools.package-data]
-"*" = ["*.yml"]
+"*" = ["*.yml", "*.json"]
 
 [tool.setuptools.exclude-package-data]
 tests = ["*test*"]
