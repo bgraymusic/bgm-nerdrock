@@ -148,7 +148,7 @@ jobs:
         --context webPackage=${{ needs.prepare-web-deployment-package.outputs.web-package-file }}
         --context lambdaPackage=${{ needs.prepare-lambda-deployment-package.outputs.lambda-package-file }}
 
-        cdk deploy
+        cdk deploy --require-approval never
         --context stage=${{ env.STAGE }}
         --context webPackage=${{ needs.prepare-web-deployment-package.outputs.web-package-file }}
         --context lambdaPackage=${{ needs.prepare-lambda-deployment-package.outputs.lambda-package-file }}
