@@ -6,7 +6,7 @@ aws:
   trackTable: trackinfo
 
 bandcamp:
-  bcApiUrl: http://api.bandcamp.com/api
+  bcApiUrl: https://api.bandcamp.com/api
   bcDiscographyPath: /band/3/discography
   bcAlbumPath: /album/2/info
   bcTrackPath: /track/3/info
