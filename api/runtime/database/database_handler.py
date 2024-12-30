@@ -15,8 +15,8 @@ class DatabaseHandler(HandlerBase):
         try:
             self.service.populate()
             return DatabaseHandler.Result('Database refreshed')
-        except Exception:
-            Log.get().exception("handlers.handle_refresh_database")
+        except Exception as e:
+            Log.get().exception("database_handler.handle", exc_info=e)
             raise InternalError()
 
     @classmethod

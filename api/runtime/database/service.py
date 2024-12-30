@@ -17,9 +17,9 @@ class DatabaseService:
                  track_table: TableResource = None,
                  bandcamp: Bandcamp = None):
         self.album_table = album_table if album_table else \
-            boto3.resource('dynamodb').Table(f'{os.getenv("stackName")}-{Config.get()["aws"]["albumTable"]}')
+            boto3.resource('dynamodb').Table(f'{os.getenv("tablePrefix")}-{Config.get()["aws"]["albumTable"]}')
         self.track_table = track_table if track_table else \
-            boto3.resource('dynamodb').Table(f'{os.getenv("stackName")}-{Config.get()["aws"]["trackTable"]}')
+            boto3.resource('dynamodb').Table(f'{os.getenv("tablePrefix")}-{Config.get()["aws"]["trackTable"]}')
         self.bandcamp = bandcamp if bandcamp else Bandcamp()
 
         with open(os.getenv('trackInfo', f'{pathlib.Path(__file__).parent}/track_info.yml')) as track_info_config_file:
@@ -57,14 +57,12 @@ class DatabaseService:
 
                 for track in album_data['tracks']:
                     if track['track_id'] in self.track_info:
-                        info = self.track_info[track['track_id']]
-                        track.update(info)
+                        track.update(self.track_info[track['track_id']])
 
                 with self.track_table.batch_writer() as track_batch:
                     for track in album_data['tracks']:
                         track_batch.put_item(Item=track)
 
-                # album_data.pop('tracks')
                 self.album_table.put_item(Item=album_data.copy())
 
     def queryAlbum(self, album_id: int):

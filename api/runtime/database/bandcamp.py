@@ -1,7 +1,6 @@
 from decimal import Decimal
 import json
-import requests
-from requests import Response
+import urllib.request
 from ..config import Config
 
 
@@ -19,7 +18,9 @@ class Bandcamp:
         payload = {**{'key': Config.get()['bandcamp']['bcKey']}, **{'track_id': track_id}}
         return self.execute_bc_api(Config.get()['bandcamp']['bcTrackPath'], payload)
 
-    def execute_bc_api(self, path, payload):
-        response: Response = requests.get(Config.get()['bandcamp']['bcApiUrl'] + path, payload)
-        response.raise_for_status()
-        return json.loads(response.text, parse_float=Decimal)
+    def execute_bc_api(self, path, payload: dict):
+        url = f'{Config.get()['bandcamp']['bcApiUrl']}{path}?'
+        for key, value in payload.items():
+            url = f'{url}{key}={value}&'
+        with urllib.request.urlopen(url) as response:
+            return json.loads(response.read().decode('utf-8'), parse_float=Decimal)
