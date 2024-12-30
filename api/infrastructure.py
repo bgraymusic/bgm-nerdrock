@@ -1,11 +1,14 @@
 from typing import List
 
+from aws_cdk import Aws, Duration
 from aws_cdk.aws_apigateway import (
     RestApi, StageOptions, Resource,
     LambdaIntegration, PassthroughBehavior,
     Method, MethodOptions, MethodResponse, IntegrationResponse
 )
+from aws_cdk.aws_iam import Role, ManagedPolicy, ServicePrincipal
 from aws_cdk.aws_lambda import Function, Runtime, Code
+from aws_cdk.aws_logs import LogGroup
 from constructs import Construct
 from infrastructure import BgmConstruct, BgmContext
 from api import HandlerBase
@@ -25,15 +28,26 @@ class APIConstruct(BgmConstruct):
         super().__init__(scope, id)
 
         self.restApi, apiResourceRoot = self.createApiRoot(context)
+        lambdaRole: Role = self.createLambdaRole(context)
 
         # Create lambda functions
         for handlerClass in HandlerBase.__subclasses__():
             description = handlerClass.describe()
+            logGroup = LogGroup(self, f'{self.capitalize(description.name)}LogGroup',
+                                log_group_name=context.physicalIdFor(f'{description.name}-log-group'))
             function = Function(
-                self, f'{self.capitalize(description.name)}Lambda',
-                function_name=context.physicalIdFor(description.name),
+                self, f'{self.capitalize(description.name)}Lambda', role=lambdaRole,
+                function_name=context.physicalIdFor(description.name), timeout=Duration.seconds(15),
                 handler=f'{handlerClass.__module__}.handle', runtime=Runtime.PYTHON_3_13,
-                code=Code.from_asset(context.lambdaPackage, deploy_time=True)
+                code=Code.from_asset(context.lambdaPackage, deploy_time=True),
+                environment={
+                    'stackName': Aws.STACK_NAME,
+                    'log_level': 'DEBUG',
+                    'config': 'api/config.yml',
+                    'secretsBucket': f'{context.org}-{context.project}-secrets',
+                    'secretsFile': 'secrets.yml',
+                    'tablePrefix': f'{context.org}-{context.project}-{context.stage}'
+                }, log_group=logGroup
             )
 
             parent = apiResourceRoot
@@ -58,11 +72,22 @@ class APIConstruct(BgmConstruct):
                 parent = resource
 
     def createApiRoot(self, context: BgmContext):
-        restApi = RestApi(
+        restApi: RestApi = RestApi(
             self, 'RestApi', rest_api_name=context.physicalIdFor('api'),
             deploy_options=StageOptions(stage_name=context.stage))
-        resourceRoot = Resource(self, 'ResourceRoot', parent=restApi.root, path_part='api')
+        resourceRoot: Resource = Resource(self, 'ResourceRoot', parent=restApi.root, path_part='api')
         return restApi, resourceRoot
+
+    def createLambdaRole(self, context) -> Role:
+        return Role(self, context.logicalIdFor('lambdaRole'),
+                    assumed_by=ServicePrincipal('lambda.amazonaws.com'),
+                    role_name=context.physicalIdFor('lambda-role'),
+                    managed_policies=[
+                        ManagedPolicy.from_aws_managed_policy_name('service-role/AWSLambdaBasicExecutionRole'),
+                        ManagedPolicy.from_aws_managed_policy_name('service-role/AWSLambdaVPCAccessExecutionRole'),
+                        ManagedPolicy.from_aws_managed_policy_name('AmazonDynamoDBFullAccess'),
+                        ManagedPolicy.from_aws_managed_policy_name('AmazonS3ReadOnlyAccess')
+                    ])
 
     def methodResponses(self, errors: List[Exception]) -> List[MethodResponse]:
         result = [MethodResponse(status_code='200', response_parameters={'method.response.header.Content-Type': True})]
