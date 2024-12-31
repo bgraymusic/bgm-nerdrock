@@ -42,20 +42,20 @@ class BgmConstruct(Construct):
 
 
 class DistributionConstruct(BgmConstruct):
-    def __init__(self, scope: Construct, id: str, stage: str, bucket: Bucket, api: RestApi) -> None:
+    def __init__(self, scope: Construct, id: str, context: BgmContext, bucket: Bucket, api: RestApi) -> None:
         super().__init__(scope, id)
         self.distribution = Distribution(
             self, 'RestApiDistribution', enabled=True, http_version=HttpVersion.HTTP2_AND_3,
             price_class=PriceClass.PRICE_CLASS_ALL, default_root_object='index.html',
             default_behavior=BehaviorOptions(
-                origin=S3StaticWebsiteOrigin(bucket),
+                origin=S3StaticWebsiteOrigin(bucket, origin_id=context.physicalIdFor('website-origin')),
                 allowed_methods=AllowedMethods.ALLOW_GET_HEAD_OPTIONS,
                 cached_methods=CachedMethods.CACHE_GET_HEAD_OPTIONS,
                 compress=True,
                 viewer_protocol_policy=ViewerProtocolPolicy.REDIRECT_TO_HTTPS),
-            additional_behaviors={stage: BehaviorOptions(
-                origin=RestApiOrigin(api),
+            additional_behaviors={'api/*': BehaviorOptions(
+                origin=RestApiOrigin(api, origin_id=context.physicalIdFor('api-origin')),
                 allowed_methods=AllowedMethods.ALLOW_GET_HEAD,
                 cached_methods=CachedMethods.CACHE_GET_HEAD,
-                viewer_protocol_policy=ViewerProtocolPolicy.REDIRECT_TO_HTTPS)
+                viewer_protocol_policy=ViewerProtocolPolicy.HTTPS_ONLY)
             })
