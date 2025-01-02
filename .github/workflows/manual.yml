@@ -1,0 +1,12 @@
+name: Env check
+
+on:
+  workflow_dispatch
+
+jobs:
+  print-pwd:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Print PWD
+      run: pwd
