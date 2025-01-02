@@ -10,3 +10,6 @@ jobs:
     steps:
     - name: Print PWD
       run: pwd
+
+    - name: Print env
+      run: env
