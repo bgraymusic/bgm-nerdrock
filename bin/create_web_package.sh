@@ -1,4 +1,4 @@
 #!/bin/bash
 
-echo "zip -qr $1-web.zip web/*"
-zip -qr $1-web.zip web/*
+echo "zip -qr bgm-nerdrock-$1-web.zip web/*"
+zip -qr bgm-nerdrock-$1-web.zip web/*

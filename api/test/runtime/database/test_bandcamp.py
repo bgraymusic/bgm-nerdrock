@@ -18,15 +18,17 @@ def setup():
 
 def test_get_band(mocker: MockerFixture):
     setup()
-    response: Response = mocker.MagicMock()
-    response.raise_for_status.return_value = None
-    response.text = open(f'{mock_data_dir}/{mock_band_info_file}').read()
-    mocker.patch('requests.get', return_value=response)
+    # response: Response = mocker.MagicMock()
+    # response.raise_for_status.return_value = None
+    # response.text = open(f'{mock_data_dir}/{mock_band_info_file}').read()
+    # mocker.patch('requests.get', return_value=response)
+    mock_response = mocker.patch('urllib.request.urlopen')
+    mock_response.read.return_value = b'{"discography":[{"band_id":47474747}]}'
     bc = Bandcamp()
 
     band_info: dict = bc.get_band_from_bc('47474747')
 
-    assert band_info['discography'][0]['band_id'] == valid_band_id
+    assert band_info['discography'][0]['band_id'] == 47474747
 
 
 def test_get_album(mocker: MockerFixture):
