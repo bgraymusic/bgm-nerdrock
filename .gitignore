@@ -19,7 +19,7 @@ node_modules
 .coverage
 .coveragerc.swp
 htmlcov
-.venv
+.venv*
 *-web.zip
 *-lambdas.zip
 
