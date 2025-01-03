@@ -13,8 +13,8 @@ class DatabaseHandler(HandlerBase):
 
     def handle(self, event, context):
         try:
-            self.service.populate()
-            return DatabaseHandler.Result('Database refreshed')
+            album_count = self.service.populate()
+            return DatabaseHandler.Result(f'Database refreshed with {album_count} albums')
         except Exception as e:
             Log.get().exception("database_handler.handle", exc_info=e)
             raise InternalError()

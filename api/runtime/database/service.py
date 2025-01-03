@@ -64,6 +64,7 @@ class DatabaseService:
                         track_batch.put_item(Item=track)
 
                 self.album_table.put_item(Item=album_data.copy())
+        return len(self.album_ids)
 
     def queryAlbum(self, album_id: int):
         return self.album_table.get_item(Key={'album_id': album_id})['Item']
