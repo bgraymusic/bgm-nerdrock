@@ -1,8 +1,7 @@
-from aws_cdk import (
-  RemovalPolicy,
-  aws_s3 as S3, aws_s3_deployment as S3Deploy,
-  aws_cloudfront as CloudFront
-)
+from aws_cdk import RemovalPolicy, CfnOutput
+from aws_cdk.aws_cloudfront import IDistribution
+from aws_cdk.aws_s3 import Bucket, BlockPublicAccess
+from aws_cdk.aws_s3_deployment import BucketDeployment, Source
 from constructs import Construct
 from infrastructure import BgmConstruct, BgmContext
 
@@ -12,16 +11,18 @@ class WebConstruct(BgmConstruct):
         super().__init__(scope, id)
 
         # Nerdrock Static Web Site Bucket
-        self.website_bucket = S3.Bucket(
+        self.website_bucket = Bucket(
             self, 'S3Bucket', bucket_name=context.physicalIdFor('web'),
+            removal_policy=RemovalPolicy.DESTROY, auto_delete_objects=True,
             website_index_document='index.html', website_error_document='error.html',
             # counterintuitively allows public access
-            block_public_access=S3.BlockPublicAccess(ignore_public_acls=True),
-            public_read_access=True, removal_policy=RemovalPolicy.DESTROY)
+            block_public_access=BlockPublicAccess(block_public_acls=True), public_read_access=True,
+        )
+        CfnOutput(self, 'Bucket', value=self.website_bucket.bucket_name)
 
-    def deployWebSite(self, distribution: CloudFront.IDistribution, context: BgmContext):
+    def deployWebSite(self, distribution: IDistribution, context: BgmContext):
         # Deploy Website to Bucket
-        S3Deploy.BucketDeployment(
+        BucketDeployment(
             self, 'Deploy', destination_bucket=self.website_bucket,
-            sources=[S3Deploy.Source.asset(context.webPackage)],
+            sources=[Source.asset(context.webPackage)],
             distribution=distribution, extract=True)

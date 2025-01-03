@@ -19,28 +19,33 @@ class CdkStack(Stack):
         self.context: BgmContext = context
         self.projectDirectory: pathlib.Path = pathlib.Path(__file__).parent
         DbConstruct(self, id=context.logicalIdFor('db'), context=context)
-        api = APIConstruct(self, id=context.logicalIdFor('api'), context=context)
-        web = WebConstruct(self, id=context.logicalIdFor('web'), context=context)
-        distribution = DistributionConstruct(
+        self.api = APIConstruct(self, id=context.logicalIdFor('api'), context=context)
+        self.web = WebConstruct(self, id=context.logicalIdFor('web'), context=context)
+        self.distribution = DistributionConstruct(
             self, id=context.logicalIdFor('distro'),
-            stage=context.stage, bucket=web.website_bucket, api=api.restApi)
-        web.deployWebSite(distribution=distribution.distribution, context=context)
+            context=context, bucket=self.web.website_bucket, api=self.api.restApi)
+        self.web.deployWebSite(distribution=self.distribution.distribution, context=context)
+
+    # Get rid of those appended hashes that ensure that no two logical IDs conflict. They make output keys
+    # hard to predict and clutter things up. If I fuck up and produce conflicts, the build will tell me.
+    def _allocate_logical_id(self, cfn_element):
+        return super()._allocate_logical_id(cfn_element)[:-8]
 
 
 app: App = App()
-stage = app.node.try_get_context('stage')
-# Avoid accidentally deploying anywhere if stage has not been explicitly passed via --context stage=xxxx
-if not stage:
-    print('Stage must be explicitly passed via `--context stage=xxxx`', file=sys.stderr)
+envName = app.node.try_get_context('ENV')
+# Avoid accidentally deploying anywhere if the environment has not been explicitly passed via --context ENV=xxxx
+if not envName:
+    print('ENV must be explicitly passed via `--context ENV=xxxx`', file=sys.stderr)
     sys.exit(-1)
 
-webPackage = app.node.try_get_context('webPackage')
-lambdaPackage = app.node.try_get_context('lambdaPackage')
-context: BgmContext = BgmContext(stage, webPackage, lambdaPackage)
+webPackage = f'bgm-nerdrock-{envName}-web.zip'
+lambdaPackage = f'bgm-nerdrock-{envName}-lambdas.zip'
+context: BgmContext = BgmContext(envName, webPackage, lambdaPackage)
 for tag, val in context.getTags().items():
     Tags.of(app).add(tag, val)
 
-CdkStack(app, context.logicalIdFor('stack'), context.physicalIdFor('stack'), context,
-         env=Environment(account=os.getenv('CDK_DEFAULT_ACCOUNT'), region=os.getenv('CDK_DEFAULT_REGION')))
+stack = CdkStack(app, context.logicalIdFor('stack'), context.physicalIdFor('stack'), context,
+                 env=Environment(account=os.getenv('CDK_DEFAULT_ACCOUNT'), region=os.getenv('CDK_DEFAULT_REGION')))
 
 app.synth()
