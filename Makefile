@@ -17,12 +17,12 @@ LAMBDA_SRCS := pyproject.toml api/__init__.py api/config.yml \
 
 deploy: $(PREFIX)-web.zip $(PREFIX)-lambdas.zip
 	@echo "> Deploying stack $(STACK)…";\
-	$$(command -v unbuffer) cdk deploy --require-approval never --context ENV=$(ENV) 2>&1 | tee /dev/stderr | grep -q "AWS::DynamoDB::Table";\
+	$$(command -v unbuffer) cdk deploy --require-approval never --c ENV=$(ENV) 2>&1 | tee /dev/stderr | grep -q "AWS::DynamoDB::Table";\
 	if [ $$? == 0 ]; then\
 		echo "> Table changes found, finding the database refresh function…";\
-		function_name=$$(aws cloudformation describe-stacks \
-			--stack-name $(STACK) \
-			--query "Stacks[0].Outputs[?contains(OutputKey,'DatabaseLambdaName')].OutputValue" \
+		function_name=$$(aws cloudformation describe-stacks\
+			--stack-name $(STACK)\
+			--query "Stacks[0].Outputs[?contains(OutputKey,'DatabaseLambdaName')].OutputValue"\
 			--output text);\
 		echo "> Found function $${function_name}, refreshing data from Bandcamp…";\
 		aws lambda invoke --function-name $$function_name /dev/stdout;\
@@ -63,6 +63,23 @@ $(PREFIX)-lambdas.zip: $(LAMBDA_SRCS)
 
 .PHONY: lambdas
 lambdas: $(PREFIX)-lambdas.zip
+
+bootstrap:
+	python3 -m venv .venv_bootstrap;\
+	source .venv_bootstrap/bin/activate;\
+	pip uninstall -y -r <(pip freeze);\
+	pip cache purge;\
+	pip install --upgrade pip;\
+	pip install '.[bootstrap,cdk]';\
+	cdk bootstrap;\
+	if [ $$(aws s3api list-buckets --query "Buckets[?Name=='$(ORG)-$(PROJECT)-secrets'] | length(@)") == 0]; then\
+		key=$$(python3 -c 'from cryptography.fernet import Fernet; print(Fernet.generate_key().decode("utf-8"))');\
+		printf "badges:\n\tencryptionKey: %s" "$$key" > secrets.yml;\
+		aws s3api create-bucket --bucket $(ORG)-$(PROJECT)-secrets;\
+		aws s3 cp secrets.yml s3://$(ORG)-$(PROJECT)-secrets/;\
+		rm secrets.yml;\
+	fi;\
+	deactivate
 
 clean:
 	rm -rf build *.egg-info dist pkg cdk.out *-web.zip *-lambdas.zip .venv*
