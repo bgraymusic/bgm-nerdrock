@@ -20,11 +20,12 @@ def setup():
 def test_success(mocker: MockerFixture):
     setup()
     service: DatabaseService = mocker.MagicMock()
+    service.populate.return_value = 47
 
     result: DatabaseHandler.Result = handle(None, None, handler=DatabaseHandler(service=service))
 
     call.service.populate.called()
-    assert result['message'] == 'Database refreshed'
+    assert result['message'] == 'Database refreshed with 47 albums'
 
 
 def test_exception(mocker: MockerFixture):
