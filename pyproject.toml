@@ -57,7 +57,7 @@ tests = ["*test*"]
 [tool.pytest.ini_options]
 minversion = "8.0"
 required_plugins = ["pytest-cov", "pytest-flake8"]
-addopts = "--import-mode=importlib --cov='api' --flake8"
+addopts = "--cache-clear --import-mode=importlib --cov='api' --flake8"
 pythonpath = "."
 testpaths = ["api/test"]
 python_files = "test_*.py"
