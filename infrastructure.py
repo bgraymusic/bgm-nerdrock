@@ -1,6 +1,7 @@
 import pathlib
 import re
 
+from aws_cdk import CfnOutput
 from aws_cdk.aws_s3 import Bucket
 from aws_cdk.aws_apigateway import RestApi
 from aws_cdk.aws_cloudfront import Distribution, BehaviorOptions
@@ -51,3 +52,4 @@ class DistributionConstruct(BgmConstruct):
             additional_behaviors={'api/*': BehaviorOptions(
                 origin=RestApiOrigin(api, origin_id=context.physicalIdFor('api-origin')))}
         )
+        CfnOutput(self, 'Distribution', value=self.distribution.domain_name)
