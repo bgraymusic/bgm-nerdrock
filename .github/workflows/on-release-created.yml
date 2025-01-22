@@ -1,3 +1,5 @@
+name: On Release Created
+
 on:
   release:
     types: [published]
