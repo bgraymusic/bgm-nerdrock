@@ -9,7 +9,7 @@ defaults:
 
 jobs:
 
-  deploy-nerdrock:
+  undeploy-nerdrock:
     runs-on: ubuntu-latest
     if: github.ref_type == 'branch' # delete can be branches or tags; we want only branches
 
@@ -32,5 +32,5 @@ jobs:
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: us-east-1
 
-      - name: Deploy
+      - name: Undeploy
         run: make undeploy ENV=${{ github.event.ref }}
