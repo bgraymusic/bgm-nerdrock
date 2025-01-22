@@ -38,7 +38,7 @@ BG.NerdRock = class {
         $(document).tooltip();
         $('#bg-prefs-button').button({ icons: { primary: 'ui-icon-gear' }, text: false });
         $('.bg-top-level-tabs').tabs({ activate: function(event, ui) { BG.NerdRock.getInstance().saveState(); } });
-    	$('#bg-github').repo({ user: 'bgraymusic', name: 'bgm-nerdrock' });
+    	$('#bg-github').repo({ user: 'bgraymusic', name: 'bgm-nerdrock', branch: 'trunk' });
         $(window).bind('popstate', function(event) {
             // Ignore inital popstate that some browsers fire on page load
             var initialPop = !this.popped && location.href == this.initialURL;
