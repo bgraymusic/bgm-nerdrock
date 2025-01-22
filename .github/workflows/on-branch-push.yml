@@ -1,4 +1,4 @@
-name: On Branch Commit or Update
+name: On Dev Branch Push
 
 on:
   push:
