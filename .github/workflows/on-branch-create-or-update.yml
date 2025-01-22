@@ -1,7 +1,6 @@
 name: On Branch Commit or Update
 
 on:
-  create:
   push:
     branches-ignore:
       - trunk
