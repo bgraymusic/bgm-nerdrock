@@ -1,0 +1,51 @@
+on:
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: 'Release Tag to Rollback To'
+        required: true
+        type: string
+
+jobs:
+  go-no-go:
+    runs-on: ubuntu_latest
+    outputs:
+      go: ${{ steps.go-no-go.outputs.go }}
+
+    steps:
+      - id: go-no-go
+        run: |
+          if [ $(git tag -l "${{ inputs.tag }}") ]; then
+            echo "go=true" >> $GITHUB_OUTPUT;
+          else
+            echo "go=false" >> $GITHUB_OUTPUT;
+          fi
+
+  rollback:
+    runs-on: ubuntu_latest
+    needs: go-no-go
+    if: needs.go-no-go.outputs.go == 'true'
+
+    steps:
+      - name: Checkout Tag
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.tag }}
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+
+      - name: Install CDK CLI
+        run: npm install -g aws-cdk
+
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: us-east-1
+
+      - name: Deploy
+        run: make deploy ENV=prod
