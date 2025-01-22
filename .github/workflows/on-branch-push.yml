@@ -10,7 +10,7 @@ defaults:
     shell: bash -v {0}
 
 jobs:
-  job1:
+  deploy-nerdrock:
     runs-on: ubuntu-latest
 
     steps:
