@@ -15,6 +15,9 @@ jobs:
         with:
           python-version: '3.13'
 
+      - name: Install CDK CLI
+        run: npm install -g aws-cdk
+
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v4
         with:
@@ -23,4 +26,4 @@ jobs:
           aws-region: us-east-1
 
       - name: Deploy
-        run: make deploy env=prod
+        run: make deploy ENV=prod
