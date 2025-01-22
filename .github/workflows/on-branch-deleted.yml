@@ -1,4 +1,4 @@
-name: On Branch Delete
+name: On Branch Deleted
 
 on:
   delete # does not support filtering by type (branch), must do later
