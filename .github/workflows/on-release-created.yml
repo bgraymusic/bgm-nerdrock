@@ -1,32 +1,19 @@
-name: On Branch Commit or Update
-
 on:
-  create:
-  push:
-    branches-ignore:
-      - trunk
-
-defaults:
-  run:
-    shell: bash -v {0}
+  release:
+    types: [published]
 
 jobs:
-  job1:
+  deploy-to-prod:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout Branch
+      - name: Checkout
         uses: actions/checkout@v4
-        with:
-          ref: ${{ github.ref_name }}
 
       - name: Setup Python
         uses: actions/setup-python@v5
         with:
           python-version: '3.13'
-
-      - name: Install CDK CLI
-        run: npm install -g aws-cdk
 
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v4
@@ -36,4 +23,4 @@ jobs:
           aws-region: us-east-1
 
       - name: Deploy
-        run: make deploy ENV=${{ github.ref_name }}
+        run: make deploy env=prod
