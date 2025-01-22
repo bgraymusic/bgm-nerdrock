@@ -58,8 +58,12 @@ deploy: bootstrap
 
 undeploy: bootstrap
 	@$(call DO,Deleting stack $(STACK));\
-	cdk destroy -f -c ENV=$(ENV) --stack-name $(STACK);\
-	$(DONE)
+	$(call SETUP_VENV,cdk);\
+		$(call DO,Undeploying with ENV=$(ENV));$(ENDL);\
+		cdk destroy -f -c ENV=$(ENV) --stack-name $(STACK);\
+		$(DONE);\
+	$(call TEARDOWN_VENV,cdk);\
+	printf "$(TARGET)$(call SUCCESS,Undeployment complete.)\n"
 
 synth: bootstrap
 	@$(call DO,Synthesizing stack $(STACK));$(ENDL);\
