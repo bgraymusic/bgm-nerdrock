@@ -20,7 +20,7 @@ jobs:
     steps:
       - id: go-no-go
         run: |
-          if [[ ${{ github.event_name }} -eq push || (${{ github.event_name }} -eq pull_request && ${{ github.event.pull_request.merged }} -eq true) ]]; then
+          if [[ "${{ github.event_name }}" -eq "push" || ("${{ github.event_name }}" -eq "pull_request" && "${{ github.event.pull_request.merged }}" -eq "true") ]]; then
             echo "go=true" >> GITHUB_OUTPUT;
           else
             echo "go=false" >> GITHUB_OUTPUT;
