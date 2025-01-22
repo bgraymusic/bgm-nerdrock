@@ -50,7 +50,7 @@ deploy: bootstrap
 				--query "Stacks[0].Outputs[?contains(OutputKey,'DatabaseLambdaName')].OutputValue" --output text);\
 			$(DONE);\
 			$(call DO,Found function $${function_name}, refreshing data from Bandcamp);\
-			aws lambda invoke --function-name $$function_name 2> /dev/null;\
+			aws lambda invoke --function-name $$function_name /dev/stdout;\
 			$(DONE);\
 		fi;\
 	$(call TEARDOWN_VENV,cdk);\
