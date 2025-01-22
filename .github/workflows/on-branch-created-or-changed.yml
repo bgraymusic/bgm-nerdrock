@@ -1,4 +1,4 @@
-name: On Dev Branch Push
+name: On Dev Branch Created or Changed
 
 on:
   push:
