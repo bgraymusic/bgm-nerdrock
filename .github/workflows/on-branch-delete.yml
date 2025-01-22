@@ -1,0 +1,36 @@
+name: On Branch Delete
+
+on:
+  delete # does not support filtering by type (branch), must do later
+
+defaults:
+  run:
+    shell: bash -v {0}
+
+jobs:
+
+  deploy-nerdrock:
+    runs-on: ubuntu-latest
+    if: github.ref_type == 'branch' # delete can be branches or tags; we want only branches
+
+    steps:
+      - name: Checkout Branch
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+
+      - name: Install CDK CLI
+        run: npm install -g aws-cdk
+
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: us-east-1
+
+      - name: Deploy
+        run: make undeploy ENV=${{ github.event.ref }}
