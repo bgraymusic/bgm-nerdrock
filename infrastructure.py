@@ -62,6 +62,8 @@ class DistributionConstruct(BgmConstruct):
         )
         zone: HostedZone = HostedZone.from_hosted_zone_attributes(self, 'HostedZone',
             hosted_zone_id='Z0624588WF0W5XTXQC7U', zone_name='briangraymusic.com')
-        ARecord(self, 'ARecord', zone=zone, target=RecordTarget.from_alias(CloudFrontTarget(self.distribution)))
-        AaaaRecord(self, 'AaaaRecord', zone=zone, target=RecordTarget.from_alias(CloudFrontTarget(self.distribution)))
+        ARecord(self, 'ARecord', zone=zone, record_name=context.domain,
+                target=RecordTarget.from_alias(CloudFrontTarget(self.distribution)))
+        AaaaRecord(self, 'AaaaRecord', zone=zone, record_name=context.domain,
+                   target=RecordTarget.from_alias(CloudFrontTarget(self.distribution)))
         CfnOutput(self, 'Distribution', value=self.distribution.domain_name)
