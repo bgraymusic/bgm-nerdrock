@@ -64,7 +64,7 @@ class BadgesHandler(HandlerBase):
             ResourceDescription(
                 '{key}',
                 [MethodDescription(HTTPMethod.GET, [InvalidTokenError, InvalidKeyError, InternalError])])
-        ])
+        ], keepWarm=True)
 
 
 def handle(event, context, *, handler: BadgesHandler = None):

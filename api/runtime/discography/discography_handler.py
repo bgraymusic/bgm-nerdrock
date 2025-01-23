@@ -51,7 +51,7 @@ class DiscographyHandler(HandlerBase):
             ResourceDescription('{token}', [MethodDescription(HTTPMethod.GET, [
                 InvalidTokenError, InternalError
             ])])
-        ])
+        ], keepWarm=True)
 
 
 def handle(event, context, *, handler: DiscographyHandler = None):

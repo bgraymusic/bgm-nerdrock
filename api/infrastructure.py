@@ -12,7 +12,7 @@ from aws_cdk.aws_lambda import Function, Runtime, Code
 from aws_cdk.aws_logs import LogGroup
 from constructs import Construct
 from infrastructure import BgmConstruct, BgmContext
-from api import HandlerBase
+from api import HandlerBase, HandlerDescription
 
 
 class APIConstruct(BgmConstruct):
@@ -36,7 +36,7 @@ class APIConstruct(BgmConstruct):
 
         # Create lambda functions
         for handlerClass in HandlerBase.__subclasses__():
-            description = handlerClass.describe()
+            description: HandlerDescription = handlerClass.describe()
             logGroup = LogGroup(self, f'{self.capitalize(description.name)}LogGroup',
                                 log_group_name=context.physicalIdFor(f'{description.name}-log-group'),
                                 removal_policy=RemovalPolicy.DESTROY)
@@ -55,7 +55,7 @@ class APIConstruct(BgmConstruct):
                 }, log_group=logGroup
             )
             self.lambdas[description.name] = function
-            if keepWarm:
+            if keepWarm and description.keepWarm:
                 keepWarm.add_target(LambdaFunction(function, event=RuleTargetInput.from_object({
                     "keep_warm": True
                 })))

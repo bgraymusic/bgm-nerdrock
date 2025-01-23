@@ -16,9 +16,10 @@ class ResourceDescription:
 
 
 class HandlerDescription:
-    def __init__(self, name: str, resources: List[ResourceDescription] = [], errors: List[Exception] = []):
+    def __init__(self, name: str, resources: List[ResourceDescription] = [], errors: List[Exception] = [], keepWarm: bool = False):
         self.name: str = name
         self.resources: List[ResourceDescription] = resources
+        self.keepWarm = keepWarm
 
 
 class InvalidTokenError(Exception):
