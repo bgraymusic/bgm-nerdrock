@@ -6,9 +6,9 @@ ENV=sandbox
 PREFIX=$(ORG)-$(PROJECT)-$(ENV)
 STACK=$(PREFIX)-stack
 MIN_BOOTSTRAP_VER=25
-BOLD=$$([ -z $$TERM ] || tput bold)
-GREEN=$$([ -z $$TERM ] || tput setaf 2)
-NORMAL=$$([ -z $$TERM ] || tput sgr0)
+BOLD=$$([ -t 1 ] && tput bold)
+GREEN=$$([ -t 1 ] && tput setaf 2)
+NORMAL=$$([ -t 1 ] && tput sgr0)
 TARGET=$(BOLD)($@)> $(NORMAL)
 define DO
 	printf "$(TARGET)$1$2$3$4$5$6$7$8$9… "
