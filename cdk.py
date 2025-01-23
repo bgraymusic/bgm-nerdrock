@@ -34,6 +34,7 @@ class CdkStack(Stack):
 
 app: App = App()
 envName = app.node.try_get_context('ENV')
+certArn = app.node.try_get_context('CERT')
 # Avoid accidentally deploying anywhere if the environment has not been explicitly passed via --context ENV=xxxx
 if not envName:
     print('ENV must be explicitly passed via `--context ENV=xxxx`', file=sys.stderr)
@@ -41,7 +42,7 @@ if not envName:
 
 webPackage = f'bgm-nerdrock-{envName}-web.zip'
 lambdaPackage = f'bgm-nerdrock-{envName}-lambdas.zip'
-context: BgmContext = BgmContext(envName, webPackage, lambdaPackage)
+context: BgmContext = BgmContext(envName, webPackage, lambdaPackage, certArn)
 for tag, val in context.getTags().items():
     Tags.of(app).add(tag, val)
 

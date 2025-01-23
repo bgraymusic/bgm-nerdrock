@@ -5,6 +5,8 @@ from aws_cdk.aws_apigateway import (
     RestApi, Resource, LambdaIntegration, PassthroughBehavior,
     Method, MethodOptions, MethodResponse, IntegrationResponse
 )
+from aws_cdk.aws_events import Rule, Schedule, RuleTargetInput
+from aws_cdk.aws_events_targets import LambdaFunction
 from aws_cdk.aws_iam import Role, ManagedPolicy, ServicePrincipal
 from aws_cdk.aws_lambda import Function, Runtime, Code
 from aws_cdk.aws_logs import LogGroup
@@ -26,6 +28,8 @@ class APIConstruct(BgmConstruct):
     def __init__(self, scope: Construct, id: str, context: BgmContext):
         super().__init__(scope, id)
 
+        keepWarm = Rule(self, 'KeepWarm', schedule=Schedule.rate(Duration.minutes(5)),
+                        rule_name=context.physicalIdFor('keep-warm')) if context.prod else None
         self.restApi, apiResourceRoot = self.createApiRoot(context)
         lambdaRole: Role = self.createLambdaRole(context)
         self.lambdas = {}
@@ -51,6 +55,10 @@ class APIConstruct(BgmConstruct):
                 }, log_group=logGroup
             )
             self.lambdas[description.name] = function
+            if keepWarm:
+                keepWarm.add_target(LambdaFunction(function, event=RuleTargetInput.from_object({
+                    "keep_warm": True
+                })))
             CfnOutput(self, f'{self.capitalize(description.name)}LambdaName', value=function.function_name)
 
             parent = apiResourceRoot

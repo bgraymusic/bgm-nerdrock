@@ -6,9 +6,9 @@ ENV=sandbox
 PREFIX=$(ORG)-$(PROJECT)-$(ENV)
 STACK=$(PREFIX)-stack
 MIN_BOOTSTRAP_VER=25
-BOLD=$$(tput bold)
-GREEN=$$(tput setaf 2)
-NORMAL=$$(tput sgr0)
+BOLD=$$([ -z $$TERM ] || tput bold)
+GREEN=$$([ -z $$TERM ] || tput setaf 2)
+NORMAL=$$([ -z $$TERM ] || tput sgr0)
 TARGET=$(BOLD)($@)> $(NORMAL)
 define DO
 	printf "$(TARGET)$1$2$3$4$5$6$7$8$9… "
@@ -43,7 +43,8 @@ deploy: bootstrap
 	@$(call DO,Deploying stack $(STACK));$(ENDL);\
 	$(call SETUP_VENV,cdk);\
 		$(call DO,Deploying with ENV=$(ENV));$(ENDL);\
-		$$(command -v unbuffer) cdk deploy --require-approval never --c ENV=$(ENV) 2>&1 | tee /dev/stderr | grep -q "AWS::DynamoDB::Table";\
+		cert=$$(aws acm list-certificates --query "CertificateSummaryList[?contains(SubjectAlternativeNameSummaries, '*.briangraymusic.com')].CertificateArn" --output text);\
+		$$(command -v unbuffer) cdk deploy --require-approval never --c ENV=$(ENV) -c CERT="$$cert" 2>&1 | tee /dev/stderr | grep -q "AWS::DynamoDB::Table";\
 		if [ $$? == 0 ]; then\
 			$(call DO,Table changes found; finding the database refresh function);\
 			function_name=$$(aws cloudformation describe-stacks --stack-name $(STACK)\
@@ -60,7 +61,8 @@ undeploy: bootstrap
 	@$(call DO,Deleting stack $(STACK));\
 	$(call SETUP_VENV,cdk);\
 		$(call DO,Undeploying with ENV=$(ENV));$(ENDL);\
-		cdk destroy -f -c ENV=$(ENV) --stack-name $(STACK);\
+		cert=$$(aws acm list-certificates --query "CertificateSummaryList[?contains(SubjectAlternativeNameSummaries, '*.briangraymusic.com')].CertificateArn" --output text);\
+		cdk destroy -f -c ENV=$(ENV) -c CERT="$$cert" --stack-name $(STACK);\
 		$(DONE);\
 	$(call TEARDOWN_VENV,cdk);\
 	printf "$(TARGET)$(call SUCCESS,Undeployment complete.)\n"
@@ -69,7 +71,8 @@ synth: bootstrap
 	@$(call DO,Synthesizing stack $(STACK));$(ENDL);\
 	$(call SETUP_VENV,cdk);\
 		$(call DO,Synthesizing with ENV=$(ENV));\
-		$$(command -v unbuffer) cdk synth -q --require-approval never --c ENV=$(ENV);\
+		cert=$$(aws acm list-certificates --query "CertificateSummaryList[?contains(SubjectAlternativeNameSummaries, '*.briangraymusic.com')].CertificateArn" --output text);\
+		$$(command -v unbuffer) cdk synth -q --require-approval never -c ENV=$(ENV) -c CERT="$$cert";\
 		$(DONE);\
 	$(call TEARDOWN_VENV,cdk);\
 	printf "$(TARGET)$(call SUCCESS,Synthesis complete;) find template in cdk.out\n"
