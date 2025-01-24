@@ -17,12 +17,12 @@ class BgmContext():
         self.org = 'bgm'
         self.project = 'nerdrock'
         self.env = env
-        self.prod = env in ['prod', 'staging']
+        self.prodLike = env in ['prod', 'staging']
         self.logicalIdPrefix = ''.join([BgmConstruct.capitalize(x) for x in [self.org, self.project, self.env]])
         self.physicalIdPrefix = f'{self.org.lower()}-{self.project.lower()}-{self.env.lower()}'
         self.lambdaPackage = lambdaPackage if lambdaPackage else f'./{self.physicalIdPrefix}-lambdas.zip'
         self.webPackage = webPackage if webPackage else f'./{self.physicalIdPrefix}-web.zip'
-        self.domain = f'{env}.briangraymusic.com'
+        self.domain = 'briangraymusic.com' if env == 'prod' else f'{env}.briangraymusic.com'
         self.certArn = certArn
 
     def logicalIdFor(self, id: str):
@@ -60,10 +60,12 @@ class DistributionConstruct(BgmConstruct):
                 origin=RestApiOrigin(api, origin_id=context.physicalIdFor('api-origin')))},
             certificate=cert, domain_names=[context.domain]
         )
-        zone: HostedZone = HostedZone.from_hosted_zone_attributes(self, 'HostedZone',
-            hosted_zone_id='Z0624588WF0W5XTXQC7U', zone_name='briangraymusic.com')
-        ARecord(self, 'ARecord', zone=zone, record_name=context.domain,
-                target=RecordTarget.from_alias(CloudFrontTarget(self.distribution)))
-        AaaaRecord(self, 'AaaaRecord', zone=zone, record_name=context.domain,
-                   target=RecordTarget.from_alias(CloudFrontTarget(self.distribution)))
+        if context.prodLike:
+            zone: HostedZone = HostedZone.from_hosted_zone_attributes(self, 'HostedZone',
+                                                                      hosted_zone_id='Z0624588WF0W5XTXQC7U',
+                                                                      zone_name='briangraymusic.com')
+            ARecord(self, 'ARecord', zone=zone, record_name=context.domain,
+                    target=RecordTarget.from_alias(CloudFrontTarget(self.distribution)))
+            AaaaRecord(self, 'AaaaRecord', zone=zone, record_name=context.domain,
+                       target=RecordTarget.from_alias(CloudFrontTarget(self.distribution)))
         CfnOutput(self, 'Distribution', value=self.distribution.domain_name)

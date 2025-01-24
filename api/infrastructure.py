@@ -29,7 +29,7 @@ class APIConstruct(BgmConstruct):
         super().__init__(scope, id)
 
         keepWarm = Rule(self, 'KeepWarm', schedule=Schedule.rate(Duration.minutes(5)),
-                        rule_name=context.physicalIdFor('keep-warm')) if context.prod else None
+                        rule_name=context.physicalIdFor('keep-warm')) if context.prodLike else None
         self.restApi, apiResourceRoot = self.createApiRoot(context)
         lambdaRole: Role = self.createLambdaRole(context)
         self.lambdas = {}
@@ -55,7 +55,7 @@ class APIConstruct(BgmConstruct):
                 }, log_group=logGroup
             )
             self.lambdas[description.name] = function
-            if keepWarm and description.keepWarm:
+            if context.prodLike and description.keepWarm:
                 keepWarm.add_target(LambdaFunction(function, event=RuleTargetInput.from_object({
                     "keep_warm": True
                 })))
