@@ -7,7 +7,7 @@ defaults:
 
 jobs:
   color-test:
-    runs-on: ubuntu_latest
+    runs-on: ubuntu-latest
     steps:
       - name: Setup Python
         uses: actions/setup-python@v5
