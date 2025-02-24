@@ -1,0 +1,21 @@
+on:
+  workflow_dispatch
+
+defaults:
+  run:
+    shell: bash
+
+jobs:
+  color-test:
+    runs-on: ubuntu_latest
+    steps:
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+
+      - name: Install colorama
+        run: pip install colorama
+
+      - name: Output in color
+        run: python -c "import colorama; print(f'{colorama.Fore.GREEN}green{colorama.Fore.RESET}')"
