@@ -3,9 +3,11 @@ name: On Trunk Changed (Push or Merged Pull Request)
 on:
   push:
     branches: [trunk]
+    paths-ignore: [.github/**]
   pull_request:
     types: [closed]
     branches: [trunk]
+    paths-ignore: [.github/**]
 
 defaults:
   run:
