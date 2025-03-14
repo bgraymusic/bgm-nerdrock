@@ -17,19 +17,20 @@ dependencies = [
 ]
 
 [project.scripts]
-bgnr-refresh = "api.runtime.database.database_handler:handle"
+bgnr = "cli.bgnr_cli:cli"
 
 [project.optional-dependencies]
-bootstrap = ["cryptography>=43.0.0,<44.0.0"]
+cli = ["boto3[crt]>=1.35.0,<2.0.0", "colorama>=0.4.6,<1.0.0"]
 cdk = [
     "aws-cdk-lib>=2.171.1,<3.0.0",
     "constructs>=10.4.0,<11.0.0",
-    "boto3>=1.35.0,<2.0.0",
+    "boto3[crt]>=1.35.0,<2.0.0",
+    "gitpython>=3.1.44,<4.0.0",
 ]
 test = [
     "aws-cdk-lib>=2.171.1,<3.0.0",
     "constructs>=10.4.0,<11.0.0",
-    "boto3>=1.35.0,<2.0.0",
+    "boto3[crt]>=1.35.0,<2.0.0",
     "pytest>=8.3.0,<9.0.0",
     "pytest-mock>=3.14,<4.0",
     "pytest-cov>=6.0.0,<7.0.0",
@@ -42,18 +43,21 @@ test = [
 [tool.setuptools]
 include-package-data = true
 packages = [
+    "cli",
+    "cli.commands",
     "api",
     "api.runtime",
     "api.runtime.badges",
     "api.runtime.database",
     "api.runtime.discography",
+    "cdk",
 ]
 
 [tool.setuptools.package-data]
 "*" = ["*.yml", "*.json"]
 
 [tool.setuptools.exclude-package-data]
-tests = ["*test*"]
+tests = ["api/test"]
 
 [tool.pytest.ini_options]
 minversion = "8.0"

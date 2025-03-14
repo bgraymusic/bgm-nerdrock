@@ -1,6 +1,6 @@
 from typing import List
 
-from aws_cdk import Aws, Duration, CfnOutput, RemovalPolicy
+from aws_cdk import Aws, Stack, Duration, CfnOutput, RemovalPolicy
 from aws_cdk.aws_apigateway import (
     RestApi, Resource, LambdaIntegration, PassthroughBehavior,
     Method, MethodOptions, MethodResponse, IntegrationResponse
@@ -11,8 +11,11 @@ from aws_cdk.aws_iam import Role, ManagedPolicy, ServicePrincipal
 from aws_cdk.aws_lambda import Function, Runtime, Code
 from aws_cdk.aws_logs import LogGroup
 from constructs import Construct
-from infrastructure import BgmConstruct, BgmContext
-from api import HandlerBase, HandlerDescription
+
+from cdk.bgm_construct import BgmConstruct
+from cdk.bgm_context import EnvContext
+from api.runtime.handler_base import HandlerBase, HandlerDescription
+import api
 
 
 class APIConstruct(BgmConstruct):
@@ -25,40 +28,37 @@ class APIConstruct(BgmConstruct):
                   }
     }
 
-    def __init__(self, scope: Construct, id: str, context: BgmContext):
-        super().__init__(scope, id)
+    def __init__(self, scope: Construct, id: str, context: EnvContext):
+        super().__init__(scope, id, context)
 
-        keepWarm = Rule(self, 'KeepWarm', schedule=Schedule.rate(Duration.minutes(5)),
-                        rule_name=context.physicalIdFor('keep-warm')) if context.prodLike else None
-        self.restApi, apiResourceRoot = self.createApiRoot(context)
-        lambdaRole: Role = self.createLambdaRole(context)
-        self.lambdas = {}
+        self.restApi, apiResourceRoot = self.createApiRoot()
+        lambdaRole: Role = self.createLambdaRole()
+        self.lambdas = []
+        globalStack = Stack.of(self).globalStack
 
         # Create lambda functions
+        api
         for handlerClass in HandlerBase.__subclasses__():
             description: HandlerDescription = handlerClass.describe()
             logGroup = LogGroup(self, f'{self.capitalize(description.name)}LogGroup',
-                                log_group_name=context.physicalIdFor(f'{description.name}-log-group'),
+                                log_group_name=self.physicalIdFor(f'{description.name}-log-group'),
                                 removal_policy=RemovalPolicy.DESTROY)
             function = Function(
                 self, f'{self.capitalize(description.name)}Lambda', role=lambdaRole,
-                function_name=context.physicalIdFor(description.name), timeout=Duration.seconds(30),
+                function_name=self.physicalIdFor(description.name), timeout=Duration.seconds(30),
                 handler=f'{handlerClass.__module__}.handle', runtime=Runtime.PYTHON_3_13,
-                code=Code.from_asset(context.lambdaPackage, deploy_time=True),
+                code=Code.from_asset(self.context.lambdaPackage, deploy_time=True),
                 environment={
                     'stackName': Aws.STACK_NAME,
                     'log_level': 'DEBUG',
                     'config': 'api/config.yml',
-                    'secretsBucket': f'{context.org}-{context.project}-secrets',
+                    # 'secretsBucket': f'{self.context.org}-{self.context.project}-secrets',
+                    'secretsBucket': globalStack.secretsBucket.bucket_name,
                     'secretsFile': 'secrets.yml',
-                    'tablePrefix': f'{context.org}-{context.project}-{context.env}'
+                    'tablePrefix': f'{self.context.org}-{self.context.project}-{self.context.env}'
                 }, log_group=logGroup
             )
-            self.lambdas[description.name] = function
-            if context.prodLike and description.keepWarm:
-                keepWarm.add_target(LambdaFunction(function, event=RuleTargetInput.from_object({
-                    "keep_warm": True
-                })))
+            self.lambdas.append((handlerClass, function))
             CfnOutput(self, f'{self.capitalize(description.name)}LambdaName', value=function.function_name)
 
             parent = apiResourceRoot
@@ -82,18 +82,18 @@ class APIConstruct(BgmConstruct):
                 parentLogical = resourceLogical
                 parent = resource
 
-    def createApiRoot(self, context: BgmContext):
+    def createApiRoot(self):
         restApi: RestApi = RestApi(
-            self, 'RestApi', rest_api_name=context.physicalIdFor('api'),
+            self, 'RestApi', rest_api_name=self.physicalIdFor('api'),
             # deploy_options=StageOptions(stage_name=context.env)
         )
         resourceRoot: Resource = Resource(self, 'ResourceRoot', parent=restApi.root, path_part='api')
         return restApi, resourceRoot
 
-    def createLambdaRole(self, context) -> Role:
-        return Role(self, context.logicalIdFor('lambdaRole'),
+    def createLambdaRole(self) -> Role:
+        return Role(self, self.logicalIdFor('lambdaRole'),
                     assumed_by=ServicePrincipal('lambda.amazonaws.com'),
-                    role_name=context.physicalIdFor('lambda-role'),
+                    role_name=self.physicalIdFor('lambda-role'),
                     managed_policies=[
                         ManagedPolicy.from_aws_managed_policy_name('service-role/AWSLambdaBasicExecutionRole'),
                         ManagedPolicy.from_aws_managed_policy_name('service-role/AWSLambdaVPCAccessExecutionRole'),
@@ -122,3 +122,16 @@ class APIConstruct(BgmConstruct):
                     'application/json':
                         "$input.path('$.errorMessage').replaceAll(\"'\", '\"').replaceAll('None', '\"\"')"}))
         return result
+
+
+class ProdAPIConstruct(APIConstruct):
+    def __init__(self, scope: Construct, id: str, context: EnvContext):
+        super().__init__(scope, id, context)
+
+        keepWarm = Rule(self, 'KeepWarm', schedule=Schedule.rate(Duration.minutes(5)),
+                        rule_name=self.physicalIdFor('keep-warm'))
+        for handlerClass, function in self.lambdas:
+            if handlerClass.describe().keepWarm:
+                keepWarm.add_target(LambdaFunction(function, event=RuleTargetInput.from_object({
+                    "keep_warm": True
+                })))

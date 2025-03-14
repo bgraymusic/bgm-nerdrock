@@ -1,0 +1,18 @@
+context:
+  org: bgm
+  project: nerdrock
+  domain: briangraymusic.com
+  secretsFile: secrets.yml
+  checkIpUrl: http://checkip.amazonaws.com
+  allowIpKey: allow_ip
+  assetsDir: assets
+  blockIpFuncSourceFile: redirect_disallowed_ips.js
+
+ssm-parameters:
+  prod-deployment-colors: [BLUE, GREEN]
+  active-prod-color: BLUE
+  secrets-bucket: bgm-nerdrock-global-secrets-bucket
+
+key-value-pairs:
+  allowed-ip: 68.80.249.63
+  redirect-domain: briangraymusic.com
