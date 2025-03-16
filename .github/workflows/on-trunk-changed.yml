@@ -40,10 +40,7 @@ jobs:
       - name: Setup Python
         uses: actions/setup-python@v5
         with:
-          python-version: '3.13'
-
-      - name: Install CDK CLI
-        run: npm install -g aws-cdk
+          python-version: "3.13"
 
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v4
@@ -52,5 +49,8 @@ jobs:
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: us-east-1
 
+      - name: Install Nerdrock CLI
+        run: pip install '.[cli]'
+
       - name: Deploy
-        run: make deploy ENV=staging
+        run: bgnr -t -v deploy -e staging

@@ -1,14 +1,12 @@
 name: On Branch Deleted
 
-on:
-  delete # does not support filtering by type (branch), must do later
+on: delete # does not support filtering by type (branch), must do later
 
 defaults:
   run:
     shell: bash -v {0}
 
 jobs:
-
   undeploy-nerdrock:
     runs-on: ubuntu-latest
     if: github.ref_type == 'branch' # delete can be branches or tags; we want only branches
@@ -20,10 +18,7 @@ jobs:
       - name: Setup Python
         uses: actions/setup-python@v5
         with:
-          python-version: '3.13'
-
-      - name: Install CDK CLI
-        run: npm install -g aws-cdk
+          python-version: "3.13"
 
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v4
@@ -32,5 +27,14 @@ jobs:
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: us-east-1
 
+      - name: Install Nerdrock CLI
+        run: pip install '.[cli]'
+
+      - name: Calculate Environment Name
+        id: env
+        run: |
+          env_name=$(echo '${{ github.event.ref }}' | sed -e "s/[^a-zA-Z0-9._-]/-/g")
+          echo "name=$env_name" >> $GITHUB_OUTPUT
+
       - name: Undeploy
-        run: make undeploy ENV=${{ github.event.ref }}
+        run: bgnr -t -v undeploy -e ${{ steps.env.outputs.name }}
