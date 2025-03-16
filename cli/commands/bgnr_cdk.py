@@ -10,7 +10,7 @@ from botocore.exceptions import ValidationError
 
 from cli.bgnr_command import Command, EnvCommand
 from cli.bgnr_util import Config, Context, Out, Proc
-from cli.commands.bgnr_make import PackageLambdasCommand, PackageWebCommand
+from cli.commands.bgnr_local import PackageLambdasCommand, PackageWebCommand
 
 
 class BootstrapCommand(Command):
