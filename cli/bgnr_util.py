@@ -136,7 +136,11 @@ class Out:
     # Wrap a long string at word boundaries so it never goes past the edge of the terminal. Assumes that we start
     # pre-indented and so do not need to indent the first line.
     def wrap(indent: int, text: str):
-        return fill(text, os.get_terminal_size().columns - indent, subsequent_indent=' ' * indent)
+        try:
+            width = os.get_terminal_size().columns - indent
+        except OSError:
+            width = 78 - indent
+        return fill(text, width, subsequent_indent=' ' * indent)
 
 
 class Proc:
