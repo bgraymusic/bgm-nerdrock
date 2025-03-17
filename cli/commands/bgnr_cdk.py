@@ -159,14 +159,12 @@ class DeployEnvCommand(EnvCommand):
             Context.get().verbose = True  # Exception to the rule: always output deploy progress as it happens
             Proc.exec(f'cdk deploy --all -c ENV={Context.get().environment}', capture_stdout=True)
             Context.get().verbose = verbose
-            # stacks = proc.stdout.split()
             with open('stacks.yml', 'r') as f:
                 stacks = yaml.load(f, yaml.Loader)
             if Context.get().verbose:
+                print('Synthesized stacks: ', end='')
                 print(pprint(stacks, indent=2))
-            # env_stack = stacks[-1].split('/')[1]
             env_stack = stacks[-1]
-            print(f'Env stack: {env_stack}')
             outputs = self.get_stack_outputs(env_stack)
 
         if env_stack:
