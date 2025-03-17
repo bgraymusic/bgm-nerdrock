@@ -1,4 +1,4 @@
-name: On Trunk Changed (Push or Merged Pull Request)
+name: On Trunk Changed
 
 on:
   workflow_dispatch:

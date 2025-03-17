@@ -1,3 +1,5 @@
+name: Rollback to Last
+
 on: workflow_dispatch
 
 jobs:

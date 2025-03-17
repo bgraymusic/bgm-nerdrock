@@ -1,3 +1,5 @@
+name: Manual Rollback
+
 on:
   workflow_dispatch:
     inputs:
