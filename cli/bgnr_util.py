@@ -27,8 +27,15 @@ class Config:
             Config.__instance = Config()
         return Config.__instance
 
+    def capitalize(self, s: str):
+        s = re.sub(r'[\W]', '', s)
+        return re.sub('([a-zA-Z])', lambda x: x.groups()[0].upper(), s, 1)
+
     def stack(self, name: str):
         return f'{self.org}-{self.project}-{name}-stack'
+
+    def toLogical(self, id: str):
+        return ''.join([self.capitalize(x) for x in id.split('-')])
 
 
 class Context:

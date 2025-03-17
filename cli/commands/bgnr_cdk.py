@@ -284,10 +284,11 @@ class UndeployCommand(EnvCommand):
 
     @classmethod
     def dependencies(cls) -> Command.Dependencies:
-        return Command.Dependencies(pip_features=['cdk'], prerequisites=[BootstrapCommand])
+        return Command.Dependencies(pip_features=['cdk'],
+                                    prerequisites=[PackageWebCommand, PackageLambdasCommand, BootstrapCommand])
 
     def execute(self):
         with Out.Do(msg=f'Deleting stack {Config.get().stack(Context.get().environment)}',
                     error=f'Failed to delete stack {Config.get().stack(Context.get().environment)}'):
             Proc.exec(f'cdk destroy -f -c ENV={Context.get().environment} '
-                      '--stack-name {Config.get().stack(Context.get().environment)}')
+                      f'{Config.get().toLogical(Config.get().stack(Context.get().environment))}')
