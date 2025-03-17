@@ -152,20 +152,14 @@ class Proc:
             self.stderr = stderr
 
     @staticmethod
-    def exec(cmd: str, *, capture_stdout: bool = False, capture_stderr: bool = False) -> Process:
+    def exec(cmd: str, *, capture_stdout: bool = False, capture_stderr: bool = False) -> subprocess.CompletedProcess:
         Out.trace(cmd)
-        proc = subprocess.Popen(shlex.split(cmd),
-                                stdout=subprocess.PIPE if capture_stdout or not Context().get().verbose else None,
-                                stderr=subprocess.PIPE if capture_stderr or not Context().get().verbose else None)
-        # proc = subprocess.run(shlex.split(cmd), check=True,
-        #                       stdout=subprocess.PIPE if capture_stdout or not Context().get().verbose else None,
-        #                       stderr=subprocess.PIPE if capture_stderr or not Context().get().verbose else None)
-        stdout, stderr = proc.communicate()
-        stdout = stdout.decode() if stdout and stdout.decode else stdout
-        stderr = stderr.decode() if stderr and stderr.decode else stderr
-        if proc.returncode != 0:
-            raise subprocess.CalledProcessError(proc.returncode, cmd, stdout, stderr)
-        return Proc.Process(proc.returncode, stdout, stderr)
+        proc = subprocess.run(shlex.split(cmd), check=True,
+                              stdout=subprocess.PIPE if capture_stdout or not Context().get().verbose else None,
+                              stderr=subprocess.PIPE if capture_stderr or not Context().get().verbose else None)
+        proc.stdout = proc.stdout.decode() if proc.stdout and proc.stdout.decode else proc.stdout
+        proc.stderr = proc.stderr.decode() if proc.stderr and proc.stderr.decode else proc.stderr
+        return proc
 
 
 class Docstring:
