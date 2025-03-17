@@ -157,6 +157,7 @@ class DeployEnvCommand(EnvCommand):
             verbose = Context.get().verbose
             Context.get().verbose = True  # Exception to the rule: always output deploy progress as it happens
             proc = Proc.exec(f'cdk deploy --all -c ENV={Context.get().environment}', capture_stdout=True)
+            print(f'DEPLOY STDOUT: {proc.stdout}')
             Context.get().verbose = verbose
             stacks = proc.stdout.split()
             if Context.get().verbose:
