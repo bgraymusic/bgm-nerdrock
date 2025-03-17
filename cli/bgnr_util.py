@@ -145,8 +145,14 @@ class Out:
 
 class Proc:
 
+    class Process():
+        def __init__(self, returncode: int, stdout: str, stderr: str):
+            self.returncode = returncode
+            self.stdout = stdout
+            self.stderr = stderr
+
     @staticmethod
-    def exec(cmd: str, *, capture_stdout: bool = False, capture_stderr: bool = False):
+    def exec(cmd: str, *, capture_stdout: bool = False, capture_stderr: bool = False) -> Process:
         Out.trace(cmd)
         proc = subprocess.Popen(shlex.split(cmd),
                                 stdout=subprocess.PIPE if capture_stdout or not Context().get().verbose else None,
@@ -159,10 +165,7 @@ class Proc:
         stderr = stderr.decode() if stderr and stderr.decode else stderr
         if proc.returncode != 0:
             raise subprocess.CalledProcessError(proc.returncode, cmd, stdout, stderr)
-        result = {}
-        for key, value in [('returncode', proc.returncode), ('stdout', stdout), ('stderr', stderr)]:
-            setattr(result, key, value)
-        return result
+        return Proc.Process(proc.returncode, stdout, stderr)
 
 
 class Docstring:
