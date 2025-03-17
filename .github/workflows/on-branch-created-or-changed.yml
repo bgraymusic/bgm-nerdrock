@@ -3,7 +3,7 @@ name: On Dev Branch Created or Changed
 on:
   workflow_dispatch:
     inputs:
-      tag:
+      branch:
         description: "Branch in which to simulate change"
         required: true
         type: string
@@ -23,7 +23,7 @@ jobs:
       - name: Checkout Branch
         uses: actions/checkout@v4
         with:
-          ref: ${{ github.ref_name }}
+          ref: ${{ github.event_name == 'workflow_dispatch' && inputs.branch || github.ref_name }}
 
       - name: Setup Python
         uses: actions/setup-python@v5
@@ -41,4 +41,4 @@ jobs:
         run: pip install '.[cli]'
 
       - name: Deploy
-        run: bgnr -t -v deploy -e ${{ github.ref_name }}
+        run: bgnr -t -v deploy -e ${{ github.event_name == 'workflow_dispatch' && inputs.branch || github.ref_name }}
