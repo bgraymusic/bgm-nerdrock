@@ -1,6 +1,7 @@
 name: On Trunk Changed (Push or Merged Pull Request)
 
 on:
+  workflow_dispatch:
   push:
     branches: [trunk]
     paths-ignore: [.github/**]

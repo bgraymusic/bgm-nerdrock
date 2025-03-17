@@ -1,6 +1,13 @@
 name: On Branch Deleted
 
-on: delete # does not support filtering by type (branch), must do later
+on:
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: "Branch in which to simulate deletion"
+        required: true
+        type: string
+  delete: # does not support filtering by type (branch), must do later
 
 defaults:
   run:
