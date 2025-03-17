@@ -3,6 +3,7 @@
 import json
 from pprint import pprint
 import re
+import yaml
 
 import boto3
 from botocore.response import StreamingBody
@@ -156,12 +157,15 @@ class DeployEnvCommand(EnvCommand):
         with Out.Do(msg=msg, done='Deployment complete.', error='Deployment failed.  See above.'):
             verbose = Context.get().verbose
             Context.get().verbose = True  # Exception to the rule: always output deploy progress as it happens
-            proc = Proc.exec(f'cdk deploy --all -c ENV={Context.get().environment}', capture_stdout=True)
+            Proc.exec(f'cdk deploy --all -c ENV={Context.get().environment}', capture_stdout=True)
             Context.get().verbose = verbose
-            stacks = proc.stdout.split()
+            # stacks = proc.stdout.split()
+            with open('stacks.yml', 'r') as f:
+                stacks = yaml.load(f, yaml.Loader)
             if Context.get().verbose:
                 print(pprint(stacks, indent=2))
-            env_stack = stacks[-1].split('/')[1]
+            # env_stack = stacks[-1].split('/')[1]
+            env_stack = stacks[-1]
             print(f'Env stack: {env_stack}')
             outputs = self.get_stack_outputs(env_stack)
 

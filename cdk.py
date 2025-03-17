@@ -23,7 +23,7 @@ if envFromCmdLine == 'global':
     environments: List[str] = []
 elif envFromCmdLine:                              # only the one specified environment
     environments: List[str] = [envFromCmdLine]
-else:                                           # prod, staging, and all branches
+else:                                           # prod colors (NOT 'prod'), staging, and all branches
     environments: List[str] = config['ssm-parameters']['prod-deployment-colors'].copy()
     environments.append('staging')
     repo = Repo()
@@ -33,7 +33,16 @@ else:                                           # prod, staging, and all branche
 
 # Synthesize the global stack, followed by any environments to be processed in this run
 globalStack = GlobalStack(app, GlobalContext(config), config['ssm-parameters'], config['key-value-pairs'])
+stacks = [globalStack.stack_name]
 for env in environments:
     envContext = EnvContext(env, config)
-    ProdEnvStack(app, envContext, globalStack) if envContext.isProd else NonProdEnvStack(app, envContext, globalStack)
+    envStack = (ProdEnvStack(app, envContext, globalStack)
+                if envContext.isProd
+                else NonProdEnvStack(app, envContext, globalStack))
+    stacks.append(envStack.stack_name)
 app.synth()
+
+# Write out all stacks we just synthesized, because the output of `cdk deploy` – which contains this info – for some
+# reason cannot be captured in GitHub actions
+with open('stacks.yml', 'w') as f:
+    yaml.dump(stacks, f)
