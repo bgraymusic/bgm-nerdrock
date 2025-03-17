@@ -40,11 +40,5 @@ jobs:
       - name: Install Nerdrock CLI
         run: pip install '.[cli]'
 
-      - name: Calculate Environment Name
-        id: env
-        run: |
-          env_name=$(echo '${{ github.ref_name }}' | sed -e "s/[^a-zA-Z0-9._-]/-/g")
-          echo "name=$env_name" >> $GITHUB_OUTPUT
-
       - name: Deploy
-        run: bgnr -t -v deploy -e ${{ steps.env.outputs.name }}
+        run: bgnr -t -v deploy -e ${{ github.ref_name }}

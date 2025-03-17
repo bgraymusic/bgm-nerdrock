@@ -53,7 +53,7 @@ class EnvContext(BgmContext):
     def __init__(self, env: str, config: dict):
         super().__init__(config)
 
-        self.env = env
+        self.env = self.normalize_env_name(env)
         self.lambdaPackage = f'./{self.assetsDir}/{self.org.lower()}-{self.project.lower()}-{self.env}-lambdas.zip'
         self.webPackage = f'./{self.assetsDir}/{self.org.lower()}-{self.project.lower()}-{self.env}-web.zip'
 
@@ -63,6 +63,12 @@ class EnvContext(BgmContext):
         self.logicalIdPrefix = ''.join([self.capitalize(x) for x in [self.org, self.project, self.env]])
         self.physicalIdPrefix = f'{self.org.lower()}-{self.project.lower()}-{self.env}'
         self.hostName = f'{self.env.lower()}.{self.domain}'
+
+    def normalize_env_name(self, env: str) -> str:
+        env = re.sub('[^A-Za-z0-9-]+', '-', env)
+        env = re.sub('^[-]', '', env)
+        env = re.sub('[-]$', '', env)
+        return env
 
     def figureIfIsProd(self, prodColors: list):
         ssm = boto3.client('ssm')
