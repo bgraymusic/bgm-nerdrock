@@ -5,6 +5,7 @@ from dataclasses import dataclass
 import importlib
 import inspect
 from pathlib import Path
+import re
 
 
 class NotBootstrappedError(Exception):
@@ -65,4 +66,11 @@ class EnvCommand(Command):
         parser.add_argument('-e', '--environment')
         parsed_ns, parsed_argv = parser.parse_known_args(argv)
         ns.environment = parsed_ns.environment or 'sandbox'
+        ns.environment = self.normalize_env_name(ns.environment)
         return (ns, parsed_argv)
+
+    def normalize_env_name(self, env: str) -> str:
+        env = re.sub('[^A-Za-z0-9-]+', '-', env)
+        env = re.sub('^[-]', '', env)
+        env = re.sub('[-]$', '', env)
+        return env
