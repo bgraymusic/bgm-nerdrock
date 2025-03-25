@@ -35,7 +35,8 @@ class GlobalContext(BgmContext):
 
         self.logicalIdPrefix = ''.join([self.capitalize(x) for x in [self.org, self.project, 'global']])
         self.physicalIdPrefix = f'{self.org.lower()}-{self.project.lower()}-global'
-        self.cfFuncPath = f'{self.cdkDirectory}/{self.blockIpFuncSourceFile}'
+        self.blockIpCfFuncPath = f'{self.cdkDirectory}/{self.blockIpFuncSourceFile}'
+        self.restRoutingCfFuncPath = f'{self.cdkDirectory}/{self.restRoutingFuncSourceFile}'
 
     def logicalIdFor(self, id: str):
         return f'{self.logicalIdPrefix}{''.join([self.capitalize(x) for x in id.split('-')])}'

@@ -61,7 +61,9 @@ class GlobalStack(BgmStack):
         CfnOutput(self, 'KeyValueStoreArn', value=kvStore.key_value_store_arn, key='KeyValueStoreArn')
 
         self.blockIpFunction = Function(self, 'BlockIpFunction', key_value_store=kvStore,
-                                        code=FunctionCode.from_file(file_path=context.cfFuncPath))
+                                        code=FunctionCode.from_file(file_path=context.blockIpCfFuncPath))
+        self.restRoutingFunction = Function(self, 'RestRoutingFunction',
+                                            code=FunctionCode.from_file(file_path=context.restRoutingCfFuncPath))
         self.hostedZone = HostedZone(self, 'HostedZone', zone_name=context.domain)
         self.hostedZone.apply_removal_policy(RemovalPolicy.RETAIN_ON_UPDATE_OR_DELETE)
         self.certificate = Certificate(self, 'Certificate', domain_name=self.context.domain,
