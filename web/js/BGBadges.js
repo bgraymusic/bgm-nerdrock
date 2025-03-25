@@ -14,8 +14,8 @@ BG.Badges = class {
 	error = $('#bg-cannot-save-badges-alert');
 	nsfw = $('#bg-nsfw-alert');
 
-    // CONSTRUCTION (use BG.Badges.getInstance())
-    constructor() {
+	// CONSTRUCTION (use BG.Badges.getInstance())
+	constructor() {
 		this.dialog.val = $('#bg-add-badge-value');
 		this.dialog.submit = $('#bg-add-badge-submit');
 	}
@@ -25,43 +25,43 @@ BG.Badges = class {
 	static addURL = 'api/badges/{token}/{key}';
 
 	static SPEC = {
-		'j': { id: 'jcc',       img: 'img/jcc_boat.svg',            title: 'Sea Monkey' },
-		'p': { id: 'patreon',   img: 'img/patreon_logo.png',        title: 'Patron' },
-		's': { id: 'spintunes', img: 'img/spintunes_starburst.gif', title: 'Spin Tuner' },
-		'k': { id: 'karaoke',   img: 'img/karaoke.png',             title: 'Karaoke' },
-		'w': { id: 'sfw',       img: 'img/safety.png',              title: 'Safe for Work' }
+		j: { id: 'jcc', img: '/img/jcc_boat.svg', title: 'Sea Monkey' },
+		p: { id: 'patreon', img: '/img/patreon_logo.png', title: 'Patron' },
+		s: { id: 'spintunes', img: '/img/spintunes_starburst.gif', title: 'Spin Tuner' },
+		k: { id: 'karaoke', img: '/img/karaoke.png', title: 'Karaoke' },
+		w: { id: 'sfw', img: '/img/safety.png', title: 'Safe for Work' },
 	};
 
 	// INITIALIZATION
 
 	async bootstrap() {
-        let token = this.loadToken();
+		let token = this.loadToken();
 		let response = await this.validateToken(token);
-        let tuple = {
-            token: response.token,
-            badges: response.badges
-        };
-        this.recordBadges(tuple);
-        tuple = await this.addURIBadges(tuple);
+		let tuple = {
+			token: response.token,
+			badges: response.badges,
+		};
+		this.recordBadges(tuple);
+		tuple = await this.addURIBadges(tuple);
 		this.draw();
 		this.registerJQueryUI();
 	}
 
-    async addURIBadges(tuple) {
-        var queryKeyList = new URL(window.location.href).searchParams.get('badges');
-        var queryKeyArray = queryKeyList ? queryKeyList.split(',') : [];
-        var revisedBadges = [...this.badges];
+	async addURIBadges(tuple) {
+		var queryKeyList = new URL(window.location.href).searchParams.get('badges');
+		var queryKeyArray = queryKeyList ? queryKeyList.split(',') : [];
+		var revisedBadges = [...this.badges];
 		let changed = false;
 		for (const key of queryKeyArray) {
-            let response = await this.addBadgeToToken(tuple.token, key);
-            tuple.token = response.token;
-            revisedBadges = response.badges;
+			let response = await this.addBadgeToToken(tuple.token, key);
+			tuple.token = response.token;
+			revisedBadges = response.badges;
 			changed = true;
-		};
-        tuple.badges = revisedBadges;
-        if (changed) this.recordBadges(tuple);
+		}
+		tuple.badges = revisedBadges;
+		if (changed) this.recordBadges(tuple);
 		return tuple;
-    }
+	}
 
 	// USER INTERFACE
 
@@ -69,8 +69,13 @@ BG.Badges = class {
 		var spec = BG.Badges.SPEC;
 		$(this.badgesDiv).empty();
 		let instance = this;
-		this.badges.forEach(badge => {
-			$(instance.badgesDiv).append($('<img/>').attr('id', 'badge-' + spec[badge].id).attr('src', spec[badge].img).attr('title', spec[badge].title));
+		this.badges.forEach((badge) => {
+			$(instance.badgesDiv).append(
+				$('<img/>')
+					.attr('id', 'badge-' + spec[badge].id)
+					.attr('src', spec[badge].img)
+					.attr('title', spec[badge].title)
+			);
 		});
 	}
 
@@ -80,27 +85,49 @@ BG.Badges = class {
 		this.registerAlertDialog();
 		this.registerNSFWDialog();
 	}
-	
+
 	registerAddDialog() {
 		let instance = BG.NerdRock.getInstance().badges;
-		$(this.button).button({ icons: { primary: 'ui-icon-plus' } }).data('state', false).click(function(event) {
-			event.stopPropagation();
-			instance.checked = !instance.checked;
-			if (instance.checked) instance.open();
-			else instance.close();
-		});
-		$(this.dialog.val).button().keypress(function(e) { if (e.which == 13) { $('#bg-add-badge-submit').click(); return false; } });
-		$(this.dialog.submit).button().click(function(event) {
-			event.stopPropagation();
-			// if (instance.addNewBadge(instance.dialog.val.val())) bgInit();
-			instance.addNewBadge(instance.dialog.val.val());
-		});
+		$(this.button)
+			.button({ icons: { primary: 'ui-icon-plus' } })
+			.data('state', false)
+			.click(function (event) {
+				event.stopPropagation();
+				instance.checked = !instance.checked;
+				if (instance.checked) instance.open();
+				else instance.close();
+			});
+		$(this.dialog.val)
+			.button()
+			.keypress(function (e) {
+				if (e.which == 13) {
+					$('#bg-add-badge-submit').click();
+					return false;
+				}
+			});
+		$(this.dialog.submit)
+			.button()
+			.click(function (event) {
+				event.stopPropagation();
+				// if (instance.addNewBadge(instance.dialog.val.val())) bgInit();
+				instance.addNewBadge(instance.dialog.val.val());
+			});
 	}
 
 	registerErrorDialog() {
-		$(this.error).dialog({ autoOpen: false, resizable: false, modal: true, buttons: {
-			'Don\'t tell me what to do': function() { $(this).dialog('close'); }, 'Ok': function() { $(this).dialog('close'); }
-		}});
+		$(this.error).dialog({
+			autoOpen: false,
+			resizable: false,
+			modal: true,
+			buttons: {
+				"Don't tell me what to do": function () {
+					$(this).dialog('close');
+				},
+				Ok: function () {
+					$(this).dialog('close');
+				},
+			},
+		});
 	}
 
 	registerAlertDialog() {
@@ -108,30 +135,50 @@ BG.Badges = class {
 			autoOpen: false,
 			resizable: false,
 			modal: true,
-			buttons: { 'Woo-hoo!': function() { $(this).dialog('close'); }, 'Just Ok': function() { $(this).dialog('close'); } },
-			open: function(event, ui) {
+			buttons: {
+				'Woo-hoo!': function () {
+					$(this).dialog('close');
+				},
+				'Just Ok': function () {
+					$(this).dialog('close');
+				},
+			},
+			open: function (event, ui) {
 				$('#bg-new-badge-icon').attr('src', $(this).data().badge.img);
 				$('#bg-new-badge-msg').text($(this).data().badge.title);
-			}
+			},
 		});
 	}
 
 	registerNSFWDialog() {
-		$(this.nsfw).dialog({ autoOpen: false, resizable: false, modal: true, width: 400, buttons: {
-			'Stay Safe': function() { $(this).dialog('close'); },
-			'Enter NSFW Mode': function() {
-				var instance = BG.NerdRock.getInstance().badges;
-				var idx = instance.badges.indexOf(BG.Badges.getHashForId('sfw'));
-				if (idx > -1) { instance.badges.splice(idx, 1); instance.store(); bgInit(); instance.draw(); }
-				$(this).dialog('close');
-			}
-		}});
+		$(this.nsfw).dialog({
+			autoOpen: false,
+			resizable: false,
+			modal: true,
+			width: 400,
+			buttons: {
+				'Stay Safe': function () {
+					$(this).dialog('close');
+				},
+				'Enter NSFW Mode': function () {
+					var instance = BG.NerdRock.getInstance().badges;
+					var idx = instance.badges.indexOf(BG.Badges.getHashForId('sfw'));
+					if (idx > -1) {
+						instance.badges.splice(idx, 1);
+						instance.store();
+						bgInit();
+						instance.draw();
+					}
+					$(this).dialog('close');
+				},
+			},
+		});
 	}
 
 	open() {
 		$(this.button).addClass('ui-state-active');
 		$(this.button).attr('aria-pressed', 'true');
-		$(this.button).button('option', 'icons', { primary: 'ui-icon-minus' } );
+		$(this.button).button('option', 'icons', { primary: 'ui-icon-minus' });
 		$(this.button).attr('title', 'Close');
 		$(this.dialog.val).val('');
 		$(this.dialog).removeClass('bg-hide');
@@ -140,24 +187,28 @@ BG.Badges = class {
 	close() {
 		$(this.button).removeClass('ui-state-active');
 		$(this.button).attr('aria-pressed', 'false');
-		$(this.button).button('option', 'icons', { primary: 'ui-icon-plus' } );
+		$(this.button).button('option', 'icons', { primary: 'ui-icon-plus' });
 		$(this.button).attr('title', 'Add new badge…');
 		$(this.dialog).addClass('bg-hide');
 	}
 
 	// BADGE MANAGEMENT
 
-	hasBadges() { return !!this.badges.length; }
+	hasBadges() {
+		return !!this.badges.length;
+	}
 
-	hasBadge(id) { return this.badges.includes(id); }
+	hasBadge(id) {
+		return this.badges.includes(id);
+	}
 
 	async addNewBadge(key) {
 		let response = await this.addBadgeToToken(this.token, key);
-        let tuple = {
-            token: response.token,
-            badges: response.badges
-        };
-        this.recordBadges(tuple);
+		let tuple = {
+			token: response.token,
+			badges: response.badges,
+		};
+		this.recordBadges(tuple);
 		this.close();
 		this.draw();
 		if (response.added_code) {
@@ -180,7 +231,7 @@ BG.Badges = class {
 			let result = await this.generateNewToken();
 			return result;
 		} else {
-			let response = await fetch(BG.Badges.validateURL.replace('{token}', token))
+			let response = await fetch(BG.Badges.validateURL.replace('{token}', token));
 			let result = await response.json();
 			return result;
 		}
@@ -195,21 +246,21 @@ BG.Badges = class {
 	// Badge and token local storage management
 
 	loadToken() {
-		if (typeof (Storage) !== 'undefined') {
+		if (typeof Storage !== 'undefined') {
 			return localStorage.getItem('token');
 		} else return null;
 	}
 
-    recordBadges(tuple) {
-        console.log('Recording authorizations:\n\tToken: ' + tuple.token + '\n\tBadges: ' + tuple.badges);
-        this.storeToken(tuple.token);
-        this.token = tuple.token;
-        this.badges = tuple.badges;
-    }
+	recordBadges(tuple) {
+		console.log('Recording authorizations:\n\tToken: ' + tuple.token + '\n\tBadges: ' + tuple.badges);
+		this.storeToken(tuple.token);
+		this.token = tuple.token;
+		this.badges = tuple.badges;
+	}
 
 	canStoreToken() {
 		try {
-			if (typeof (Storage) !== 'undefined') {
+			if (typeof Storage !== 'undefined') {
 				let testString = 'foo';
 				localStorage.setItem('testTokenStore', testString);
 				let fetched = localStorage.getItem('testStoreToken');
@@ -218,16 +269,19 @@ BG.Badges = class {
 			} else {
 				return false;
 			}
-		} catch (e) { return false; }
+		} catch (e) {
+			return false;
+		}
 	}
 
 	storeToken(token) {
 		try {
-			if (typeof (Storage) !== 'undefined') {
+			if (typeof Storage !== 'undefined') {
 				if (token) localStorage.setItem('token', token);
 				else localStorage.removeItem('token');
 			}
-		} catch (e) { $('#bg-cannot-save-badges-alert').dialog('open'); }
+		} catch (e) {
+			$('#bg-cannot-save-badges-alert').dialog('open');
+		}
 	}
-
 };
