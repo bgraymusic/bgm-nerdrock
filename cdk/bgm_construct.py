@@ -3,7 +3,7 @@ import re
 
 from aws_cdk import CfnOutput, Stack
 from aws_cdk.aws_apigateway import RestApi
-from aws_cdk.aws_cloudfront import Distribution, BehaviorOptions
+from aws_cdk.aws_cloudfront import Distribution, BehaviorOptions, FunctionAssociation, FunctionEventType
 from aws_cdk.aws_cloudfront_origins import S3StaticWebsiteOrigin, RestApiOrigin
 from aws_cdk.aws_route53 import ARecord, AaaaRecord, RecordTarget
 from aws_cdk.aws_route53_targets import CloudFrontTarget
@@ -31,18 +31,26 @@ class BgmConstruct(Construct):
 
 
 class DistributionConstruct(BgmConstruct):
-    def __init__(self, scope: Construct, id: str, context: EnvContext, bucket: Bucket, api: RestApi) -> None:
+    def __init__(self, scope: Construct, id: str, context: EnvContext, bucket: Bucket, api: RestApi,
+                 blockRemoteAccess: bool = False) -> None:
         super().__init__(scope, id, context)
 
         globalStack = Stack.of(self).globalStack
 
-        # cert = Certificate.from_certificate_arn(self, 'Certificate', context.certArn)
+        function_associations = [
+            FunctionAssociation(event_type=FunctionEventType.VIEWER_REQUEST, function=globalStack.restRoutingFunction),
+            FunctionAssociation(event_type=FunctionEventType.VIEWER_REQUEST, function=globalStack.blockIpFunction)
+        ] if blockRemoteAccess else [
+            FunctionAssociation(event_type=FunctionEventType.VIEWER_REQUEST, function=globalStack.restRoutingFunction)
+        ]
+
         self.distribution = Distribution(
             self, context.logicalIdFor('Distribution'),
             comment=context.physicalIdFor('distribution'),
             default_root_object='index.html',
             default_behavior=BehaviorOptions(
-                origin=S3StaticWebsiteOrigin(bucket, origin_id=context.physicalIdFor('website-origin'))),
+                origin=S3StaticWebsiteOrigin(bucket, origin_id=context.physicalIdFor('website-origin')),
+                function_associations=function_associations),
             additional_behaviors={'api/*': BehaviorOptions(
                 origin=RestApiOrigin(api, origin_id=context.physicalIdFor('api-origin')))},
             certificate=globalStack.certificate, domain_names=[context.hostName]
@@ -56,6 +64,5 @@ class DistributionConstruct(BgmConstruct):
 
 class NonProdDistributionConstruct(DistributionConstruct):
     def __init__(self, scope: Construct, id: str, context: EnvContext, bucket: Bucket, api: RestApi):
-        super().__init__(scope, id, context, bucket, api)
+        super().__init__(scope, id, context, bucket, api, True)
 
-        self.distribution  # add CF function
