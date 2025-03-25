@@ -113,5 +113,5 @@ class UpdateLocCommand(Command):
             Out.trace(f'aws cloudfront-keyvaluestore describe-key-value-store --kvs-arn {kvs_arn}')
             etag = kvs_client.describe_key_value_store(KvsARN=kvs_arn)['ETag']
             Out.trace('aws cloudfront-keyvaluestore put-key '
-                      f'--key allowed_ip --value {ip} --kvs-arn {kvs_arn} --if-match {etag}')
-            kvs_client.put_key(Key='allowed_ip', Value=ip, KvsARN=kvs_arn, IfMatch=etag)
+                      f'--key allowed-ip --value {ip} --kvs-arn {kvs_arn} --if-match {etag}')
+            kvs_client.put_key(Key='allowed-ip', Value=ip, KvsARN=kvs_arn, IfMatch=etag)
