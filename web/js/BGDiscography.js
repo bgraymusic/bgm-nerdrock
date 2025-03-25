@@ -10,13 +10,13 @@ BG.Discography = class {
 	// Important HTML DOM elements
 	cont = undefined;
 
-    constructor() {}
+	constructor() {}
 
 	// Classes applied to elements for styling
-	static css = { cont: 'bg-music' }
+	static css = { cont: 'bg-music' };
 
-	static discographyURL = 'api/discography';
-	static discographyWithTokenURL = 'api/discography/{token}';
+	static discographyURL = '/api/discography';
+	static discographyWithTokenURL = '/api/discography/{token}';
 
 	static registerJQueryUI() {
 		BG.Album.registerJQueryUI();
@@ -24,13 +24,13 @@ BG.Discography = class {
 
 	async bootstrap(token) {
 		let musicDiv = document.getElementById(BG.Discography.css.cont);
-		[...musicDiv.childNodes].forEach(el => el.remove());
+		[...musicDiv.childNodes].forEach((el) => el.remove());
 		this.drawAlbums = [];
 		this.bgAlbums = [];
-        let discData = await this.fetchDiscography(token);
-        this.addAlbums(discData.discography);
-    	this.buildDOM(musicDiv);
-    	BG.Discography.registerJQueryUI();
+		let discData = await this.fetchDiscography(token);
+		this.addAlbums(discData.discography);
+		this.buildDOM(musicDiv);
+		BG.Discography.registerJQueryUI();
 	}
 
 	async fetchDiscography(token) {
@@ -39,7 +39,7 @@ BG.Discography = class {
 			let result = await response.json();
 			return result;
 		} else {
-			let response = await fetch(BG.Discography.discographyWithTokenURL.replace('{token}', token))
+			let response = await fetch(BG.Discography.discographyWithTokenURL.replace('{token}', token));
 			let result = await response.json();
 			return result;
 		}
@@ -50,9 +50,9 @@ BG.Discography = class {
 		$(this.cont).empty();
 		$(this.cont).data().discography = this;
 		var discography = this;
-		$(this.drawAlbums).each(function() {
+		$(this.drawAlbums).each(function () {
 			if (this.tracks.length) {
-				if ($('.'+BG.Album.css.cont).length) $(musicDiv).append($('<hr/>'));
+				if ($('.' + BG.Album.css.cont).length) $(musicDiv).append($('<hr/>'));
 				var album = new BG.Album(discography, this);
 				discography.bgAlbums.push(album);
 				var albumDiv = $('<div/>').addClass(BG.Album.css.cont);
@@ -64,10 +64,12 @@ BG.Discography = class {
 
 	addAlbums(albums) {
 		var discography = this;
-		$(albums).each(function() { discography.drawAlbums.push(this); });
+		$(albums).each(function () {
+			discography.drawAlbums.push(this);
+		});
 	}
 
 	addAlbum(album) {
 		this.drawAlbums.push(album);
 	}
-}
+};

@@ -20,9 +20,9 @@ BG.Badges = class {
 		this.dialog.submit = $('#bg-add-badge-submit');
 	}
 
-	static generateURL = 'api/badges';
-	static validateURL = 'api/badges/{token}';
-	static addURL = 'api/badges/{token}/{key}';
+	static generateURL = '/api/badges';
+	static validateURL = '/api/badges/{token}';
+	static addURL = '/api/badges/{token}/{key}';
 
 	static SPEC = {
 		j: { id: 'jcc', img: '/img/jcc_boat.svg', title: 'Sea Monkey' },
