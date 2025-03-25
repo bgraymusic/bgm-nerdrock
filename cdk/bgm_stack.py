@@ -4,7 +4,7 @@ from pathlib import Path
 
 from aws_cdk import Stack, Environment, Tags, RemovalPolicy, CfnOutput
 from aws_cdk.aws_certificatemanager import Certificate, CertificateValidation
-from aws_cdk.aws_cloudfront import KeyValueStore, ImportSource, Function, FunctionCode
+from aws_cdk.aws_cloudfront import KeyValueStore, ImportSource, Function, FunctionCode, FunctionRuntime
 from aws_cdk.aws_route53 import HostedZone
 from aws_cdk.aws_s3 import Bucket
 from aws_cdk.aws_ssm import StringParameter, StringListParameter
@@ -62,7 +62,7 @@ class GlobalStack(BgmStack):
 
         self.blockIpFunction = Function(self, 'BlockIpFunction', key_value_store=kvStore,
                                         code=FunctionCode.from_file(file_path=context.blockIpCfFuncPath))
-        self.restRoutingFunction = Function(self, 'RestRoutingFunction',
+        self.restRoutingFunction = Function(self, 'RestRoutingFunction', runtime=FunctionRuntime.FunctionRuntime.JS_2_0,
                                             code=FunctionCode.from_file(file_path=context.restRoutingCfFuncPath))
         self.hostedZone = HostedZone(self, 'HostedZone', zone_name=context.domain)
         self.hostedZone.apply_removal_policy(RemovalPolicy.RETAIN_ON_UPDATE_OR_DELETE)
