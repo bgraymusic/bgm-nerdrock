@@ -281,7 +281,7 @@ BG.NerdRock = class {
 			});
 		}
 		if (params['blogUri']) {
-			$('#bg-blogframe').attr('src', BG.NerdRock.BLOGROOT + params['blogUri']);
+			$('#bg-blogframe').attr('src', BG.NerdRock.BLOGROOT + '/' + params['blogUri']);
 		}
 	}
 };
