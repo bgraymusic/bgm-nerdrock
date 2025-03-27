@@ -1,27 +1,18 @@
-// bgBandId = '230945364';
-
-// secretBandId = '2536692004';
-
 albumOrder = [
 	3599490148, // For Patron Eyes Only
 	444214854, // Operation SpinTunes
 	24668382, // Flying Monkeys
-	3708688148, // The Gleeble Chronicles
-	3541981135, // Every Song in the Universe
+	3708688148, // Songs from the Gleebleverse
+	3541981135, // Every Song Ever
 	3939645898, // Every Karaoke Track in the Universe
 	1047117555, // Also This Other Stuff
 ];
-
-// oldestFirst = [
-// 	444214854,  // Operation SpinTunes
-// 	3708688148 // The Gleeble Chronicles
-// ]
 
 maxComputedTimeOffset = 0.55;
 
 trackInfo = {
 	///////////////////////////////////////////////////////
-	// Every Song in the Universe
+	// Every Song Ever
 
 	// Staff Meeting 2015
 	1057430561: {
