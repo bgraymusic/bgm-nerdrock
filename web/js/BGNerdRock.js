@@ -4,8 +4,8 @@ var BG = BG || {};
 // Main Nerd Rock application class
 
 BG.NerdRock = class {
-	// static BLOGROOT = 'https://blog.briangraymusic.com';
-	static BLOGROOT = 'http://localhost:4001';
+	static BLOGROOT =
+		window.location.hostname == 'localhost' ? 'http://localhost:4001' : 'https://blog.briangraymusic.com';
 
 	badges = new BG.Badges();
 	discography = new BG.Discography();
