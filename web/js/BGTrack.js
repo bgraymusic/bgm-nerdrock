@@ -59,6 +59,8 @@ BG.Track.css = {
 	},
 };
 
+BG.Track.bandcampBaseUrl = 'https://briangray.bandcamp.com/';
+
 BG.Track.tickLength = 50; // milliseconds per tick
 
 BG.Track.getFromElement = function (element) {
@@ -119,7 +121,7 @@ BG.Track.prototype.buildControls = function (controls) {
 		$('<button/>')
 			.addClass(BG.Track.css.hdr.controls.buy)
 			.attr('title', 'Buy "' + this.title + '" on BandCamp.com')
-			.data('href', Bandcamp.URL + this.url)
+			.data('href', BG.Track.bandcampBaseUrl + this.url)
 	);
 };
 
