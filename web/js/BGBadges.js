@@ -20,9 +20,10 @@ BG.Badges = class {
 		this.dialog.submit = $('#bg-add-badge-submit');
 	}
 
-	static generateURL = '/api/badges';
-	static validateURL = '/api/badges/{token}';
-	static addURL = '/api/badges/{token}/{key}';
+	static urlPrefix = window.location.hostname == 'localhost' ? 'http://staging.briangraymusic.com' : '';
+	static generateURL = this.urlPrefix + '/api/badges';
+	static validateURL = this.urlPrefix + '/api/badges/{token}';
+	static addURL = this.urlPrefix + '/api/badges/{token}/{key}';
 
 	static SPEC = {
 		j: { id: 'jcc', img: '/img/jcc_boat.svg', title: 'Sea Monkey' },

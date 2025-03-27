@@ -15,8 +15,9 @@ BG.Discography = class {
 	// Classes applied to elements for styling
 	static css = { cont: 'bg-music' };
 
-	static discographyURL = '/api/discography';
-	static discographyWithTokenURL = '/api/discography/{token}';
+	static urlPrefix = window.location.hostname == 'localhost' ? 'http://staging.briangraymusic.com' : '';
+	static discographyURL = this.urlPrefix + '/api/discography';
+	static discographyWithTokenURL = this.urlPrefix + '/api/discography/{token}';
 
 	static registerJQueryUI() {
 		BG.Album.registerJQueryUI();
