@@ -26,7 +26,6 @@ BG.NerdRock = class {
 
 	// Initialization steps
 	async main() {
-		console.log('BG.NerdRock.main() called');
 		this.drawGlobalUI();
 		this.registerPopstateHandler();
 		await this.badges.bootstrap();
@@ -120,7 +119,6 @@ BG.NerdRock = class {
 		let tabs = $('#bg-top-level-tabs').tabs('instance').tabs;
 		let idx = false;
 		tabs.each(function (i) {
-			console.log(this);
 			if (this.textContent.toLowerCase() == name.toLowerCase()) {
 				idx = i;
 				return false;
