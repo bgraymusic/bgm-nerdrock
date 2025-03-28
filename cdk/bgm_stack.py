@@ -70,8 +70,9 @@ class GlobalStack(BgmStack):
         self.certificate = Certificate(self, 'Certificate', domain_name=self.context.domain,
                                        subject_alternative_names=[f'*.{self.context.domain}'],
                                        validation=CertificateValidation.from_dns(self.hostedZone))
-        self.blogCname = CnameRecord(self, 'BlogCnameRecord', record_name=self.context.blogHostName,
-                                     domain_name=self.context.blogTargetDomain, ttl=Duration.days(1))
+        self.blogCname = CnameRecord(self, 'BlogCnameRecord', zone=self.hostedZone, ttl=Duration.days(1),
+                                     record_name=self.context.blogHostName,
+                                     domain_name=self.context.blogTargetDomain)
 
 
 class EnvStack(BgmStack):
