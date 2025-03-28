@@ -3,7 +3,9 @@ import re
 
 from aws_cdk import CfnOutput, Stack
 from aws_cdk.aws_apigateway import RestApi
-from aws_cdk.aws_cloudfront import Distribution, BehaviorOptions, FunctionAssociation, FunctionEventType
+from aws_cdk.aws_cloudfront import (
+    Distribution, BehaviorOptions, FunctionAssociation, FunctionEventType, OriginRequestPolicy, ResponseHeadersPolicy
+)
 from aws_cdk.aws_cloudfront_origins import S3StaticWebsiteOrigin, RestApiOrigin
 from aws_cdk.aws_route53 import ARecord, AaaaRecord, RecordTarget
 from aws_cdk.aws_route53_targets import CloudFrontTarget
@@ -52,7 +54,10 @@ class DistributionConstruct(BgmConstruct):
                 origin=S3StaticWebsiteOrigin(bucket, origin_id=context.physicalIdFor('website-origin')),
                 function_associations=function_associations),
             additional_behaviors={'api/*': BehaviorOptions(
-                origin=RestApiOrigin(api, origin_id=context.physicalIdFor('api-origin')))},
+                origin=RestApiOrigin(api, origin_id=context.physicalIdFor('api-origin')),
+                origin_request_policy=OriginRequestPolicy.CORS_CUSTOM_ORIGIN,
+                response_headers_policy=ResponseHeadersPolicy.CORS_ALLOW_ALL_ORIGINS_WITH_PREFLIGHT
+                )},
             certificate=globalStack.certificate, domain_names=[context.hostName]
         )
         ARecord(self, 'ARecord', zone=globalStack.hostedZone, record_name=context.hostName,

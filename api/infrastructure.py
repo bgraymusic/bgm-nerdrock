@@ -85,7 +85,7 @@ class APIConstruct(BgmConstruct):
     def createApiRoot(self):
         restApi: RestApi = RestApi(
             self, 'RestApi', rest_api_name=self.physicalIdFor('api'),
-            default_cors_preflight_options=CorsOptions(allow_origins=Cors.ALL_ORIGINS)
+            # default_cors_preflight_options=CorsOptions(allow_origins=Cors.ALL_ORIGINS)
         )
         resourceRoot: Resource = Resource(self, 'ResourceRoot', parent=restApi.root, path_part='api')
         return restApi, resourceRoot
