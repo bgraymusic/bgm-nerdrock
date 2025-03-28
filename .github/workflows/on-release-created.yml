@@ -8,7 +8,7 @@ defaults:
 
 jobs:
   deploy-to-prod:
-    if: github.ref_type == 'tag' # create can be branches or tags; we want only tags
+    if: github.event.ref_type == 'tag' # create can be branches or tags; we want only tags
     runs-on: ubuntu-latest
 
     steps:
