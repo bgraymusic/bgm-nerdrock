@@ -4,7 +4,7 @@ on:
   workflow_dispatch:
     inputs:
       branch:
-        description: "Branch in which to simulate deletion"
+        description: 'Branch in which to simulate deletion'
         required: true
         type: string
   delete: # does not support filtering by type (branch), must do later
@@ -18,7 +18,7 @@ jobs:
     runs-on: ubuntu-latest
 
     # delete can be branches or tags; we want only branches
-    if: github.ref_type == 'branch' || github.ref_type == 'workflow_dispatch'
+    if: github.ref_type == 'branch' || github.event_name == 'workflow_dispatch'
 
     steps:
       - name: Checkout Branch
@@ -27,7 +27,7 @@ jobs:
       - name: Setup Python
         uses: actions/setup-python@v5
         with:
-          python-version: "3.13"
+          python-version: '3.13'
 
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v4
