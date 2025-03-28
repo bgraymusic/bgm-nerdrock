@@ -102,7 +102,7 @@ class EnvContext(BgmContext):
             return prodColors[prodColors.index(prodColor)+1]
 
     def logicalIdFor(self, id: str):
-        return f'{self.logicalIdPrefix}{self.capitalize(id)}'
+        return f'{self.logicalIdPrefix}{''.join([self.capitalize(x) for x in id.split('-')])}'
 
     def physicalIdFor(self, id: str):
         return f'{self.physicalIdPrefix}-{id}'
