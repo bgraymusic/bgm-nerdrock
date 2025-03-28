@@ -31,3 +31,5 @@ jobs:
         run: |-
           git tag ${{ inputs.tag }}
           git push origin ${{ inputs.tag }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GH_PAT }} # default token will not trigger followup actions
