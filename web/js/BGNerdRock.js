@@ -205,6 +205,7 @@ BG.NerdRock = class {
 		});
 		$('#bg-blogframe').attr('src', BG.NerdRock.BLOGROOT + ($.url().param('blog') ? $.url().param('blog') : ''));
 		$('#bg-github').repo({ user: 'bgraymusic', name: 'bgm-nerdrock', branch: 'trunk' });
+		$('#bg-github .repo a')[0].click();
 	}
 
 	registerPopstateHandler() {
