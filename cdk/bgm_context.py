@@ -21,6 +21,10 @@ class BgmContext():
     def physicalIdFor(self, id: str):
         pass
 
+    @abc.abstractmethod
+    def getStackDescription(self):
+        pass
+
     def getTags(self):
         return {'org': self.org, 'project': self.project}
 
@@ -43,6 +47,9 @@ class GlobalContext(BgmContext):
 
     def physicalIdFor(self, id: str):
         return f'{self.physicalIdPrefix}-{id}'
+
+    def getStackDescription(self):
+        return 'The global stack for all NerdRock environments to reference'
 
     def getTags(self):
         tags = super().getTags()
@@ -99,6 +106,14 @@ class EnvContext(BgmContext):
 
     def physicalIdFor(self, id: str):
         return f'{self.physicalIdPrefix}-{id}'
+
+    def getStackDescription(self):
+        if (self.env == 'staging'):
+            return 'Nerdrock production-like staging environment'
+        elif (self.isProd):
+            return f'Nerdrock {self.env} production environment'
+        else:
+            return f'Nerdrock {self.env} lower environment'
 
     def getTags(self):
         tags = super().getTags()

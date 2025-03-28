@@ -20,6 +20,7 @@ from web import WebConstruct
 class BgmStack(Stack):
     def __init__(self, scope: Construct, context: BgmContext) -> None:
         super().__init__(scope, context.logicalIdFor('stack'), stack_name=context.physicalIdFor('stack'),
+                         description=context.getStackDescription(),
                          env=Environment(account=os.getenv('CDK_DEFAULT_ACCOUNT'),
                                          region=os.getenv('CDK_DEFAULT_REGION')))
         self.projectDirectory: Path = Path(__file__).parent.parent
