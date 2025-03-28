@@ -3,7 +3,7 @@ from typing import List
 from aws_cdk import Aws, Stack, Duration, CfnOutput, RemovalPolicy
 from aws_cdk.aws_apigateway import (
     RestApi, Resource, LambdaIntegration, PassthroughBehavior,
-    Method, MethodOptions, MethodResponse, IntegrationResponse
+    Method, MethodOptions, MethodResponse, IntegrationResponse, CorsOptions, Cors
 )
 from aws_cdk.aws_events import Rule, Schedule, RuleTargetInput
 from aws_cdk.aws_events_targets import LambdaFunction
@@ -85,7 +85,7 @@ class APIConstruct(BgmConstruct):
     def createApiRoot(self):
         restApi: RestApi = RestApi(
             self, 'RestApi', rest_api_name=self.physicalIdFor('api'),
-            # deploy_options=StageOptions(stage_name=context.env)
+            default_cors_preflight_options=CorsOptions(allow_origins=Cors.ALL_ORIGINS)
         )
         resourceRoot: Resource = Resource(self, 'ResourceRoot', parent=restApi.root, path_part='api')
         return restApi, resourceRoot
