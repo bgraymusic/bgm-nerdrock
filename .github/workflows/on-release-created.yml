@@ -1,8 +1,6 @@
 name: On Release Created
 
-on:
-  release:
-    types: [published]
+on: create # does not support filtering by type (tag), must do later
 
 defaults:
   run:
@@ -10,16 +8,19 @@ defaults:
 
 jobs:
   deploy-to-prod:
+    if: github.ref_type == 'tag' # create can be branches or tags; we want only tags
     runs-on: ubuntu-latest
 
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+        with:
+          ref: ${{ github.ref_name }}
 
       - name: Setup Python
         uses: actions/setup-python@v5
         with:
-          python-version: "3.13"
+          python-version: '3.13'
 
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v4

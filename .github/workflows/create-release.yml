@@ -1,0 +1,33 @@
+name: Create Release
+
+on:
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: 'Symantic versioning tag to apply to the release'
+        required: true
+        type: string
+
+defaults:
+  run:
+    shell: bash -v {0}
+
+jobs:
+  create_release:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: us-east-1
+
+      - name: Create Release Tag
+        run: |-
+          git tag ${{ inputs.tag }}
+          git push origin ${{ inputs.tag }}
