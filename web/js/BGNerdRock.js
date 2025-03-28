@@ -200,12 +200,13 @@ BG.NerdRock = class {
 		// TOP LEVEL TABS
 		$('.bg-top-level-tabs').tabs({
 			activate: function (event, ui) {
+				// repo.js starts closed; simulate a click to expand the home directory
+				if (ui.newTab[0].innerText == 'Code') ui.newPanel.find('.repo a')[0].click();
 				BG.NerdRock.getInstance().saveState();
 			},
 		});
 		$('#bg-blogframe').attr('src', BG.NerdRock.BLOGROOT + ($.url().param('blog') ? $.url().param('blog') : ''));
 		$('#bg-github').repo({ user: 'bgraymusic', name: 'bgm-nerdrock', branch: 'trunk' });
-		$('#bg-github .repo a')[0].click();
 	}
 
 	registerPopstateHandler() {
