@@ -2,10 +2,10 @@ import json
 import os
 from pathlib import Path
 
-from aws_cdk import Stack, Environment, Tags, RemovalPolicy, CfnOutput
+from aws_cdk import Stack, Environment, Tags, RemovalPolicy, CfnOutput, Duration
 from aws_cdk.aws_certificatemanager import Certificate, CertificateValidation
 from aws_cdk.aws_cloudfront import KeyValueStore, ImportSource, Function, FunctionCode, FunctionRuntime
-from aws_cdk.aws_route53 import HostedZone
+from aws_cdk.aws_route53 import HostedZone, CnameRecord
 from aws_cdk.aws_s3 import Bucket
 from aws_cdk.aws_ssm import StringParameter, StringListParameter
 from constructs import Construct
@@ -70,6 +70,8 @@ class GlobalStack(BgmStack):
         self.certificate = Certificate(self, 'Certificate', domain_name=self.context.domain,
                                        subject_alternative_names=[f'*.{self.context.domain}'],
                                        validation=CertificateValidation.from_dns(self.hostedZone))
+        self.blogCname = CnameRecord(self, 'BlogCnameRecord', record_name=self.context.blogHostName,
+                                     domain_name=self.context.blogTargetDomain, ttl=Duration.days(1))
 
 
 class EnvStack(BgmStack):
