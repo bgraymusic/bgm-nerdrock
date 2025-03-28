@@ -21,7 +21,7 @@ jobs:
     runs-on: ubuntu-latest
 
     # delete can be branches or tags; we want only branches
-    if: github.ref_type == 'branch' || github.event_name == 'workflow_dispatch'
+    if: github.event.ref_type == 'branch' || github.event_name == 'workflow_dispatch'
 
     steps:
       - name: Dump Context
