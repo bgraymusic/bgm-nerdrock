@@ -13,6 +13,9 @@ defaults:
   run:
     shell: bash -v {0}
 
+env:
+  DEBUG: true
+
 jobs:
   undeploy-nerdrock:
     runs-on: ubuntu-latest
@@ -21,6 +24,11 @@ jobs:
     if: github.ref_type == 'branch' || github.event_name == 'workflow_dispatch'
 
     steps:
+      - name: Dump Context
+        if: env.DEBUG
+        run: |
+          echo "${{ toJson(github) }}"
+
       - name: Checkout Branch
         uses: actions/checkout@v4
 
