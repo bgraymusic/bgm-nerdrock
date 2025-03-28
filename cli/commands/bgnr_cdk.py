@@ -288,6 +288,8 @@ class UndeployCommand(EnvCommand):
                                     prerequisites=[PackageWebCommand, PackageLambdasCommand, BootstrapCommand])
 
     def execute(self):
+        if (Context.get().environment == 'global'):
+            Out.failure('ATTEMPTING TO DELETE THE GLOBAL STACK!!! COMMAND REJECTED.')
         with Out.Do(msg=f'Deleting stack {Config.get().stack(Context.get().environment)}',
                     error=f'Failed to delete stack {Config.get().stack(Context.get().environment)}'):
             Proc.exec(f'cdk destroy -f -c ENV={Context.get().environment} '
