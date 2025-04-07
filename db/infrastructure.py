@@ -1,5 +1,5 @@
 from aws_cdk import RemovalPolicy, CfnOutput
-from aws_cdk.aws_dynamodb import Table, Attribute, AttributeType
+from aws_cdk.aws_dynamodb import Table, Attribute, AttributeType, BillingMode
 from constructs import Construct
 
 from cdk.bgm_construct import BgmConstruct
@@ -22,5 +22,6 @@ class DbConstruct(BgmConstruct):
                 self, f'{self.capitalize(table["name"])}Table', table_name=self.physicalIdFor(table['name']),
                 partition_key=Attribute(name=table['pk'], type=AttributeType.NUMBER) if table['pk'] else None,
                 sort_key=Attribute(name=table['sk'], type=AttributeType.NUMBER) if table['sk'] else None,
-                removal_policy=RemovalPolicy.DESTROY)
+                removal_policy=RemovalPolicy.DESTROY, billing_mode=BillingMode.PAY_PER_REQUEST,
+                max_read_request_units=5)
             CfnOutput(self, f'{self.capitalize(table["name"])}TableOutput', value=ddb.table_name)
