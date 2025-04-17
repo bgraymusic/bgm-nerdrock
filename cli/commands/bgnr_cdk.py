@@ -3,6 +3,7 @@
 import json
 from pprint import pprint
 import re
+import time
 import yaml
 
 import boto3
@@ -171,8 +172,8 @@ class DeployEnvCommand(EnvCommand):
             self.bootstrap_secrets()
             self.refresh_db(outputs)
             if (Context.get().environment == 'prod'):
+                self.update_domain_records(env_stack)
                 self.update_prod_color(env_stack)
-                self.update_domain_record(outputs)
 
     def get_stack_outputs(self, stack: str) -> dict:
         cf_client = boto3.client('cloudformation')
@@ -217,20 +218,7 @@ class DeployEnvCommand(EnvCommand):
             if Context.get().verbose:
                 print(f'\n{json.dumps(response, indent=2)}')
 
-    def update_prod_color(self, env_stack: str):
-        match: re.Match[str] = re.match(fr'{Config.get().org}-{Config.get().project}-(\w+?)-stack', env_stack)
-        prod_color = match.groups()[0]
-        with Out.Do(msg=f'Setting new active prod color to {prod_color}',
-                    error=f'Error updating the prod color to {prod_color}'):
-            Out.trace(f'aws ssm put-parameter --name bgm-nerdrock-active-prod-color --value {prod_color} --overwrite')
-            ssm_client = boto3.client('ssm')
-            ssm_client.put_parameter(Name='bgm-nerdrock-active-prod-color', Value=prod_color, Overwrite=True)
-
-    def update_domain_record(self, outputs: dict):
-        with Out.Do(msg='Finding the target distribution for prod DNS record update',
-                    error='Error getting target distribution'):
-            distribution = next((x for x in outputs if 'Distribution' in x['OutputKey']))['OutputValue']
-
+    def update_domain_records(self, env_stack: str):
         with Out.Do(msg='Finding HostedZone to update', error='Error finding HostedZone'):
             cf_client = boto3.client('cloudformation')
             resources = cf_client.list_stack_resources(StackName=Config.get().stack('global'))['StackResourceSummaries']
@@ -238,7 +226,16 @@ class DeployEnvCommand(EnvCommand):
                 [x for x in resources if x['ResourceType'] == 'AWS::Route53::HostedZone']
             ))['PhysicalResourceId']
 
-        with Out.Do(msg=f'Pointing {Config.get().domain} to the deployed prod distribution', error=''):
+        with Out.Do(msg='Finding the target distribution for prod DNS record update',
+                    error='Error getting target distribution'):
+            env_resources = cf_client.list_stack_resources(StackName=env_stack)['StackResourceSummaries']
+            distribution_id = next(
+                (x for x in env_resources if x['ResourceType'] == 'AWS::CloudFront::Distribution')
+            )['PhysicalResourceId']
+            cfront_client = boto3.client('cloudfront')
+            distribution_domain = cfront_client.get_distribution(Id=distribution_id)['Distribution']['DomainName']
+
+        with Out.Do(msg=f'Pointing {Config.get().domain} to the deployed prod distribution'):
             r53_client = boto3.client('route53')
             for record_type in ['A', 'AAAA']:
                 r53_client.change_resource_record_sets(HostedZoneId=hosted_zone,
@@ -250,12 +247,37 @@ class DeployEnvCommand(EnvCommand):
                                                                    'Type': record_type,
                                                                    'AliasTarget': {
                                                                        'HostedZoneId': Config.get().cf_hosted_zone,
-                                                                       'DNSName': distribution,
+                                                                       'DNSName': distribution_domain,
                                                                        'EvaluateTargetHealth': False
                                                                    }
                                                                }
                                                            }]
                                                        })
+            r53_client.change_resource_record_sets(HostedZoneId=hosted_zone,
+                                                   ChangeBatch={
+                                                        'Changes': [{
+                                                            'Action': 'UPSERT',
+                                                            'ResourceRecordSet': {
+                                                                'Name': f'_.{Config.get().domain}.',
+                                                                'Type': 'TXT',
+                                                                'ResourceRecords': [{'Value': f'"{distribution_domain}."'}],
+                                                                'TTL': 300
+                                                            }
+                                                        }]
+                                                   })
+
+        with Out.Do(msg=f'Moving alternate domain name for {Config.get().domain} to new distribution'):
+            time.sleep(5)  # Takes a bit for the record to be seen, even if it shows back from an API call
+            cfront_client.associate_alias(TargetDistributionId=distribution_id, Alias=Config.get().domain)
+
+    def update_prod_color(self, env_stack: str):
+        match: re.Match[str] = re.match(fr'{Config.get().org}-{Config.get().project}-(\w+?)-stack', env_stack)
+        prod_color = match.groups()[0]
+        with Out.Do(msg=f'Setting new active prod color to {prod_color}',
+                    error=f'Error updating the prod color to {prod_color}; DNS and SSM are mismatched!'):
+            Out.trace(f'aws ssm put-parameter --name bgm-nerdrock-active-prod-color --value {prod_color} --overwrite')
+            ssm_client = boto3.client('ssm')
+            ssm_client.put_parameter(Name='bgm-nerdrock-active-prod-color', Value=prod_color, Overwrite=True)
 
 
 class UndeployCommand(EnvCommand):

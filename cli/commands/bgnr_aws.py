@@ -1,10 +1,11 @@
 '''Commands that use the AWS API via boto3'''
 
+import json
+import time
 import boto3
-import requests
 
 from cli.bgnr_command import Command
-from cli.bgnr_util import Config, Out
+from cli.bgnr_util import Config, Out, Proc
 
 
 class RollbackCommand(Command):
@@ -36,20 +37,23 @@ class RollbackCommand(Command):
             color_list: list[str] = next(
                 (x for x in response['Parameters'] if x['Name'] == 'bgm-nerdrock-prod-deployment-colors')
             )['Value'].split(',')
+            prev_color = color_list[-1] if active_color == color_list[0] else color_list[color_list.index(active_color)-1]
 
-        prev_color = color_list[-1] if active_color == color_list[0] else color_list[color_list.index(active_color)-1]
-        cf_client = boto3.client('cloudformation')
+        with Out.Do(msg='Finding HostedZone to update', error='Error finding HostedZone'):
+            cf_client = boto3.client('cloudformation')
+            global_resources = cf_client.list_stack_resources(StackName=Config.get().stack('global'))['StackResourceSummaries']
+            hosted_zone = next(
+                (x for x in global_resources if x['ResourceType'] == 'AWS::Route53::HostedZone')
+            )['PhysicalResourceId']
 
         with Out.Do(msg='Finding the target distribution for prod DNS record update',
                     error='Error getting target distribution'):
-            outputs = cf_client.describe_stacks(StackName=Config.get().stack(prev_color))['Stacks'][0]['Outputs']
-            distribution = next((x for x in outputs if 'Distribution' in x['OutputKey']))['OutputValue']
-
-        with Out.Do(msg='Finding HostedZone to update', error='Error finding HostedZone'):
-            resources = cf_client.list_stack_resources(StackName=Config.get().stack('global'))['StackResourceSummaries']
-            hosted_zone = next(
-                (x for x in resources if x['ResourceType'] == 'AWS::Route53::HostedZone')
+            env_resources = cf_client.list_stack_resources(StackName=Config.get().stack(prev_color))['StackResourceSummaries']
+            distribution_id = next(
+                (x for x in env_resources if x['ResourceType'] == 'AWS::CloudFront::Distribution')
             )['PhysicalResourceId']
+            cfront_client = boto3.client('cloudfront')
+            distribution_domain = cfront_client.get_distribution(Id=distribution_id)['Distribution']['DomainName']
 
         with Out.Do(msg=f'Rolling back from {active_color} to {prev_color}',
                     error=f'Failed to roll back; prod is still pointed to {active_color}'):
@@ -64,14 +68,29 @@ class RollbackCommand(Command):
                                                                    'Type': record_type,
                                                                    'AliasTarget': {
                                                                        'HostedZoneId': Config.get().cf_hosted_zone,
-                                                                       'DNSName': distribution,
+                                                                       'DNSName': distribution_domain,
                                                                        'EvaluateTargetHealth': False
                                                                    }
                                                                }
                                                            }]
                                                        })
+            r53_client.change_resource_record_sets(HostedZoneId=hosted_zone,
+                                                   ChangeBatch={
+                                                        'Changes': [{
+                                                            'Action': 'UPSERT',
+                                                            'ResourceRecordSet': {
+                                                                'Name': f'_.{Config.get().domain}.',
+                                                                'Type': 'TXT',
+                                                                'ResourceRecords': [{'Value': f'"{distribution_domain}."'}],
+                                                                'TTL': 300
+                                                            }
+                                                        }]
+                                                   })
 
-        with Out.Do(msg=f'Seting {prev_color} as the new active prod color',
+            time.sleep(5)  # Takes a bit for the record to be seen, even if it shows back from an API call
+            cfront_client.associate_alias(TargetDistributionId=distribution_id, Alias=Config.get().domain)
+
+        with Out.Do(msg=f'Setting {prev_color} as the new active prod color',
                     error=f'Error updating the prod color to {prev_color}; DNS and SSM are mismatched!'):
             ssm_client.put_parameter(Name='bgm-nerdrock-active-prod-color', Value=prev_color, Overwrite=True)
 
@@ -100,10 +119,10 @@ class UpdateLocCommand(Command):
         return 'update-loc'
 
     def execute(self):
-        with Out.Do('Fetching public IP address'):
-            Out.trace('curl -s4 checkip.amazonaws.com')
-            ip = requests.get('https://checkip.amazonaws.com').content.decode().strip()
-        with Out.Do(f'Updating key-value store with current location {ip}'):
+        with Out.Do('Fetching public IP addresses'):
+            ipv4 = Proc.exec(Config.get().ipv4_check, capture_stdout=True).stdout.strip()
+            ipv6 = Proc.exec(Config.get().ipv6_check, capture_stdout=True).stdout.strip()
+        with Out.Do(f'Updating key-value store with current location {ipv4}/{ipv6}'):
             cf_client = boto3.client('cloudformation')
             stack_name = f'{Config.get().org}-{Config.get().project}-global-stack'
             Out.trace('aws cloudformation describe-stacks --stack-name bgm-nerdrock-global-stack')
@@ -113,5 +132,6 @@ class UpdateLocCommand(Command):
             Out.trace(f'aws cloudfront-keyvaluestore describe-key-value-store --kvs-arn {kvs_arn}')
             etag = kvs_client.describe_key_value_store(KvsARN=kvs_arn)['ETag']
             Out.trace('aws cloudfront-keyvaluestore put-key '
-                      f'--key allowed-ip --value {ip} --kvs-arn {kvs_arn} --if-match {etag}')
-            kvs_client.put_key(Key='allowed-ip', Value=ip, KvsARN=kvs_arn, IfMatch=etag)
+                      f'--key {Config.get().allowed_ips_key} --value {ipv4} --kvs-arn {kvs_arn} --if-match {etag}')
+            kvs_client.put_key(Key=Config.get().allowed_ips_key, Value=','.join([ipv4, ipv6]),
+                               KvsARN=kvs_arn, IfMatch=etag)
