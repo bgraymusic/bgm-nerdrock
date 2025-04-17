@@ -8,8 +8,8 @@ context:
   checkIpUrl: http://checkip.amazonaws.com
   allowIpKey: allow_ip
   assetsDir: assets
-  blockIpFuncSourceFile: redirect_disallowed_ips.js
-  restRoutingFuncSourceFile: reroute_rest_paths.js
+  nonProdFuncSourceFile: non_prod_viewer_request_func.js
+  prodFuncSourceFile: prod_viewer_request_func.js
 
 ssm-parameters:
   prod-deployment-colors: [BLUE, GREEN]

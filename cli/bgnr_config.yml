@@ -3,4 +3,7 @@ project: nerdrock
 min_bootstrap_ver: 25
 cdk_bootstrap_stack: CDKToolkit
 domain: briangraymusic.com
+ipv4_check: curl -s4 ifconfig.co
+ipv6_check: curl -s6 ifconfig.co
+allowed_ips_key: allowed-ips
 cf_hosted_zone: Z2FDTNDATAQYW2

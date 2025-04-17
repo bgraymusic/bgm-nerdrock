@@ -10,6 +10,19 @@ class BgmContext():
     def __init__(self, config: dict):
         self.projectDirectory: Path = Path(__file__).parent.parent
         self.cdkDirectory: Path = Path(__file__).parent
+
+        self.org: str = None
+        self.project: str = None
+        self.domain: str = None
+        self.blogHostName: str = None
+        self.blogTargetDomain: str = None
+        self.secretsFile: str = None
+        self.checkIpUrl: str = None
+        self.allowIpKey: str = None
+        self.assetsDir: str = None
+        self.nonProdFuncSourceFile: str = None
+        self.prodFuncSourceFile: str = None
+
         for key, value in config['context'].items():
             setattr(self, key, value)
 
@@ -37,10 +50,10 @@ class GlobalContext(BgmContext):
     def __init__(self, config: dict):
         super().__init__(config)
 
+        self.prodFuncPath = f'{self.cdkDirectory}/{self.prodFuncSourceFile}'
+
         self.logicalIdPrefix = ''.join([self.capitalize(x) for x in [self.org, self.project, 'global']])
         self.physicalIdPrefix = f'{self.org.lower()}-{self.project.lower()}-global'
-        self.blockIpCfFuncPath = f'{self.cdkDirectory}/{self.blockIpFuncSourceFile}'
-        self.restRoutingCfFuncPath = f'{self.cdkDirectory}/{self.restRoutingFuncSourceFile}'
 
     def logicalIdFor(self, id: str):
         return f'{self.logicalIdPrefix}{''.join([self.capitalize(x) for x in id.split('-')])}'
@@ -64,6 +77,8 @@ class EnvContext(BgmContext):
         self.env = self.normalize_env_name(env)
         self.lambdaPackage = f'./{self.assetsDir}/{self.org.lower()}-{self.project.lower()}-{self.env}-lambdas.zip'
         self.webPackage = f'./{self.assetsDir}/{self.org.lower()}-{self.project.lower()}-{self.env}-web.zip'
+        self.nonProdFuncPath = f'{self.cdkDirectory}/{self.nonProdFuncSourceFile}'
+        self.prodFuncPath = f'{self.cdkDirectory}/{self.prodFuncSourceFile}'
 
         self.defaultProdColor = config['ssm-parameters']['active-prod-color']
         self.figureIfIsProd(config['ssm-parameters']['prod-deployment-colors'].copy())
@@ -78,7 +93,7 @@ class EnvContext(BgmContext):
         env = re.sub('[-]$', '', env)
         return env
 
-    def figureIfIsProd(self, prodColors: list):
+    def figureIfIsProd(self, prodColors: list[str]):
         ssm = boto3.client('ssm')
         if self.env == 'staging':
             self.isProd = True

@@ -57,14 +57,16 @@ class GlobalStack(BgmStack):
                                 parameter_name=f'{context.org}-{context.project}-{key}')
 
         kvData = [{"key": key, "value": value} for key, value in kvPairs.items()]
-        kvStore = KeyValueStore(self, 'KeyValueStore', key_value_store_name=self.physicalIdFor('kv-store'),
-                                source=ImportSource.from_inline(json.dumps({"data": kvData})))
-        CfnOutput(self, 'KeyValueStoreArn', value=kvStore.key_value_store_arn, key='KeyValueStoreArn')
+        self.kvStore = KeyValueStore(self, 'KeyValueStore', key_value_store_name=self.physicalIdFor('kv-store'),
+                                     source=ImportSource.from_inline(json.dumps({"data": kvData})))
+        CfnOutput(self, 'KeyValueStoreArn', value=self.kvStore.key_value_store_arn, key='KeyValueStoreArn')
 
-        self.blockIpFunction = Function(self, 'BlockIpFunction', key_value_store=kvStore,
-                                        code=FunctionCode.from_file(file_path=context.blockIpCfFuncPath))
-        self.restRoutingFunction = Function(self, 'RestRoutingFunction', runtime=FunctionRuntime.JS_2_0,
-                                            code=FunctionCode.from_file(file_path=context.restRoutingCfFuncPath))
+        self.prodFunc = Function(self, 'RestRoutingFunction', runtime=FunctionRuntime.JS_2_0,
+                                 code=FunctionCode.from_file(file_path=context.prodFuncPath))
+        CfnOutput(self, 'ProdFuncExportPlaceholder', value=self.prodFunc.function_arn,
+                  key='ExportsOutputFnGetAttRestRoutingFunctionFunctionARN',
+                  export_name='bgm-nerdrock-global-stack:ExportsOutputFnGetAttRestRoutingFunctionFunctionARNDAC36FAC')
+
         self.hostedZone = HostedZone(self, 'HostedZone', zone_name=context.domain)
         self.hostedZone.apply_removal_policy(RemovalPolicy.RETAIN_ON_UPDATE_OR_DELETE)
         self.certificate = Certificate(self, 'Certificate', domain_name=self.context.domain,

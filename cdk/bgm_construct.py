@@ -4,7 +4,8 @@ import re
 from aws_cdk import CfnOutput, Stack
 from aws_cdk.aws_apigateway import RestApi
 from aws_cdk.aws_cloudfront import (
-    Distribution, BehaviorOptions, FunctionAssociation, FunctionEventType, OriginRequestPolicy, ResponseHeadersPolicy
+    Distribution, BehaviorOptions, Function, FunctionAssociation, FunctionCode, FunctionEventType,
+    OriginRequestPolicy, ResponseHeadersPolicy
 )
 from aws_cdk.aws_cloudfront_origins import S3StaticWebsiteOrigin, RestApiOrigin
 from aws_cdk.aws_route53 import ARecord, AaaaRecord, RecordTarget
@@ -39,20 +40,22 @@ class DistributionConstruct(BgmConstruct):
 
         globalStack = Stack.of(self).globalStack
 
-        function_associations = [
-            FunctionAssociation(event_type=FunctionEventType.VIEWER_REQUEST, function=globalStack.restRoutingFunction),
-            FunctionAssociation(event_type=FunctionEventType.VIEWER_REQUEST, function=globalStack.blockIpFunction)
-        ] if blockRemoteAccess else [
-            FunctionAssociation(event_type=FunctionEventType.VIEWER_REQUEST, function=globalStack.restRoutingFunction)
-        ]
+        if blockRemoteAccess:
+            func = Function(self, context.logicalIdFor('NonProdCFFunction'), key_value_store=globalStack.kvStore,
+                            code=FunctionCode.from_file(file_path=context.nonProdFuncPath),
+                            function_name=context.physicalIdFor('non-prod-cf-func'))
+        else:
+            func = Function(self, context.logicalIdFor('ProdCFFunction'), key_value_store=globalStack.kvStore,
+                            code=FunctionCode.from_file(file_path=context.prodFuncPath),
+                            function_name=context.physicalIdFor('prod-cf-func'))
 
         self.distribution = Distribution(
             self, context.logicalIdFor('Distribution'),
             comment=context.physicalIdFor('distribution'),
-            default_root_object='index.html',
+            default_root_object='index.html', enable_logging=True,
             default_behavior=BehaviorOptions(
                 origin=S3StaticWebsiteOrigin(bucket, origin_id=context.physicalIdFor('website-origin')),
-                function_associations=function_associations),
+                function_associations=[FunctionAssociation(event_type=FunctionEventType.VIEWER_REQUEST, function=func)]),
             additional_behaviors={'api/*': BehaviorOptions(
                 origin=RestApiOrigin(api, origin_id=context.physicalIdFor('api-origin')),
                 origin_request_policy=OriginRequestPolicy.CORS_CUSTOM_ORIGIN,
