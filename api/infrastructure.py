@@ -15,7 +15,6 @@ from constructs import Construct
 from cdk.bgm_construct import BgmConstruct
 from cdk.bgm_context import EnvContext
 from api.runtime.handler_base import HandlerBase, HandlerDescription
-import api
 
 
 class APIConstruct(BgmConstruct):
@@ -37,7 +36,6 @@ class APIConstruct(BgmConstruct):
         globalStack = Stack.of(self).globalStack
 
         # Create lambda functions
-        api
         for handlerClass in HandlerBase.__subclasses__():
             description: HandlerDescription = handlerClass.describe()
             logGroup = LogGroup(self, f'{self.capitalize(description.name)}LogGroup',
