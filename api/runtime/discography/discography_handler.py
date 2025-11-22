@@ -1,3 +1,5 @@
+"""Entry point and handler for the /api/discography endpoint"""
+
 from ..handler_base import (
     HandlerBase, HandlerDescription,
     InvalidTokenError, InternalError,
@@ -9,7 +11,13 @@ from ..badges.service import BadgeService
 
 
 class DiscographyHandler(HandlerBase):
-    def __init__(self, *, discography_service: DiscographyService = None, badge_service: BadgeService = None):
+    """Handler definition for the /api/discography endpoint, including keep_warm"""
+
+    def __init__(
+        self, *,
+        discography_service: DiscographyService | None = None,
+        badge_service: BadgeService | None = None
+    ) -> None:
         self.discography_service = discography_service if discography_service else DiscographyService()
         self.badge_service = badge_service if badge_service else BadgeService()
 
@@ -20,13 +28,13 @@ class DiscographyHandler(HandlerBase):
             self['token'] = token
             self['discography'] = discography
 
-    def handle(self, event, context):
+    def handle(self, event, context) -> Result:
         if 'keep_warm' in event:
             return DiscographyHandler.Result('Discography handler triggered with keep_warm', None, None, None)
 
         try:
             token = event['token'] if 'token' in event else self.badge_service.create_token()
-            __, badge_codes = self.badge_service.get_badges_from_token(token)
+            _, badge_codes = self.badge_service.get_badges_from_token(token)
             response = self.discography_service.get_discography(badge_codes)
             return DiscographyHandler.Result('Discography successfully fetched', badge_codes, token, response)
         except ValueError as e:
@@ -37,13 +45,13 @@ class DiscographyHandler(HandlerBase):
                 badToken=event['token'],
                 goodToken=self.badge_service.create_token(),
                 badges=[],
-                discography=discography)
-        except Exception:
-            Log.get().exception("DiscographyHandler.handle")
-            raise InternalError()
+                discography=discography) from e
+        except Exception as e:
+            Log.get().exception('DiscographyHandler.handle')
+            raise InternalError() from e
 
     @classmethod
-    def describe(cls):
+    def describe(cls) -> HandlerDescription:
         return HandlerDescription('discography', [
             ResourceDescription('discography', [MethodDescription(HTTPMethod.GET, [
                 InternalError
@@ -51,10 +59,10 @@ class DiscographyHandler(HandlerBase):
             ResourceDescription('{token}', [MethodDescription(HTTPMethod.GET, [
                 InvalidTokenError, InternalError
             ])])
-        ], keepWarm=True)
+        ], keep_warm=True)
 
 
-def handle(event, context, *, handler: DiscographyHandler = None):
+def handle(event, context, *, handler: DiscographyHandler | None = None) -> DiscographyHandler.Result:
     Log.get().debug(f'handle_badges triggered with event {event}')
     handler = handler if handler else DiscographyHandler()
     return handler.handle(event, context)

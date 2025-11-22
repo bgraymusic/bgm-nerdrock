@@ -1,21 +1,22 @@
-context:
+!Config
+context: !Context
   org: bgm
   project: nerdrock
   domain: briangraymusic.com
-  blogHostName: blog
-  blogTargetDomain: bgraymusic.github.io
-  secretsFile: secrets.yml
-  checkIpUrl: http://checkip.amazonaws.com
-  allowIpKey: allow_ip
-  assetsDir: assets
-  nonProdFuncSourceFile: non_prod_viewer_request_func.js
-  prodFuncSourceFile: prod_viewer_request_func.js
+  blog_hostname: blog
+  blog_target_domain: bgraymusic.github.io
+  secrets_file: secrets.yml
+  check_ip_url: http://checkip.amazonaws.com
+  allow_ip_key: allow_ip
+  assets_dir: assets
+  non_prod_func_source_file: non_prod_viewer_request_func.js
+  prod_func_source_file: prod_viewer_request_func.js
 
-ssm-parameters:
-  prod-deployment-colors: [BLUE, GREEN]
-  active-prod-color: BLUE
-  secrets-bucket: bgm-nerdrock-global-secrets-bucket
+ssm_parameters: !SsmParameters
+  prod_deployment_colors: [BLUE, GREEN]
+  active_prod_color: BLUE
+  secrets_bucket: bgm-nerdrock-global-secrets-bucket
 
-key-value-pairs:
-  allowed-ip: 68.80.249.63
-  redirect-domain: briangraymusic.com
+key_value_pairs: !KeyValuePairs
+  allowed_ip: 68.80.249.63
+  redirect_domain: briangraymusic.com

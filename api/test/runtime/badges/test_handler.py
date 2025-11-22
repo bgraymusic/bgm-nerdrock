@@ -1,3 +1,5 @@
+"""Tests for the badges handler module"""
+
 import os
 from unittest.mock import call
 import pytest
@@ -48,7 +50,7 @@ def test_no_token(mocker: MockerFixture):
 def test_valid_token_no_key(mocker: MockerFixture):
     setup()
     service = mocker.MagicMock()
-    service.get_badges_from_token.return_value = (Config.get()['badges']['badges']['k'], ['k'])
+    service.get_badges_from_token.return_value = (Config.get().badges.badges['k'], ['k'])
     handler = BadgesHandler(service=service)
     event = {'token': ']"k"['}
 
@@ -92,7 +94,7 @@ def test_valid_token_invalid_key(mocker: MockerFixture):
     setup()
     service = mocker.MagicMock()
     service.add_badge_to_token.side_effect = KeyError()
-    service.get_badges_from_token.return_value = (Config.get()['badges']['badges']['j'], ['j'])
+    service.get_badges_from_token.return_value = (Config.get().badges.badges['j'], ['j'])
     handler = BadgesHandler(service=service)
     event = {'token': ']"j"[', 'key': invalid_key}
 

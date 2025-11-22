@@ -1,10 +1,12 @@
+"""Support for CLI commands: loader, base classes, exceptions"""
+
 from __future__ import annotations
-from abc import abstractmethod
-from argparse import ArgumentParser, Namespace
-from dataclasses import dataclass
+import abc
+import argparse
+import dataclasses
 import importlib
 import inspect
-from pathlib import Path
+import pathlib
 import re
 
 
@@ -19,14 +21,16 @@ class NoGlobalStackError(Exception):
 
 
 class Command:
-    @dataclass
+    """Base class for all commands; handles class loading and sets up the interface"""
+
+    @dataclasses.dataclass
     class Dependencies:
         pip_features: list[str]
         prerequisites: list[type[Command]]
 
     @classmethod
     def load_commands(cls) -> dict[str, type[Command]]:
-        cmd_dir = Path(f'{str(Path(__file__).parent)}/commands')
+        cmd_dir = pathlib.Path(f'{str(pathlib.Path(__file__).parent)}/commands')
         commands: dict[str, type[Command]] = {}
         for file in [x for x in cmd_dir.iterdir() if x.name.endswith('.py')]:
             module = importlib.import_module(f'cli.commands.{file.stem}')
@@ -37,32 +41,36 @@ class Command:
         return commands
 
     @classmethod
-    @abstractmethod
+    @abc.abstractmethod
     def key(cls) -> str:
         pass
 
     @classmethod
-    @abstractmethod
+    @abc.abstractmethod
     def description(cls) -> str:
-        return cls.__doc__.split('\n')[0]
+        if cls.__doc__ is None:
+            return ''
+        else:
+            return cls.__doc__.split('\n', maxsplit=1)[0]
 
     @classmethod
     def dependencies(cls) -> Dependencies:
         return Command.Dependencies([], [])
 
-    def parse_args(self, argv: list[str]) -> tuple[Namespace, list[str]]:
-        return (Namespace(), argv)
+    def parse_args(self, argv: list[str]) -> tuple[argparse.Namespace, list[str]]:
+        return (argparse.Namespace(), argv)
 
-    @abstractmethod
+    @abc.abstractmethod
     def execute(self) -> None:
         pass
 
 
 class EnvCommand(Command):
+    """Base class for commands that take an '--environment' (-e) argument"""
 
-    def parse_args(self, argv: list[str]) -> tuple[Namespace, list[str]]:
+    def parse_args(self, argv: list[str]) -> tuple[argparse.Namespace, list[str]]:
         ns, argv = super().parse_args(argv)
-        parser = ArgumentParser(usage=self.__class__.__doc__, add_help=False)
+        parser = argparse.ArgumentParser(usage=self.__class__.__doc__, add_help=False)
         parser.add_argument('-e', '--environment')
         parsed_ns, parsed_argv = parser.parse_known_args(argv)
         ns.environment = parsed_ns.environment or 'sandbox'

@@ -1,11 +1,8 @@
+"""Tests for the bandcamp API access module"""
+
 import os
-from requests import Response
 from pytest_mock import MockerFixture
-from ...mock_data.test_data import (
-    mock_data_dir, mock_config_file, mock_secrets_file,
-    mock_band_info_file, mock_album_info_file, mock_track_info_file,
-    valid_band_id, valid_album_id, valid_track_id
-)
+from ...mock_data.test_data import mock_data_dir, mock_config_file, mock_secrets_file
 from ....runtime.config import Config
 from ....runtime.database.bandcamp import Bandcamp
 

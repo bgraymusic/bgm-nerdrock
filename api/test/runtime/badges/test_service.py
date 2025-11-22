@@ -1,3 +1,5 @@
+"""Tests for the badges service module"""
+
 import os
 from unittest.mock import call
 import pytest
@@ -39,7 +41,7 @@ def test_get_badges_from_valid_token(mocker: MockerFixture):
     core: BadgeCore = mocker.MagicMock()
     core.is_valid_token.return_value = True
     core.token_to_badge_codes.return_value = ['k']
-    core.badges_spec = Config.get()['badges']['badges']
+    core.badges_spec = Config.get().badges.badges
     service = BadgeService(core=core)
 
     badges, badge_codes = service.get_badges_from_token(']"k"[')
@@ -47,7 +49,7 @@ def test_get_badges_from_valid_token(mocker: MockerFixture):
     call.core.is_valid_token.assert_called_with(']"k"[')
     call.core.token_to_badge_codes.assert_called_with(']"k"[')
     assert badge_codes == ['k']
-    assert badges == [Config.get()['badges']['badges']['k']]
+    assert badges == [Config.get().badges.badges['k']]
 
 
 def test_get_badges_from_invalid_token(mocker: MockerFixture):
@@ -68,7 +70,7 @@ def test_add_valid_badge_to_valid_token(mocker: MockerFixture):
     core.is_valid_token.return_value = True
     core.is_valid_key.return_value = True
     core.token_to_badge_codes.return_value = []
-    core.get_spec_for_key.return_value = Config.get()['badges']['badges']['k']
+    core.get_spec_for_key.return_value = Config.get().badges.badges['k']
     core.badge_codes_to_token.return_value = ']"k"['
     service = BadgeService(core=core)
 
@@ -90,7 +92,7 @@ def test_add_redundant_valid_badge_to_valid_token(mocker: MockerFixture):
     core.is_valid_token.return_value = True
     core.is_valid_key.return_value = True
     core.token_to_badge_codes.return_value = ['k']
-    core.get_spec_for_key.return_value = Config.get()['badges']['badges']['k']
+    core.get_spec_for_key.return_value = Config.get().badges.badges['k']
     core.badge_codes_to_token.return_value = ']"k"['
     service = BadgeService(core=core)
 

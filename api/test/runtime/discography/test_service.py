@@ -1,3 +1,5 @@
+"""Tests for the discography service module"""
+
 import os
 
 import pytest
@@ -29,7 +31,7 @@ def test_get_default_discography(mocker: MockerFixture):
     db_service.queryAlbum.return_value = album_table_contents['Item']
     db_service.queryTracksFromAlbum.return_value = track_table_contents['Items']
     badge_core = mocker.MagicMock()
-    badge_core.badges_spec = Config.get()['badges']['badges']
+    badge_core.badges_spec = Config.get().badges.badges
     service: DiscographyService = DiscographyService(db_service=db_service, badge_core=badge_core)
 
     discography = service.get_discography(badges=[])
@@ -43,7 +45,7 @@ def test_get_spintunes_discography(mocker: MockerFixture):
     db_service.queryAlbum.return_value = album_table_contents['Item']
     db_service.queryTracksFromAlbum.return_value = track_table_contents['Items']
     badge_core = mocker.MagicMock()
-    badge_core.badges_spec = Config.get()['badges']['badges']
+    badge_core.badges_spec = Config.get().badges.badges
     service: DiscographyService = DiscographyService(db_service=db_service, badge_core=badge_core)
 
     discography = service.get_discography(badges=['s'])
@@ -57,7 +59,7 @@ def test_get_nsfw_discography(mocker: MockerFixture):
     db_service.queryAlbum.return_value = album_table_contents['Item']
     db_service.queryTracksFromAlbum.return_value = track_table_contents['Items']
     badge_core = mocker.MagicMock()
-    badge_core.badges_spec = Config.get()['badges']['badges']
+    badge_core.badges_spec = Config.get().badges.badges
     service: DiscographyService = DiscographyService(db_service=db_service, badge_core=badge_core)
 
     discography = service.get_discography(badges=['w'])
@@ -71,7 +73,7 @@ def test_get_bad_discography(mocker: MockerFixture):
     db_service.queryAlbum.return_value = album_table_contents['Item']
     db_service.queryTracksFromAlbum.return_value = track_table_contents['Items']
     badge_core = mocker.MagicMock()
-    badge_core.badges_spec = Config.get()['badges']['badges']
+    badge_core.badges_spec = Config.get().badges.badges
     service: DiscographyService = DiscographyService(db_service=db_service, badge_core=badge_core)
 
     with pytest.raises(KeyError):

@@ -1,39 +1,40 @@
 aws:
-  account: 028568048704
+  account: '028568048704'
+  role: bgmMicroserviceRole
   region: us-east-1
-  albumTable: albuminfo
-  trackTable: trackinfo
+  album_table: albuminfo
+  track_table: trackinfo
 
 bandcamp:
-  bcApiUrl: http://api.bandcamp.com/api
-  bcDiscographyPath: /band/3/discography
-  bcAlbumPath: /album/2/info
-  bcTrackPath: /track/3/info
-  bcBandIDs:
+  bc_api_url: https://api.bandcamp.com/api
+  bc_discography_path: /band/3/discography
+  bc_album_path: /album/2/info
+  bc_track_path: /track/3/info
+  bc_band_ids:
     - 230945364
 
 albums:
-  forwardSorted:
+  forward_sorted:
     - 3708688148 # Songs from the Gleebleverse
 
 badges:
-  defaultAlbumIDs:
-    - 3541981135
-    - 1047117555
-    - 3708688148
+  default_album_ids:
+    - 3708688148 # Songs from the Gleebleverse
+    - 3541981135 # Every Song Ever
+    - 1047117555 # Also this Other Stuff
   badges:
-    p:
-      code: p
-      enum: Patreon
-    s:
-      code: s
-      enum: Spintunes
-    j:
-      code: j
-      enum: JoCoCruise
     k:
       code: k
       enum: Karaoke
+    p:
+      code: p
+      enum: Patreon
+    j:
+      code: j
+      enum: JoCoCruise
+    s:
+      code: s
+      enum: Spintunes
     w:
       code: w
       enum: SafeForWork

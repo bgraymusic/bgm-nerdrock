@@ -1,5 +1,8 @@
-from colorama import Style, Fore
-from dataclasses import dataclass
+"""Utility classes supporting configration, context, printing, OS commands, and help"""
+
+from __future__ import annotations
+import colorama
+import dataclasses
 import os
 from pathlib import Path
 import re
@@ -11,21 +14,40 @@ import yaml
 from cli.bgnr_command import Command
 
 
-class Config:
-    __instance = None
+class Config(yaml.YAMLObject):
+    """Object representation of the bgnr_config.yml file"""
 
-    def __init__(self):
-        with open(f'{Path(__file__).parent}/bgnr_config.yml') as config_file:
-            config_contents = config_file.read()
-            config: dict = yaml.load(config_contents, Loader=yaml.BaseLoader)
-            for key, value in config.items():
-                setattr(self, key, value)
+    _instance = None
+    yaml_tag = '!Config'
+
+    def __init__(
+        self, org: str, project: str, min_bootstrap_ver: int, cdk_bootstrap_stack: str, domain: str,
+        ipv4_check: str, ipv6_check: str, allowed_ips_key: str, cf_hosted_zone: str, default_prod_color: str
+    ) -> None:
+        self.org = org
+        self.project = project
+        self.min_bootstrap_ver = min_bootstrap_ver
+        self.cdk_bootstrap_stack = cdk_bootstrap_stack
+        self.domain = domain
+        self.ipv4_check = ipv4_check
+        self.ipv6_check = ipv6_check
+        self.allowed_ips_key = allowed_ips_key
+        self.cf_hosted_zone = cf_hosted_zone
+        self.default_prod_color = default_prod_color
+
+    # def __init__(self):
+    #     with open(f'{Path(__file__).parent}/bgnr_config.yml') as config_file:
+    #         config_contents = config_file.read()
+    #         config: dict = yaml.load(config_contents, Loader=yaml.BaseLoader)
+    #         for key, value in config.items():
+    #             setattr(self, key, value)
 
     @classmethod
-    def get(cls, force_new=False):
-        if not Config.__instance or force_new:
-            Config.__instance = Config()
-        return Config.__instance
+    def get(cls, force_new=False) -> Config:
+        if not Config._instance or force_new:
+            with open(f'{Path(__file__).parent}/bgnr_config.yml', encoding='utf-8') as config_file:
+                return yaml.safe_load(config_file.read())
+        return Config._instance
 
     def capitalize(self, s: str):
         s = re.sub(r'[\W]', '', s)
@@ -34,14 +56,16 @@ class Config:
     def stack(self, name: str):
         return f'{self.org}-{self.project}-{name}-stack'
 
-    def toLogical(self, id: str):
-        return ''.join([self.capitalize(x) for x in id.split('-')])
+    def to_logical(self, construct_id: str):
+        return ''.join([self.capitalize(x) for x in construct_id.split('-')])
 
 
 class Context:
-    __instance = None
+    """Collection of data for commands to use while processing"""
 
-    @dataclass
+    _instance = None
+
+    @dataclasses.dataclass
     class Flag:
         names: list[str]
         action: str
@@ -51,28 +75,30 @@ class Context:
         self.trace: bool = False
         self.verbose: bool = False
         self.commands: dict[str, type[Command]] = Command.load_commands()
-        self.command: str = None
+        self.command: str = ''
         self.flags: list[Context.Flag] = []
-        self.environment: str = None
+        self.environment: str = ''
 
     @classmethod
     def get(cls, force_new=False):
-        if not Context.__instance or force_new:
-            Context.__instance = Context()
-        return Context.__instance
+        if not Context._instance or force_new:
+            Context._instance = Context()
+        return Context._instance
 
     def resolve_cmd_templates(self):
         for cmd in self.commands.values():
-            cmd.__doc__ = Docstring.resolve_template(cmd.__doc__)
+            cmd.__doc__ = Docstring.resolve_template(cmd.__doc__ or '')
 
 
 class Out:
+    """Helper for outputting to the console with consistent formatting"""
 
     class Do:
-        def __init__(self, msg: str, error: str = None, done: str = None):
+        """Consistent tracing of shell command execution and results"""
+        def __init__(self, msg: str, error: str | None = None, done: str | None = None):
             self.msg: str = msg
-            self.error: str = error
-            self.done: str = done
+            self.error: str = error or ''
+            self.done: str = done or ''
 
         def __enter__(self):
             Out.target(self.msg, True)
@@ -99,19 +125,19 @@ class Out:
 
     @staticmethod
     def success(msg: str):
-        return f'{Fore.GREEN}{msg}{Fore.RESET}'
+        return f'{colorama.Fore.GREEN}{msg}{colorama.Fore.RESET}'
 
     @staticmethod
     def failure(msg: str):
-        return f'{Fore.RED}{msg}{Fore.RESET}'
+        return f'{colorama.Fore.RED}{msg}{colorama.Fore.RESET}'
 
     @staticmethod
     def bold(msg: str):
-        return f'{Style.BRIGHT}{msg}{Style.NORMAL}'
+        return f'{colorama.Style.BRIGHT}{msg}{colorama.Style.NORMAL}'
 
     @staticmethod
     def dim(msg: str):
-        return f'{Style.DIM}{msg}{Style.NORMAL}'
+        return f'{colorama.Style.DIM}{msg}{colorama.Style.NORMAL}'
 
     @staticmethod
     def commands():
@@ -142,6 +168,7 @@ class Out:
 
     # Wrap a long string at word boundaries so it never goes past the edge of the terminal. Assumes that we start
     # pre-indented and so do not need to indent the first line.
+    @staticmethod
     def wrap(indent: int, text: str):
         try:
             width = os.get_terminal_size().columns - indent
@@ -151,6 +178,7 @@ class Out:
 
 
 class Proc:
+    """Execution of shell commands"""
 
     class Process():
         def __init__(self, returncode: int, stdout: str, stderr: str):
@@ -161,11 +189,11 @@ class Proc:
     @staticmethod
     def exec(cmd: str, *, capture_stdout: bool = False, capture_stderr: bool = False) -> subprocess.CompletedProcess:
         Out.trace(cmd)
-        proc = subprocess.run(shlex.split(cmd), check=True,
+        proc = subprocess.run(shlex.split(cmd), check=True, text=True,
                               stdout=subprocess.PIPE if capture_stdout or not Context().get().verbose else None,
                               stderr=subprocess.PIPE if capture_stderr or not Context().get().verbose else None)
-        proc.stdout = proc.stdout.decode() if proc.stdout and proc.stdout.decode else proc.stdout
-        proc.stderr = proc.stderr.decode() if proc.stderr and proc.stderr.decode else proc.stderr
+        # proc.stdout = proc.stdout.decode() if proc.stdout and proc.stdout.decode else proc.stdout
+        # proc.stderr = proc.stderr.decode() if proc.stderr and proc.stderr.decode else proc.stderr
         return proc
 
 

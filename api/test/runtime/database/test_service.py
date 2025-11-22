@@ -1,3 +1,5 @@
+"""Tests for the database service module"""
+
 import os
 import json
 from unittest.mock import call
@@ -18,7 +20,7 @@ def setup():
     os.environ['trackInfo'] = f'{mock_data_dir}/{mock_track_info_yml}'
     Config.get(force_new=True)
 
-    
+
 def test_create(mocker: MockerFixture):
     setup()
     album_table = mocker.MagicMock()
@@ -55,7 +57,9 @@ def test_populate(mocker: MockerFixture):
     track_table = mocker.MagicMock()
     bandcamp = mocker.MagicMock()
 
-    bandcamp.get_album_from_bc.return_value = json.load(open(f'{mock_data_dir}/{mock_album_info_file}'))
+    bandcamp.get_album_from_bc.return_value = json.load(
+        open(f'{mock_data_dir}/{mock_album_info_file}', encoding='utf-8')
+    )
 
     album_batch_writer = mocker.MagicMock()
     album_batch_writer.put_item.return_value = mocker.MagicMock()
@@ -82,7 +86,7 @@ def test_query_album(mocker: MockerFixture):
     bandcamp = mocker.MagicMock()
     service = DatabaseService(album_table=album_table, track_table=track_table, bandcamp=bandcamp)
 
-    album_data = service.queryAlbum(47474747)
+    album_data = service.query_album(47474747)
 
     assert album_data['album_id'] == 1047117555
 
@@ -95,6 +99,6 @@ def test_query_tracks_from_album(mocker: MockerFixture):
     bandcamp = mocker.MagicMock()
     service = DatabaseService(album_table=album_table, track_table=track_table, bandcamp=bandcamp)
 
-    track_data = service.queryTracksFromAlbum(47474747, False)
+    track_data = service.query_tracks_from_album(47474747, False)
 
     assert track_data[0]['track_id'] == 10211934

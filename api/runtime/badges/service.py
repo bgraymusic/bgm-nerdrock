@@ -1,9 +1,12 @@
+"""Non-boundary implementation of the database service"""
+
 from .core import BadgeCore
 
 
 class BadgeService:
+    """Non-boundary implementation of the database service"""
 
-    def __init__(self, *, core: BadgeCore = None):
+    def __init__(self, *, core: BadgeCore | None = None):
         self.core = core if core else BadgeCore()
 
     def create_token(self):
@@ -27,8 +30,8 @@ class BadgeService:
         else:
             badge_codes = self.core.token_to_badge_codes(token)
             spec = self.core.get_spec_for_key(key)
-            addedCode = None
-            if not spec['code'] in badge_codes:
-                badge_codes.append(spec['code'])
-                addedCode = spec['code']
-            return badge_codes, self.core.badge_codes_to_token(badge_codes), addedCode
+            added_code = None
+            if spec and not spec.code in badge_codes:
+                badge_codes.append(spec.code)
+                added_code = spec.code
+            return badge_codes, self.core.badge_codes_to_token(badge_codes), added_code

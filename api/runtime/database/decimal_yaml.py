@@ -1,4 +1,5 @@
-#!/usr/bin/env python3
+"""A YAML loader that interprets non-integer numbers as Decimals"""
+
 from decimal import Decimal
 import re
 

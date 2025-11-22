@@ -1,7 +1,11 @@
+"""Tests of the config file loader/class"""
+
 import os
 import pathlib
+
 from pytest_mock import MockerFixture
-from ...runtime.config import Config
+
+from api.runtime.config import Config
 
 
 mock_data_dir = f'{pathlib.Path(__file__).parent.parent}/mock_data'
@@ -17,9 +21,9 @@ def test_config_with_local_secrets():
     config = Config.get(force_new=True)
 
     # something from config.yml
-    assert config['aws']['account'] == '028568048704'
+    assert config.aws.account == '028568048704'
     # something from secrets.yml
-    assert config['badges']['encryptionKey'] == 'laKNXjbnUCw7tnQHnwhSiSgkEmqsZj6B3Qx_Mqm7zr0='
+    assert config.badges.encryption_key == 'laKNXjbnUCw7tnQHnwhSiSgkEmqsZj6B3Qx_Mqm7zr0='
 
 
 def test_config_with_bucket_secrets(mocker: MockerFixture):
@@ -27,7 +31,7 @@ def test_config_with_bucket_secrets(mocker: MockerFixture):
     os.environ['secretsBucket'] = mock_secrets_bucket
     os.environ['secretsFile'] = mock_secrets_file
 
-    with open(f'{mock_data_dir}/{mock_secrets_file}') as secret_config_file:
+    with open(f'{mock_data_dir}/{mock_secrets_file}', encoding='utf-8') as secret_config_file:
         mock_s3 = mocker.MagicMock()
         mock_s3.get_object.return_value = {'Body': secret_config_file}
         mocker.patch('boto3.client', return_value=mock_s3)
@@ -35,6 +39,6 @@ def test_config_with_bucket_secrets(mocker: MockerFixture):
         config = Config.get(force_new=True)
 
         # something from config.yml
-        assert config['aws']['account'] == '028568048704'
+        assert config.aws.account == '028568048704'
         # something from secrets.yml
-        assert config['badges']['encryptionKey'] == 'laKNXjbnUCw7tnQHnwhSiSgkEmqsZj6B3Qx_Mqm7zr0='
+        assert config.badges.encryption_key == 'laKNXjbnUCw7tnQHnwhSiSgkEmqsZj6B3Qx_Mqm7zr0='

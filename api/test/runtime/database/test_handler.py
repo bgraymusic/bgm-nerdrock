@@ -1,3 +1,5 @@
+"""Tests for the database handler module"""
+
 import os
 from unittest.mock import call
 

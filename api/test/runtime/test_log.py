@@ -1,3 +1,5 @@
+"""Tests of the Log facility"""
+
 import os
 import logging
 from ...runtime.log import Log

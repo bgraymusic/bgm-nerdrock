@@ -1,91 +1,102 @@
+"""Portable data for use by stacks and constructs"""
+
 import abc
-from pathlib import Path
+import pathlib
 import re
 
 import boto3
-from botocore.exceptions import ClientError
+from mypy_boto3_ssm import type_defs
+import botocore.exceptions
+
+from cdk import bgm_config
 
 
-class BgmContext():
-    def __init__(self, config: dict):
-        self.projectDirectory: Path = Path(__file__).parent.parent
-        self.cdkDirectory: Path = Path(__file__).parent
+class BgmContext(abc.ABC):
+    """Context base class, with common data and operations"""
 
-        self.org: str = None
-        self.project: str = None
-        self.domain: str = None
-        self.blogHostName: str = None
-        self.blogTargetDomain: str = None
-        self.secretsFile: str = None
-        self.checkIpUrl: str = None
-        self.allowIpKey: str = None
-        self.assetsDir: str = None
-        self.nonProdFuncSourceFile: str = None
-        self.prodFuncSourceFile: str = None
+    def __init__(self, config: bgm_config.BgmConfig):
+        self.project_directory: pathlib.Path = pathlib.Path(__file__).parent.parent
+        self.cdk_directory: pathlib.Path = pathlib.Path(__file__).parent
 
-        for key, value in config['context'].items():
+        self.org: str = ''
+        self.project: str = ''
+        self.domain: str = ''
+        self.blog_host_name: str = ''
+        self.blog_target_domain: str = ''
+        self.secrets_file: str = ''
+        self.check_ip_url: str = ''
+        self.allow_ip_key: str = ''
+        self.assets_dir: str = ''
+        self.non_prod_func_source_file: str = ''
+        self.prod_func_source_file: str = ''
+
+        for key, value in vars(config.context):
             setattr(self, key, value)
 
     @abc.abstractmethod
-    def logicalIdFor(self, id: str):
+    def logical_id_for(self, construct_id: str) -> str:
         pass
 
     @abc.abstractmethod
-    def physicalIdFor(self, id: str):
+    def physical_id_for(self, construct_id: str) -> str:
         pass
 
     @abc.abstractmethod
-    def getStackDescription(self):
+    def get_stack_description(self) -> str:
         pass
 
-    def getTags(self):
+    def get_tags(self) -> dict[str, str]:
         return {'org': self.org, 'project': self.project}
 
-    def capitalize(self, s: str):
+    def capitalize(self, s: str) -> str:
         s = re.sub(r'[\W]', '', s)
         return re.sub('([a-zA-Z])', lambda x: x.groups()[0].upper(), s, 1)
 
 
 class GlobalContext(BgmContext):
-    def __init__(self, config: dict):
+    """Context class for the global stack"""
+
+    def __init__(self, config: bgm_config.BgmConfig):
         super().__init__(config)
 
-        self.prodFuncPath = f'{self.cdkDirectory}/{self.prodFuncSourceFile}'
+        self.prod_func_path = f'{self.cdk_directory}/{self.prod_func_source_file}'
 
-        self.logicalIdPrefix = ''.join([self.capitalize(x) for x in [self.org, self.project, 'global']])
-        self.physicalIdPrefix = f'{self.org.lower()}-{self.project.lower()}-global'
+        self.logical_id_prefix = ''.join([self.capitalize(x) for x in [self.org, self.project, 'global']])
+        self.physical_id_prefix = f'{self.org.lower()}-{self.project.lower()}-global'
 
-    def logicalIdFor(self, id: str):
-        return f'{self.logicalIdPrefix}{''.join([self.capitalize(x) for x in id.split('-')])}'
+    def logical_id_for(self, construct_id: str) -> str:
+        return f'{self.logical_id_prefix}{''.join([self.capitalize(x) for x in construct_id.split('-')])}'
 
-    def physicalIdFor(self, id: str):
-        return f'{self.physicalIdPrefix}-{id}'
+    def physical_id_for(self, construct_id: str) -> str:
+        return f'{self.physical_id_prefix}-{construct_id}'
 
-    def getStackDescription(self):
+    def get_stack_description(self) -> str:
         return 'The global stack for all NerdRock environments to reference'
 
-    def getTags(self):
-        tags = super().getTags()
-        tags['app'] = self.physicalIdPrefix
+    def get_tags(self) -> dict[str, str]:
+        tags = super().get_tags()
+        tags['app'] = self.physical_id_prefix
         return tags
 
 
 class EnvContext(BgmContext):
-    def __init__(self, env: str, config: dict):
+    """Context class for all environment (non-global) stacks"""
+
+    def __init__(self, env: str, config: bgm_config.BgmConfig):
         super().__init__(config)
 
         self.env = self.normalize_env_name(env)
-        self.lambdaPackage = f'./{self.assetsDir}/{self.org.lower()}-{self.project.lower()}-{self.env}-lambdas.zip'
-        self.webPackage = f'./{self.assetsDir}/{self.org.lower()}-{self.project.lower()}-{self.env}-web.zip'
-        self.nonProdFuncPath = f'{self.cdkDirectory}/{self.nonProdFuncSourceFile}'
-        self.prodFuncPath = f'{self.cdkDirectory}/{self.prodFuncSourceFile}'
+        self.lambda_package = f'./{self.assets_dir}/{self.org.lower()}-{self.project.lower()}-{self.env}-lambdas.zip'
+        self.web_package = f'./{self.assets_dir}/{self.org.lower()}-{self.project.lower()}-{self.env}-web.zip'
+        self.non_prod_func_path = f'{self.cdk_directory}/{self.non_prod_func_source_file}'
+        self.prod_func_path = f'{self.cdk_directory}/{self.prod_func_source_file}'
 
-        self.defaultProdColor = config['ssm-parameters']['active-prod-color']
-        self.figureIfIsProd(config['ssm-parameters']['prod-deployment-colors'].copy())
+        self.default_prod_color = config.ssm_parameters.active_prod_color
+        self.figure_if_is_prod(config.ssm_parameters.prod_deployment_colors.copy())
 
-        self.logicalIdPrefix = ''.join([self.capitalize(x) for x in [self.org, self.project, self.env]])
-        self.physicalIdPrefix = f'{self.org.lower()}-{self.project.lower()}-{self.env}'
-        self.hostName = f'{self.env.lower()}.{self.domain}'
+        self.logical_id_prefix = ''.join([self.capitalize(x) for x in [self.org, self.project, self.env]])
+        self.physical_id_prefix = f'{self.org.lower()}-{self.project.lower()}-{self.env}'
+        self.host_name = f'{self.env.lower()}.{self.domain}'
 
     def normalize_env_name(self, env: str) -> str:
         env = re.sub('[^A-Za-z0-9-]+', '-', env)
@@ -93,45 +104,47 @@ class EnvContext(BgmContext):
         env = re.sub('[-]$', '', env)
         return env
 
-    def figureIfIsProd(self, prodColors: list[str]):
+    def figure_if_is_prod(self, prod_colors: list[str]) -> None:
         ssm = boto3.client('ssm')
         if self.env == 'staging':
-            self.isProd = True
+            self.is_prod = True
         elif self.env == 'prod':
-            self.isProd = True
+            self.is_prod = True
             try:
-                prodColorResult = ssm.get_parameter(Name='bgm-nerdrock-active-prod-color')
-                self.env = self.getNextProdColor(prodColorResult['Parameter']['Value'], prodColors) \
-                    or self.defaultProdColor
-            except ClientError:
-                self.env = self.defaultProdColor
-        elif self.env.upper() in [x.upper() for x in prodColors]:
-            self.isProd = True
+                prod_color_result: type_defs.GetParameterResultTypeDef = ssm.get_parameter(
+                    Name='bgm-nerdrock-active-prod-color'
+                )
+                self.env = self.get_next_prod_color(prod_color_result.get('Parameter').get('Value'), prod_colors) \
+                    or self.default_prod_color
+            except botocore.exceptions.ClientError:
+                self.env = self.default_prod_color
+        elif self.env.upper() in [x.upper() for x in prod_colors]:
+            self.is_prod = True
         else:
-            self.isProd = False
+            self.is_prod = False
 
-    def getNextProdColor(self, prodColor, prodColors):
-        if prodColor == prodColors[-1]:
-            return prodColors[0]
+    def get_next_prod_color(self, prod_color: str | None, prod_colors: list[str]) -> str:
+        if not prod_color or prod_color == prod_colors[-1]:
+            return prod_colors[0]
         else:
-            return prodColors[prodColors.index(prodColor)+1]
+            return prod_colors[prod_colors.index(prod_color)+1]
 
-    def logicalIdFor(self, id: str):
-        return f'{self.logicalIdPrefix}{''.join([self.capitalize(x) for x in id.split('-')])}'
+    def logical_id_for(self, construct_id: str) -> str:
+        return f'{self.logical_id_prefix}{''.join([self.capitalize(x) for x in construct_id.split('-')])}'
 
-    def physicalIdFor(self, id: str):
-        return f'{self.physicalIdPrefix}-{id}'
+    def physical_id_for(self, construct_id: str) -> str:
+        return f'{self.physical_id_prefix}-{construct_id}'
 
-    def getStackDescription(self):
-        if (self.env == 'staging'):
+    def get_stack_description(self) -> str:
+        if self.env == 'staging':
             return 'Nerdrock production-like staging environment'
-        elif (self.isProd):
+        elif self.is_prod:
             return f'Nerdrock {self.env} production environment'
         else:
             return f'Nerdrock {self.env} lower environment'
 
-    def getTags(self):
-        tags = super().getTags()
+    def get_tags(self) -> dict[str, str]:
+        tags = super().get_tags()
         tags['env'] = self.env
-        tags['app'] = self.physicalIdPrefix
+        tags['app'] = self.physical_id_prefix
         return tags

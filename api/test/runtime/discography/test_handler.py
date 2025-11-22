@@ -1,3 +1,5 @@
+"""Tests for the discography handler module"""
+
 import os
 import json
 
@@ -33,7 +35,9 @@ def test_keep_warm(mocker: MockerFixture):
 def test_no_token(mocker: MockerFixture):
     setup()
     discography_service = mocker.MagicMock()
-    discography_service.get_discography.return_value = json.load(open(f'{mock_data_dir}/{mock_discography_file}'))
+    discography_service.get_discography.return_value = json.load(
+        open(f'{mock_data_dir}/{mock_discography_file}', encoding='utf-8')
+    )
     badge_service = mocker.MagicMock()
     badge_service.get_badges_from_token.return_value = ([], [])
     discography_handler = DiscographyHandler(discography_service=discography_service, badge_service=badge_service)
@@ -49,7 +53,9 @@ def test_no_token(mocker: MockerFixture):
 def test_bad_token(mocker: MockerFixture):
     setup()
     discography_service = mocker.MagicMock()
-    discography_service.get_discography.return_value = json.load(open(f'{mock_data_dir}/{mock_discography_file}'))
+    discography_service.get_discography.return_value = json.load(
+        open(f'{mock_data_dir}/{mock_discography_file}', encoding='utf-8')
+    )
     badge_service = mocker.MagicMock()
     badge_service.get_badges_from_token.side_effect = ValueError()
     discography_handler = DiscographyHandler(discography_service=discography_service, badge_service=badge_service)
@@ -62,7 +68,9 @@ def test_bad_token(mocker: MockerFixture):
 def test_internal_error(mocker: MockerFixture):
     setup()
     discography_service = mocker.MagicMock()
-    discography_service.get_discography.return_value = json.load(open(f'{mock_data_dir}/{mock_discography_file}'))
+    discography_service.get_discography.return_value = json.load(
+        open(f'{mock_data_dir}/{mock_discography_file}', encoding='utf-8')
+    )
     badge_service = mocker.MagicMock()
     badge_service.get_badges_from_token.side_effect = Exception()
     discography_handler = DiscographyHandler(discography_service=discography_service, badge_service=badge_service)

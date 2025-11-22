@@ -1,3 +1,5 @@
+"""Exporting CDK Construct definitions for the NerdRock web site"""
+
 from .infrastructure import WebConstruct
 
-WebConstruct
+__all__ = ['WebConstruct']

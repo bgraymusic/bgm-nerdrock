@@ -43,4 +43,4 @@ cdk.out
 stacks.yml
 
 # Anything designated "local"
-local
+local/

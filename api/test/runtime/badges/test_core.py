@@ -1,3 +1,5 @@
+"""Tests for the internal badges crypto and validation functionality"""
+
 import os
 import pytest
 from pytest_mock import MockerFixture
@@ -16,16 +18,16 @@ def setup():
     Config.get(force_new=True)
 
 
-def encryption_side_effect(input: str):
-    return input[::-1]
+def encryption_side_effect(ciphertext: str):
+    return ciphertext[::-1]
 
 
 def test_create(mocker: MockerFixture):
     setup()
     cipher = mocker.MagicMock()
     core = BadgeCore(cipher=cipher)
-    assert core.badges_spec == Config.get()['badges']['badges']
-    assert core.encryption_key == Config.get()['badges']['encryptionKey']
+    assert core.badges_spec == Config.get().badges.badges
+    assert core.encryption_key == Config.get().badges.encryption_key
 
 
 def test_create_with_both_key_and_cipher(mocker: MockerFixture):
