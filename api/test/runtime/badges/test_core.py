@@ -1,5 +1,6 @@
 """Tests for the internal badges crypto and validation functionality"""
 
+from cryptography import fernet
 import os
 import pytest
 from pytest_mock import MockerFixture
@@ -76,7 +77,16 @@ def test_valid_token(mocker: MockerFixture):
 def test_invalid_token(mocker: MockerFixture):
     setup()
     cipher = mocker.MagicMock()
-    cipher.decrypt.side_effect = Exception()
+    cipher.decrypt.side_effect = fernet.InvalidToken()
+    core = BadgeCore(cipher=cipher)
+    token = ']"j"['
+    assert not core.is_valid_token(token)
+
+
+def test_invalid_token_type(mocker: MockerFixture):
+    setup()
+    cipher = mocker.MagicMock()
+    cipher.decrypt.side_effect = TypeError()
     core = BadgeCore(cipher=cipher)
     token = ']"j"['
     assert not core.is_valid_token(token)
