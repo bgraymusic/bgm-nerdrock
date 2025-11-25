@@ -1,4 +1,4 @@
-!Config
+!CliConfig
 org: bgm
 project: nerdrock
 min_bootstrap_ver: 25

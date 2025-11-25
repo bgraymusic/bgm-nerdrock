@@ -1,5 +1,5 @@
-!Config
-context: !Context
+!CdkConfig
+context: !CdkContext
   org: bgm
   project: nerdrock
   domain: briangraymusic.com
@@ -12,11 +12,11 @@ context: !Context
   non_prod_func_source_file: non_prod_viewer_request_func.js
   prod_func_source_file: prod_viewer_request_func.js
 
-ssm_parameters: !SsmParameters
+ssm_parameters: !CdkSsmParameters
   prod_deployment_colors: [BLUE, GREEN]
   active_prod_color: BLUE
   secrets_bucket: bgm-nerdrock-global-secrets-bucket
 
-key_value_pairs: !KeyValuePairs
+key_value_pairs: !CdkKeyValuePairs
   allowed_ip: 68.80.249.63
   redirect_domain: briangraymusic.com

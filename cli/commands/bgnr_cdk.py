@@ -19,7 +19,7 @@ import mypy_boto3_s3 as boto3_s3
 import mypy_boto3_ssm as boto3_ssm
 
 from cli import bgnr_command
-from cli.bgnr_util import Config, Context, Out, Proc
+from cli.bgnr_util import CliConfig, Context, Out, Proc
 from cli.commands.bgnr_local import PackageLambdasCommand, PackageWebCommand
 
 
@@ -48,12 +48,12 @@ class BootstrapCommand(bgnr_command.Command):
         cf_client: boto3_cf.CloudFormationClient = boto3.client('cloudformation')
         try:
             Out.trace('aws cloudformation describe-stacks --stack-name CDKToolkit')
-            stack = cf_client.describe_stacks(StackName=Config.get().cdk_bootstrap_stack).get('Stacks')[0]
+            stack = cf_client.describe_stacks(StackName=CliConfig.get().cdk_bootstrap_stack).get('Stacks')[0]
             output = next(
                 (x for x in stack.get('Outputs') or [] if x and x.get('OutputKey') == 'BootstrapVersion'),
                 None
             )
-            if output and int(output.get('OutputValue') or -1) >= int(Config.get().min_bootstrap_ver):
+            if output and int(output.get('OutputValue') or -1) >= int(CliConfig.get().min_bootstrap_ver):
                 Out.target(Out.success('CDK already bootstrapped.'))
                 bootstrap_msg = ''
                 bootstrap_required = False
@@ -102,7 +102,7 @@ class SynthCommand(bgnr_command.EnvCommand):
         )
 
     def execute(self):
-        stack = f'{Config.get().org}-{Config.get().project}-{Context.get().environment}-stack'
+        stack = f'{CliConfig.get().org}-{CliConfig.get().project}-{Context.get().environment}-stack'
         with Out.Do(msg=f'Synthesizing stack {stack}',
                     error='Synthesis failed, see above for details',
                     done='Synthesis complete; find template in cdk.out'):
@@ -170,7 +170,7 @@ class DeployEnvCommand(bgnr_command.EnvCommand):
 
     def execute(self):
         msg = 'Deploying production stack' if Context.get().environment == 'prod' \
-            else f'Deploying stack {Config.get().stack(Context.get().environment)}'
+            else f'Deploying stack {CliConfig.get().stack(Context.get().environment)}'
         with Out.Do(msg=msg, done='Deployment complete.', error='Deployment failed.  See above.'):
             verbose = Context.get().verbose
             Context.get().verbose = True  # Exception to the rule: always output deploy progress as it happens
@@ -201,8 +201,8 @@ class DeployEnvCommand(bgnr_command.EnvCommand):
         s3_client: boto3_s3.S3Client = boto3.client('s3')
 
         with Out.Do('Checking for global secrets file'):
-            Out.trace(f'aws cloudformation describe-stacks --stack-name {Config.get().stack('global')}')
-            outputs = self.get_stack_outputs(Config.get().stack('global'))
+            Out.trace(f'aws cloudformation describe-stacks --stack-name {CliConfig.get().stack('global')}')
+            outputs = self.get_stack_outputs(CliConfig.get().stack('global'))
             secrets_bucket = next((x for x in outputs if x.get('OutputKey') == 'SecretsBucketName')).get('OutputValue')
             Out.trace(f'  -> secrets_bucket: {secrets_bucket}')
             if secrets_bucket:
@@ -240,7 +240,7 @@ class DeployEnvCommand(bgnr_command.EnvCommand):
     def update_domain_records(self, env_stack: str):
         with Out.Do(msg='Finding HostedZone to update', error='Error finding HostedZone'):
             cf_client: boto3_cf.CloudFormationClient = boto3.client('cloudformation')
-            resources = cf_client.list_stack_resources(StackName=Config.get().stack('global'))['StackResourceSummaries']
+            resources = cf_client.list_stack_resources(StackName=CliConfig.get().stack('global'))['StackResourceSummaries']
             hosted_zone = next(hz for x in resources if (
                 x.get('ResourceType') == 'AWS::Route53::HostedZone' and
                 (hz := x.get('PhysicalResourceId')) is not None
@@ -256,17 +256,17 @@ class DeployEnvCommand(bgnr_command.EnvCommand):
             cfront_client: boto3_cfront.CloudFrontClient = boto3.client('cloudfront')
             distribution_domain = cfront_client.get_distribution(Id=distribution_id)['Distribution']['DomainName']
 
-        with Out.Do(msg=f'Pointing {Config.get().domain} to the deployed prod distribution'):
+        with Out.Do(msg=f'Pointing {CliConfig.get().domain} to the deployed prod distribution'):
             r53_client: boto3_r53.Route53Client = boto3.client('route53')
             for record_type in typing.Literal['A', 'AAAA'].__args__:
                 r53_client.change_resource_record_sets(HostedZoneId=hosted_zone, ChangeBatch={
                     'Changes': [{
                         'Action': 'UPSERT',
                         'ResourceRecordSet': {
-                            'Name': Config.get().domain,
+                            'Name': CliConfig.get().domain,
                             'Type': record_type,
                             'AliasTarget': {
-                                'HostedZoneId': Config.get().cf_hosted_zone,
+                                'HostedZoneId': CliConfig.get().cf_hosted_zone,
                                 'DNSName': distribution_domain,
                                 'EvaluateTargetHealth': False
                             }
@@ -277,7 +277,7 @@ class DeployEnvCommand(bgnr_command.EnvCommand):
                 'Changes': [{
                     'Action': 'UPSERT',
                     'ResourceRecordSet': {
-                        'Name': f'_.{Config.get().domain}.',
+                        'Name': f'_.{CliConfig.get().domain}.',
                         'Type': 'TXT',
                         'ResourceRecords': [{'Value': f'"{distribution_domain}."'}],
                         'TTL': 300
@@ -285,13 +285,13 @@ class DeployEnvCommand(bgnr_command.EnvCommand):
                 }]
             })
 
-        with Out.Do(msg=f'Moving alternate domain name for {Config.get().domain} to new distribution'):
+        with Out.Do(msg=f'Moving alternate domain name for {CliConfig.get().domain} to new distribution'):
             time.sleep(5)  # Takes a bit for the record to be seen, even if it shows back from an API call
-            cfront_client.associate_alias(TargetDistributionId=distribution_id, Alias=Config.get().domain)
+            cfront_client.associate_alias(TargetDistributionId=distribution_id, Alias=CliConfig.get().domain)
 
     def update_prod_color(self, env_stack: str):
-        match: re.Match[str] | None = re.match(fr'{Config.get().org}-{Config.get().project}-(\w+?)-stack', env_stack)
-        prod_color = match.groups()[0] if match else Config.get().default_prod_color
+        match: re.Match[str] | None = re.match(fr'{CliConfig.get().org}-{CliConfig.get().project}-(\w+?)-stack', env_stack)
+        prod_color = match.groups()[0] if match else CliConfig.get().default_prod_color
         with Out.Do(msg=f'Setting new active prod color to {prod_color}',
                     error=f'Error updating the prod color to {prod_color}; DNS and SSM are mismatched!'):
             Out.trace(f'aws ssm put-parameter --name bgm-nerdrock-active-prod-color --value {prod_color} --overwrite')
@@ -333,7 +333,7 @@ class UndeployCommand(bgnr_command.EnvCommand):
     def execute(self):
         if Context.get().environment == 'global':
             Out.failure('ATTEMPTING TO DELETE THE GLOBAL STACK!!! COMMAND REJECTED.')
-        with Out.Do(msg=f'Deleting stack {Config.get().stack(Context.get().environment)}',
-                    error=f'Failed to delete stack {Config.get().stack(Context.get().environment)}'):
+        with Out.Do(msg=f'Deleting stack {CliConfig.get().stack(Context.get().environment)}',
+                    error=f'Failed to delete stack {CliConfig.get().stack(Context.get().environment)}'):
             Proc.exec(f'cdk destroy -f -c ENV={Context.get().environment} '
-                      f'{Config.get().to_logical(Config.get().stack(Context.get().environment))}')
+                      f'{CliConfig.get().to_logical(CliConfig.get().stack(Context.get().environment))}')

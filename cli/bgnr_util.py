@@ -14,11 +14,12 @@ import yaml
 from cli.bgnr_command import Command
 
 
-class Config(yaml.YAMLObject):
+class CliConfig(yaml.YAMLObject):
     """Object representation of the bgnr_config.yml file"""
 
     _instance = None
-    yaml_tag = '!Config'
+    yaml_tag = '!CliConfig'
+    yaml_loader = yaml.SafeLoader
 
     def __init__(
         self, org: str, project: str, min_bootstrap_ver: int, cdk_bootstrap_stack: str, domain: str,
@@ -43,11 +44,11 @@ class Config(yaml.YAMLObject):
     #             setattr(self, key, value)
 
     @classmethod
-    def get(cls, force_new=False) -> Config:
-        if not Config._instance or force_new:
+    def get(cls, force_new=False) -> CliConfig:
+        if not CliConfig._instance or force_new:
             with open(f'{Path(__file__).parent}/bgnr_config.yml', encoding='utf-8') as config_file:
                 return yaml.safe_load(config_file.read())
-        return Config._instance
+        return CliConfig._instance
 
     def capitalize(self, s: str):
         s = re.sub(r'[\W]', '', s)
@@ -58,6 +59,9 @@ class Config(yaml.YAMLObject):
 
     def to_logical(self, construct_id: str):
         return ''.join([self.capitalize(x) for x in construct_id.split('-')])
+
+
+yaml.add_path_resolver(CliConfig.yaml_tag, [CliConfig.__name__], dict)
 
 
 class Context:

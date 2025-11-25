@@ -5,6 +5,7 @@ import pathlib
 import re
 
 import boto3
+import mypy_boto3_ssm as boto3_ssm
 from mypy_boto3_ssm import type_defs
 import botocore.exceptions
 
@@ -14,24 +15,21 @@ from cdk import bgm_config
 class BgmContext(abc.ABC):
     """Context base class, with common data and operations"""
 
-    def __init__(self, config: bgm_config.BgmConfig):
+    def __init__(self, config: bgm_config.CdkConfig):
         self.project_directory: pathlib.Path = pathlib.Path(__file__).parent.parent
         self.cdk_directory: pathlib.Path = pathlib.Path(__file__).parent
 
-        self.org: str = ''
-        self.project: str = ''
-        self.domain: str = ''
-        self.blog_host_name: str = ''
-        self.blog_target_domain: str = ''
-        self.secrets_file: str = ''
-        self.check_ip_url: str = ''
-        self.allow_ip_key: str = ''
-        self.assets_dir: str = ''
-        self.non_prod_func_source_file: str = ''
-        self.prod_func_source_file: str = ''
-
-        for key, value in vars(config.context):
-            setattr(self, key, value)
+        self.org: str = config.context.org
+        self.project: str = config.context.project
+        self.domain: str = config.context.domain
+        self.blog_hostname: str = config.context.blog_hostname
+        self.blog_target_domain: str = config.context.blog_target_domain
+        self.secrets_file: str = config.context.secrets_file
+        self.check_ip_url: str = config.context.check_ip_url
+        self.allow_ip_key: str = config.context.allow_ip_key
+        self.assets_dir: str = config.context.assets_dir
+        self.non_prod_func_source_file: str = config.context.non_prod_func_source_file
+        self.prod_func_source_file: str = config.context.prod_func_source_file
 
     @abc.abstractmethod
     def logical_id_for(self, construct_id: str) -> str:
@@ -56,7 +54,7 @@ class BgmContext(abc.ABC):
 class GlobalContext(BgmContext):
     """Context class for the global stack"""
 
-    def __init__(self, config: bgm_config.BgmConfig):
+    def __init__(self, config: bgm_config.CdkConfig):
         super().__init__(config)
 
         self.prod_func_path = f'{self.cdk_directory}/{self.prod_func_source_file}'
@@ -82,7 +80,7 @@ class GlobalContext(BgmContext):
 class EnvContext(BgmContext):
     """Context class for all environment (non-global) stacks"""
 
-    def __init__(self, env: str, config: bgm_config.BgmConfig):
+    def __init__(self, env: str, config: bgm_config.CdkConfig):
         super().__init__(config)
 
         self.env = self.normalize_env_name(env)
@@ -105,7 +103,7 @@ class EnvContext(BgmContext):
         return env
 
     def figure_if_is_prod(self, prod_colors: list[str]) -> None:
-        ssm = boto3.client('ssm')
+        ssm: boto3_ssm.SSMClient = boto3.client('ssm')
         if self.env == 'staging':
             self.is_prod = True
         elif self.env == 'prod':

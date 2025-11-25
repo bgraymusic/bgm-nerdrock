@@ -31,7 +31,7 @@ def create_app() -> aws_cdk.App:
 
 
 def create_environment_list(
-    app: aws_cdk.App, config: bgm_config.BgmConfig
+    app: aws_cdk.App, config: bgm_config.CdkConfig
 ) -> list[str]:
     """Returns a list of environments to generate based on '-c' env var"""
     env_from_cmd_line = app.node.try_get_context('ENV')
@@ -49,7 +49,7 @@ def create_environment_list(
     return environments
 
 
-def create_stacks(app: aws_cdk.App, config: bgm_config.BgmConfig, environments: list[str]) -> None:
+def create_stacks(app: aws_cdk.App, config: bgm_config.CdkConfig, environments: list[str]) -> None:
     global_stack = bgm_stack.GlobalStack(app, bgm_context.GlobalContext(config), config)
 
     for env in environments:
@@ -69,7 +69,7 @@ def dump_stacks(stacks: list[str]) -> None:
 
 
 cdk_app: aws_cdk.App = create_app()
-cdk_environments: list[str] = create_environment_list(cdk_app, bgm_config.BgmConfig.get())
-create_stacks(cdk_app, bgm_config.BgmConfig.get(), cdk_environments)
+cdk_environments: list[str] = create_environment_list(cdk_app, bgm_config.CdkConfig.get())
+create_stacks(cdk_app, bgm_config.CdkConfig.get(), cdk_environments)
 cdk_assembly: aws_cdk.cx_api.CloudAssembly = cdk_app.synth()
 dump_stacks([x.stack_name for x in cdk_assembly.stacks])

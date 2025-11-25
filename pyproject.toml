@@ -13,7 +13,7 @@ dependencies = [
 ]
 name = "bgm-nerdrock"
 readme = "README.md"
-requires-python = ">=3.12,<4.0"
+requires-python = ">=3.13,<4.0"
 version = "1.1"
 
     [project.scripts]

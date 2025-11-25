@@ -51,7 +51,7 @@ class RollbackCommand(bgnr_command.Command):
         with bgnr_util.Out.Do(msg='Finding HostedZone to update', error='Error finding HostedZone'):
             cf_client: boto3_cf.CloudFormationClient = boto3.client('cloudformation')
             global_resources = cf_client.list_stack_resources(
-                StackName=bgnr_util.Config.get().stack('global')
+                StackName=bgnr_util.CliConfig.get().stack('global')
             )['StackResourceSummaries']
             hosted_zone = next(hz for x in global_resources if (
                 x.get('ResourceType') == 'AWS::Route53::HostedZone' and (hz := x.get('PhysicalResourceId')) is not None
@@ -60,7 +60,7 @@ class RollbackCommand(bgnr_command.Command):
         with bgnr_util.Out.Do(msg='Finding the target distribution for prod DNS record update',
                     error='Error getting target distribution'):
             env_resources = cf_client.list_stack_resources(
-                StackName=bgnr_util.Config.get().stack(prev_color)
+                StackName=bgnr_util.CliConfig.get().stack(prev_color)
             )['StackResourceSummaries']
             distribution_id = next(prid for x in env_resources if (
                 x.get('ResourceType') == 'AWS::CloudFront::Distribution' and
@@ -77,10 +77,10 @@ class RollbackCommand(bgnr_command.Command):
                     'Changes': [{
                         'Action': 'UPSERT',
                         'ResourceRecordSet': {
-                            'Name': bgnr_util.Config.get().domain,
+                            'Name': bgnr_util.CliConfig.get().domain,
                             'Type': record_type,
                             'AliasTarget': {
-                                'HostedZoneId': bgnr_util.Config.get().cf_hosted_zone,
+                                'HostedZoneId': bgnr_util.CliConfig.get().cf_hosted_zone,
                                 'DNSName': distribution_domain,
                                 'EvaluateTargetHealth': False
                             }
@@ -92,7 +92,7 @@ class RollbackCommand(bgnr_command.Command):
                 'Changes': [{
                     'Action': 'UPSERT',
                     'ResourceRecordSet': {
-                        'Name': f'_.{bgnr_util.Config.get().domain}.',
+                        'Name': f'_.{bgnr_util.CliConfig.get().domain}.',
                         'Type': 'TXT',
                         'ResourceRecords': [{'Value': f'"{distribution_domain}."'}],
                         'TTL': 300
@@ -101,7 +101,7 @@ class RollbackCommand(bgnr_command.Command):
             })
 
             time.sleep(5)  # Takes a bit for the record to be seen, even if it shows back from an API call
-            cfront_client.associate_alias(TargetDistributionId=distribution_id, Alias=bgnr_util.Config.get().domain)
+            cfront_client.associate_alias(TargetDistributionId=distribution_id, Alias=bgnr_util.CliConfig.get().domain)
 
         with bgnr_util.Out.Do(msg=f'Setting {prev_color} as the new active prod color',
                     error=f'Error updating the prod color to {prev_color}; DNS and SSM are mismatched!'):
@@ -133,11 +133,11 @@ class UpdateLocCommand(bgnr_command.Command):
 
     def execute(self):
         with bgnr_util.Out.Do('Fetching public IP addresses'):
-            ipv4 = bgnr_util.Proc.exec(bgnr_util.Config.get().ipv4_check, capture_stdout=True).stdout.strip()
-            ipv6 = bgnr_util.Proc.exec(bgnr_util.Config.get().ipv6_check, capture_stdout=True).stdout.strip()
+            ipv4 = bgnr_util.Proc.exec(bgnr_util.CliConfig.get().ipv4_check, capture_stdout=True).stdout.strip()
+            ipv6 = bgnr_util.Proc.exec(bgnr_util.CliConfig.get().ipv6_check, capture_stdout=True).stdout.strip()
         with bgnr_util.Out.Do(f'Updating key-value store with current location {ipv4}/{ipv6}'):
             cf_client: boto3_cf.CloudFormationClient = boto3.client('cloudformation')
-            stack_name = f'{bgnr_util.Config.get().org}-{bgnr_util.Config.get().project}-global-stack'
+            stack_name = f'{bgnr_util.CliConfig.get().org}-{bgnr_util.CliConfig.get().project}-global-stack'
             bgnr_util.Out.trace('aws cloudformation describe-stacks --stack-name bgm-nerdrock-global-stack')
             stack = cf_client.describe_stacks(StackName=stack_name)['Stacks'][0]
             kvs_arn = next(val for x in stack.get('Outputs') or [] if (
@@ -152,5 +152,5 @@ class UpdateLocCommand(bgnr_command.Command):
                                 '--value {ipv4} '
                                 '--kvs-arn {kvs_arn} '
                                 '--if-match {etag}')
-            kvs_client.put_key(Key=bgnr_util.Config.get().allowed_ips_key, Value=','.join([ipv4, ipv6]),
+            kvs_client.put_key(Key=bgnr_util.CliConfig.get().allowed_ips_key, Value=','.join([ipv4, ipv6]),
                                KvsARN=kvs_arn, IfMatch=etag)

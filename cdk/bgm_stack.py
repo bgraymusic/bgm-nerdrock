@@ -43,7 +43,7 @@ class GlobalStack(BgmStack):
     """Implementation of the global stack, which contains data and services for all environments"""
 
     def __init__(
-        self, scope: aws_constructs.Construct, context: bgm_context.GlobalContext, config: bgm_config.BgmConfig
+        self, scope: aws_constructs.Construct, context: bgm_context.GlobalContext, config: bgm_config.CdkConfig
     ) -> None:
         super().__init__(scope, context)
 
@@ -51,7 +51,7 @@ class GlobalStack(BgmStack):
                                     removal_policy=aws_cdk.RemovalPolicy.DESTROY, auto_delete_objects=True)
         aws_cdk.CfnOutput(self, 'SecretsBucketName', value=self.secrets_bucket.bucket_name, key='SecretsBucketName')
 
-        for key, value in vars(config.ssm_parameters):
+        for key, value in vars(config.ssm_parameters).items():
             if isinstance(value, list):
                 aws_ssm.StringListParameter(self, self.logical_id_for(key), string_list_value=value,
                                     parameter_name=f'{context.org}-{context.project}-{key}')
@@ -59,7 +59,7 @@ class GlobalStack(BgmStack):
                 aws_ssm.StringParameter(self, self.logical_id_for(key), string_value=value,
                                 parameter_name=f'{context.org}-{context.project}-{key}')
 
-        kv_data = [{'key': key, 'value': value} for key, value in vars(config.key_value_pairs)]
+        kv_data = [{'key': key, 'value': value} for key, value in vars(config.key_value_pairs).items()]
         self.kv_store = aws_cloudfront.KeyValueStore(
             self, 'KeyValueStore', key_value_store_name=self.physical_id_for('kv-store'),
             source=aws_cloudfront.ImportSource.from_inline(json.dumps({'data': kv_data}))
@@ -83,7 +83,7 @@ class GlobalStack(BgmStack):
         )
         self.blog_cname = aws_route53.CnameRecord(
             self, 'BlogCnameRecord', zone=self.hosted_zone, ttl=aws_cdk.Duration.days(1),
-            record_name=self.context.blog_host_name, domain_name=self.context.blog_target_domain
+            record_name=self.context.blog_hostname, domain_name=self.context.blog_target_domain
         )
 
 
